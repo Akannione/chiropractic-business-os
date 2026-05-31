@@ -52,6 +52,8 @@ KPI_HELP = {
 
 def get_db_path() -> Path:
     configured = os.environ.get("BUSINESS_OS_DB_PATH", "data/business_os.sqlite").strip()
+    if not configured:
+        configured = "data/business_os.sqlite"
     path = Path(configured).expanduser()
     if not path.is_absolute():
         path = APP_ROOT / path
@@ -122,7 +124,10 @@ def display_frame(frame: pd.DataFrame) -> pd.DataFrame:
 
 
 def export_csv_for_demo(frame: pd.DataFrame) -> bytes:
-    return display_frame(frame).to_csv(index=False).encode("utf-8")
+    try:
+        return display_frame(frame).to_csv(index=False).encode("utf-8")
+    except Exception as exc:
+        raise ValueError("CSV export could not be prepared.") from exc
 
 
 def filter_due_today(leads: pd.DataFrame) -> pd.DataFrame:
@@ -551,17 +556,24 @@ def render_export(leads: pd.DataFrame) -> None:
         st.info("No export data yet. Add patient inquiries before downloading CSV files.")
         return
 
+    try:
+        inquiries_csv = export_csv_for_demo(export_frame)
+        followups_csv = export_csv_for_demo(open_followups)
+    except ValueError:
+        st.error("CSV export could not be prepared. Please refresh the app and try again.")
+        return
+
     col1, col2 = st.columns(2)
     col1.download_button(
         "Download patient inquiries CSV",
-        data=export_csv_for_demo(export_frame),
+        data=inquiries_csv,
         file_name=f"patient_inquiries_{date.today().isoformat()}.csv",
         mime="text/csv",
         type="primary",
     )
     col2.download_button(
         "Download follow-up list CSV",
-        data=export_csv_for_demo(open_followups),
+        data=followups_csv,
         file_name=f"patient_followups_{date.today().isoformat()}.csv",
         mime="text/csv",
     )

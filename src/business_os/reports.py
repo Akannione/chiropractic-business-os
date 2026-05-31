@@ -21,8 +21,8 @@ def _prepare_for_metrics(leads: pd.DataFrame) -> pd.DataFrame:
             prepared[column] = default
 
     prepared["estimated_value"] = pd.to_numeric(prepared["estimated_value"], errors="coerce").fillna(0)
-    prepared["created_at_dt"] = pd.to_datetime(prepared["created_at_dt"], errors="coerce")
-    prepared["next_follow_up_dt"] = pd.to_datetime(prepared["next_follow_up_dt"], errors="coerce")
+    prepared["created_at_dt"] = pd.to_datetime(prepared["created_at_dt"], errors="coerce", format="mixed")
+    prepared["next_follow_up_dt"] = pd.to_datetime(prepared["next_follow_up_dt"], errors="coerce", format="mixed")
     prepared["is_closed"] = prepared["status"].isin({"Active Patient", "Lost"})
     prepared["is_open"] = ~prepared["is_closed"]
     today = pd.Timestamp.today().normalize()

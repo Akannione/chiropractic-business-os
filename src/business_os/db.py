@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -46,9 +46,12 @@ REQUIRED_COLUMNS = [
 
 
 def connect(db_path: Path) -> sqlite3.Connection:
-    db_path.parent.mkdir(parents=True, exist_ok=True)
-    connection = sqlite3.connect(db_path)
+    resolved_path = db_path.expanduser()
+    resolved_path.parent.mkdir(parents=True, exist_ok=True)
+    connection = sqlite3.connect(resolved_path, timeout=10)
     connection.row_factory = sqlite3.Row
+    connection.execute("PRAGMA foreign_keys = ON")
+    connection.execute("PRAGMA journal_mode = WAL")
     return connection
 
 
@@ -72,24 +75,27 @@ def initialize_database(db_path: Path) -> None:
             )
             """
         )
-        for old_status, new_status in STATUS_ALIASES.items():
-            connection.execute(
-                "UPDATE leads SET status = ? WHERE status = ?",
-                (new_status, old_status),
-            )
-        for old_source, new_source in SOURCE_ALIASES.items():
-            connection.execute(
-                "UPDATE leads SET source = ? WHERE source = ?",
-                (new_source, old_source),
-            )
+        migrate_existing_labels(connection)
         connection.commit()
+
+
+def migrate_existing_labels(connection: sqlite3.Connection) -> None:
+    for old_status, new_status in STATUS_ALIASES.items():
+        connection.execute(
+            "UPDATE leads SET status = ? WHERE status = ?",
+            (new_status, old_status),
+        )
+    for old_source, new_source in SOURCE_ALIASES.items():
+        connection.execute(
+            "UPDATE leads SET source = ? WHERE source = ?",
+            (new_source, old_source),
+        )
 
 
 def seed_sample_data_if_empty(db_path: Path) -> int:
     with connect(db_path) as connection:
         count = connection.execute("SELECT COUNT(*) FROM leads").fetchone()[0]
         if count:
-            refresh_demo_data_for_chiropractor(connection)
             return 0
 
         rows = build_sample_leads()
@@ -110,49 +116,17 @@ def seed_sample_data_if_empty(db_path: Path) -> int:
         return len(rows)
 
 
-def refresh_demo_data_for_chiropractor(connection: sqlite3.Connection) -> int:
-    rows = build_sample_leads()
-    existing_ids = [
-        int(row["id"])
-        for row in connection.execute("SELECT id FROM leads ORDER BY id LIMIT ?", (len(rows),)).fetchall()
-    ]
-    if not existing_ids:
-        return 0
-
-    updated = 0
-    for lead_id, row in zip(existing_ids, rows, strict=False):
-        connection.execute(
-            """
-            UPDATE leads
-            SET name = ?,
-                phone = ?,
-                email = ?,
-                service_needed = ?,
-                source = ?,
-                status = ?,
-                estimated_value = ?,
-                notes = ?,
-                next_follow_up_date = ?,
-                updated_at = ?
-            WHERE id = ?
-            """,
-            (
-                row["name"],
-                row["phone"],
-                row["email"],
-                row["service_needed"],
-                row["source"],
-                row["status"],
-                row["estimated_value"],
-                row["notes"],
-                row["next_follow_up_date"],
-                row["updated_at"],
-                lead_id,
-            ),
-        )
-        updated += 1
-    connection.commit()
-    return updated
+def format_date(value: date | datetime | str | None) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, datetime):
+        return value.date().isoformat()
+    if isinstance(value, date):
+        return value.isoformat()
+    parsed = pd.to_datetime(str(value).strip(), errors="coerce", format="mixed")
+    if pd.isna(parsed):
+        return ""
+    return parsed.date().isoformat()
 
 
 def insert_lead(
@@ -169,6 +143,7 @@ def insert_lead(
     next_follow_up_date: str,
 ) -> int:
     now = datetime.now().replace(microsecond=0).isoformat(sep=" ")
+    follow_up = format_date(next_follow_up_date)
     with connect(db_path) as connection:
         cursor = connection.execute(
             """
@@ -187,7 +162,7 @@ def insert_lead(
                 status,
                 float(estimated_value or 0),
                 notes.strip(),
-                next_follow_up_date,
+                follow_up,
                 now,
                 now,
             ),
@@ -205,15 +180,18 @@ def update_lead_followup(
     notes: str,
 ) -> None:
     now = datetime.now().replace(microsecond=0).isoformat(sep=" ")
+    follow_up = format_date(next_follow_up_date)
     with connect(db_path) as connection:
-        connection.execute(
+        cursor = connection.execute(
             """
             UPDATE leads
             SET status = ?, next_follow_up_date = ?, notes = ?, updated_at = ?
             WHERE id = ?
             """,
-            (status, next_follow_up_date, notes.strip(), now, int(lead_id)),
+            (status, follow_up, notes.strip(), now, int(lead_id)),
         )
+        if cursor.rowcount == 0:
+            raise ValueError(f"No patient inquiry found for id {lead_id}.")
         connection.commit()
 
 
@@ -244,10 +222,10 @@ def prepare_leads_frame(frame: pd.DataFrame) -> pd.DataFrame:
         if column not in prepared.columns:
             prepared[column] = ""
     prepared["estimated_value"] = pd.to_numeric(prepared["estimated_value"], errors="coerce").fillna(0)
-    prepared["created_at_dt"] = pd.to_datetime(prepared["created_at"], errors="coerce")
-    prepared["updated_at_dt"] = pd.to_datetime(prepared["updated_at"], errors="coerce")
+    prepared["created_at_dt"] = pd.to_datetime(prepared["created_at"], errors="coerce", format="mixed")
+    prepared["updated_at_dt"] = pd.to_datetime(prepared["updated_at"], errors="coerce", format="mixed")
     prepared["next_follow_up_dt"] = pd.to_datetime(
-        prepared["next_follow_up_date"].replace("", pd.NA), errors="coerce"
+        prepared["next_follow_up_date"].replace("", pd.NA), errors="coerce", format="mixed"
     )
     prepared["is_closed"] = prepared["status"].isin(CLOSED_STATUSES)
     prepared["is_open"] = ~prepared["is_closed"]
