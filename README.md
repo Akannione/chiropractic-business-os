@@ -9,6 +9,7 @@ Prepared for a June 15 chiropractor demo. The app is intentionally focused on pr
 - Patient inquiry intake form
 - SQLite patient inquiry database
 - KPI dashboard
+- KPI help dialog and plain-language tooltips
 - Patient inquiry details with follow-up scheduling
 - Weekly practice summary with a printable Practice Performance Snapshot
 - CSV export
@@ -79,12 +80,15 @@ Copy `.env.example` if your deployment platform or local workflow needs a refere
 ## Demo Workflow
 
 1. Open the Dashboard tab to review patient inquiries, follow-ups, and estimated treatment value.
-2. Add a patient inquiry from the Patient Inquiries tab.
-3. Use Inquiry Details and Follow-Up to update status or next follow-up date.
-4. Review the weekly practice summary and generate a Practice Performance Snapshot from the Weekly Summary tab.
-5. Download the snapshot, all inquiries, or the follow-up queue as CSV/text exports.
+2. Use `KPI Help` if the practice owner wants plain-language definitions for each metric.
+3. Add a patient inquiry from the Patient Inquiries tab.
+4. Use Inquiry Details and Follow-Up to update status or next follow-up date.
+5. Review the weekly practice summary and generate a Practice Performance Snapshot from the Weekly Summary tab.
+6. Download the snapshot, all inquiries, or the follow-up queue as CSV/text exports.
 
 ## KPI Definitions
+
+These definitions are also available inside the app through the `KPI Help` and `Weekly KPI Help` buttons.
 
 - Total Patient Inquiries: count of all patient inquiries.
 - New This Week: inquiries created during the current calendar week, starting Monday.
@@ -145,7 +149,7 @@ python3 -m streamlit run app.py
 
 ## Database Fields
 
-The SQLite table is still named `leads` internally to preserve the original MVP schema. In the app, these records are shown as patient inquiries.
+The SQLite table is still named `leads` internally to preserve the original MVP schema. In the app and exports, these records are shown as patient inquiries. The help and visual polish updates did not change the database schema.
 
 - `id`
 - `name`
@@ -249,11 +253,12 @@ http://localhost:8502/_stcore/health -> 200 ok
 ## Demo Walkthrough
 
 1. Start on Dashboard and point out Total Patient Inquiries, Follow-Ups Needed, Active Patients, and Estimated Treatment Value.
-2. Open Patient Inquiries and add a realistic fake inquiry.
-3. Update one inquiry to `Consultation Scheduled` or `Active Patient`.
-4. Return to Dashboard to show KPIs recalculating after the update.
-5. Open Weekly Summary and review the Practice Performance Snapshot.
-6. Download the snapshot or patient inquiry CSV from the relevant download buttons.
+2. Click `KPI Help` to show how each number is calculated in plain language.
+3. Open Patient Inquiries and add a realistic fake inquiry.
+4. Update one inquiry to `Consultation Scheduled` or `Active Patient`.
+5. Return to Dashboard to show KPIs recalculating after the update.
+6. Open Weekly Summary and review the Practice Performance Snapshot.
+7. Download the snapshot or patient inquiry CSV from the relevant download buttons.
 
 ## Troubleshooting
 

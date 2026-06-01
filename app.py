@@ -49,6 +49,17 @@ KPI_HELP = {
     "Conversion Rate": "The share of all patient inquiries that became Active Patients.",
     "Top Inquiry Source": "The inquiry source with the highest number of patient inquiries.",
 }
+PATIENT_EXPORT_COLUMNS = [
+    "name",
+    "phone",
+    "email",
+    "service_needed",
+    "source",
+    "status",
+    "estimated_value",
+    "notes",
+    "next_follow_up_date",
+]
 
 
 def get_db_path() -> Path:
@@ -128,6 +139,11 @@ def display_frame(frame: pd.DataFrame) -> pd.DataFrame:
     return frame.rename(columns={key: value for key, value in labels.items() if key in frame.columns})
 
 
+def table_height(frame: pd.DataFrame, *, min_rows: int = 4, max_rows: int = 12) -> int:
+    row_count = max(min_rows, min(len(frame), max_rows))
+    return 38 + (row_count * 35)
+
+
 def export_csv_for_demo(frame: pd.DataFrame) -> bytes:
     try:
         return display_frame(frame).to_csv(index=False).encode("utf-8")
@@ -181,7 +197,9 @@ def render_style() -> None:
     st.markdown(
         """
 <style>
-    .block-container {max-width: 1320px; padding-top: 1.25rem; padding-bottom: 2rem;}
+    .block-container {max-width: 1320px; padding-top: 1.1rem; padding-bottom: 2rem;}
+    h1 {margin-bottom: 0.2rem;}
+    h2, h3 {margin-top: 1.4rem;}
     div[data-testid="stMetric"] {
         border: 1px solid #d7dee8;
         border-radius: 8px;
@@ -235,6 +253,12 @@ def render_style() -> None:
     .signal-warning {border-color: #f2d19b; background: #fffaf0;}
     .signal-success {border-color: #b9ddc2; background: #f6fff8;}
     .signal-money {border-color: #bdd3ff; background: #f7faff;}
+    @media (max-width: 760px) {
+        .block-container {padding-left: 0.75rem; padding-right: 0.75rem;}
+        div[data-testid="stMetric"] {padding: 0.75rem;}
+        .signal-box {min-height: 96px;}
+        .signal-value {font-size: 1.15rem;}
+    }
 </style>
 """,
         unsafe_allow_html=True,
@@ -242,7 +266,14 @@ def render_style() -> None:
 
 
 def main() -> None:
-    st.set_page_config(page_title="Chiropractic Business OS", layout="wide")
+    st.set_page_config(
+        page_title="Chiropractic Business OS",
+        layout="wide",
+        initial_sidebar_state="collapsed",
+        menu_items={
+            "About": "A simple chiropractic practice dashboard for patient inquiries, follow-ups, and weekly performance.",
+        },
+    )
     render_style()
 
     st.title("Chiropractic Business OS")
@@ -266,12 +297,22 @@ def main() -> None:
         render_export(leads)
 
 
+@st.dialog("KPI Help")
+def render_kpi_help_dialog() -> None:
+    st.caption("Plain-language guide to the numbers used in this demo.")
+    for label, explanation in KPI_HELP.items():
+        st.markdown(f"**{label}**")
+        st.write(explanation)
+
+
 def render_dashboard(leads: pd.DataFrame) -> None:
     st.subheader("Practice Dashboard")
     st.markdown(
         '<div class="section-note">A fast view of inquiry volume, patient conversion, treatment value, and follow-up risk.</div>',
         unsafe_allow_html=True,
     )
+    if st.button("KPI Help", help="Open a quick explanation of each dashboard metric."):
+        render_kpi_help_dialog()
 
     kpis = calculate_kpis(leads)
     metric_cols = st.columns(4)
@@ -334,6 +375,7 @@ def render_dashboard(leads: pd.DataFrame) -> None:
         ),
         width="stretch",
         hide_index=True,
+        height=table_height(leads.head(10)),
     )
 
     with st.expander("Optional inquiry source breakdown"):
@@ -344,6 +386,7 @@ def render_dashboard(leads: pd.DataFrame) -> None:
             ),
             width="stretch",
             hide_index=True,
+            height=table_height(source_counts),
         )
 
 
@@ -445,7 +488,11 @@ def render_lead_intake() -> None:
             help="The next date the practice should call, email, or message this inquiry.",
         )
         notes = st.text_area("Notes", height=120, help="Symptoms, insurance notes, appointment preference, or follow-up context.")
-        submitted = st.form_submit_button("Save inquiry", type="primary")
+        submitted = st.form_submit_button(
+            "Save patient inquiry",
+            type="primary",
+            help="Save this patient inquiry and update the dashboard immediately.",
+        )
 
     if submitted:
         errors = validate_lead_form(name, phone, email, service_needed)
@@ -508,6 +555,7 @@ def render_lead_details(leads: pd.DataFrame) -> None:
         ),
         width="stretch",
         hide_index=True,
+        height=table_height(filtered),
     )
 
     if filtered.empty:
@@ -562,7 +610,11 @@ def render_lead_details(leads: pd.DataFrame) -> None:
             help="Schedule the next practice action for this inquiry.",
         )
         notes = st.text_area("Notes", value=str(selected["notes"] or ""), height=110, help="Update the latest context.")
-        saved = st.form_submit_button("Update inquiry", type="primary")
+        saved = st.form_submit_button(
+            "Update patient inquiry",
+            type="primary",
+            help="Save the selected status, notes, and next follow-up date.",
+        )
 
     if saved:
         try:
@@ -587,6 +639,8 @@ def render_weekly_report(leads: pd.DataFrame) -> None:
         st.info("No weekly data yet. Add patient inquiries to generate a practice summary.")
         return
     st.caption("A simple owner-ready summary of inquiry activity, active patients, follow-up pressure, and estimated treatment value.")
+    if st.button("Weekly KPI Help", help="Open a quick explanation of the weekly performance metrics."):
+        render_kpi_help_dialog()
     st.markdown('<div class="report-box">', unsafe_allow_html=True)
     st.markdown(f"#### Week of {summary['week_start']} to {summary['week_end']}")
     metric_cols = st.columns(4)
@@ -669,12 +723,14 @@ def render_weekly_report(leads: pd.DataFrame) -> None:
         file_name=f"practice_snapshot_{date.today().isoformat()}.txt",
         mime="text/plain",
         type="primary",
+        help="Download a plain-text Practice Performance Snapshot for sharing or printing.",
     )
     download_cols[1].download_button(
         "Download snapshot CSV",
         data=snapshot_csv,
         file_name=f"practice_snapshot_{date.today().isoformat()}.csv",
         mime="text/csv",
+        help="Download snapshot metrics in a spreadsheet-friendly CSV file.",
     )
 
 
@@ -685,9 +741,8 @@ def render_export(leads: pd.DataFrame) -> None:
         unsafe_allow_html=True,
     )
 
-    export_columns = ["name", "phone", "email", "service_needed", "source", "status", "estimated_value", "notes", "next_follow_up_date"]
-    export_frame = safe_dataframe(leads, export_columns) if not leads.empty else pd.DataFrame(columns=export_columns)
-    open_followups = safe_dataframe(leads[leads["is_open"]], export_columns) if not leads.empty else export_frame
+    export_frame = safe_dataframe(leads, PATIENT_EXPORT_COLUMNS) if not leads.empty else pd.DataFrame(columns=PATIENT_EXPORT_COLUMNS)
+    open_followups = safe_dataframe(leads[leads["is_open"]], PATIENT_EXPORT_COLUMNS) if not leads.empty else export_frame
 
     if export_frame.empty:
         st.info("No export data yet. Add patient inquiries before downloading CSV files.")
@@ -702,21 +757,23 @@ def render_export(leads: pd.DataFrame) -> None:
 
     col1, col2 = st.columns(2)
     col1.download_button(
-        "Download patient inquiries CSV",
+        "Download patient inquiry CSV",
         data=inquiries_csv,
         file_name=f"patient_inquiries_{date.today().isoformat()}.csv",
         mime="text/csv",
         type="primary",
+        help="Download patient-friendly inquiry data with readable column names.",
     )
     col2.download_button(
-        "Download follow-up list CSV",
+        "Download follow-up CSV",
         data=followups_csv,
         file_name=f"patient_followups_{date.today().isoformat()}.csv",
         mime="text/csv",
+        help="Download patient inquiries that still need follow-up.",
     )
 
     st.markdown("### Export Preview")
-    st.dataframe(display_frame(export_frame), width="stretch", hide_index=True)
+    st.dataframe(display_frame(export_frame), width="stretch", hide_index=True, height=table_height(export_frame))
 
 
 if __name__ == "__main__":
