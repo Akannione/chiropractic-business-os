@@ -234,7 +234,3 @@ def prepare_leads_frame(frame: pd.DataFrame) -> pd.DataFrame:
         prepared["next_follow_up_dt"] < today
     )
     return prepared
-
-
-def export_csv(frame: pd.DataFrame) -> bytes:
-    return frame[REQUIRED_COLUMNS].to_csv(index=False).encode("utf-8")

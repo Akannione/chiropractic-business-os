@@ -24,6 +24,7 @@ business_os_mvp/
   .env.example
   data/
     business_os.sqlite
+    chiropractor_sample_data.csv
   exports/
   src/
     business_os/
@@ -63,13 +64,17 @@ Or run the included launcher:
 
 The app initializes `data/business_os.sqlite` automatically and seeds chiropractic sample inquiries when the database is empty.
 
-Optional environment variable:
+## Environment Variables
+
+Optional database path:
 
 ```bash
 BUSINESS_OS_DB_PATH=data/business_os.sqlite
 ```
 
-If this path is relative, the app resolves it from the `business_os_mvp/` folder. Use an absolute path only when the deployment host gives you persistent disk storage.
+If this path is unset or blank, the app uses `data/business_os.sqlite`. If this path is relative, the app resolves it from the app folder. Use an absolute path only when the deployment host gives you persistent disk storage.
+
+Copy `.env.example` if your deployment platform or local workflow needs a reference value. The app reads `BUSINESS_OS_DB_PATH` from the process environment; it does not require a `.env` package.
 
 ## Demo Workflow
 
@@ -89,6 +94,38 @@ If this path is relative, the app resolves it from the `business_os_mvp/` folder
 - Estimated Treatment Value: sum of `estimated_value` for all inquiries not marked `Lost`.
 - Inquiry-to-Patient Conversion Rate: `Active Patient` count divided by Total Patient Inquiries.
 - Top Inquiry Source: the source with the highest inquiry count, or `None` when there are no inquiries.
+
+## Sample Data
+
+Demo inquiries are stored in:
+
+```text
+data/chiropractor_sample_data.csv
+```
+
+When the SQLite database is empty, the app reads this CSV and inserts the sample patient inquiries into the existing `leads` table. Existing database records are never overwritten, so the CSV is only used for first-time seeding.
+
+To replace or extend the demo data:
+
+1. Edit `data/chiropractor_sample_data.csv`.
+2. Keep the same CSV headers.
+3. Use fake patient names, phone numbers, and emails only.
+4. Use the supported status and source labels listed below.
+5. Use `created_offset_days` and `next_follow_up_offset_days` to keep demo dates fresh relative to the day the database is seeded.
+
+Date offset examples:
+
+- `next_follow_up_offset_days = -2` creates an overdue follow-up.
+- `next_follow_up_offset_days = 0` creates a follow-up due today.
+- `next_follow_up_offset_days = 3` creates a future follow-up.
+- Leave `next_follow_up_offset_days` blank for no scheduled follow-up.
+
+To reseed from the CSV during local testing, stop the app and delete the local SQLite file:
+
+```bash
+rm data/business_os.sqlite
+python3 -m streamlit run app.py
+```
 
 ## Demo Status Labels
 
@@ -149,6 +186,13 @@ BUSINESS_OS_DB_PATH = "data/business_os.sqlite"
 
 If `BUSINESS_OS_DB_PATH` is unset or blank, the app defaults to `data/business_os.sqlite` relative to this app folder. For a demo, the default relative SQLite path is fine. Streamlit Community Cloud storage can reset on redeploy, so treat the bundled SQLite database as demo data unless persistent storage is added later.
 
+Streamlit Community Cloud notes:
+
+- Main file path: `app.py`
+- Dependencies: installed from `requirements.txt`
+- Optional secret: `BUSINESS_OS_DB_PATH = "data/business_os.sqlite"`
+- SQLite local storage can reset on app restart or redeploy.
+
 ### Render
 
 1. Create a new Render Web Service from the GitHub repository.
@@ -173,6 +217,12 @@ BUSINESS_OS_DB_PATH=data/business_os.sqlite
 
 For a real hosted demo, configure a Render persistent disk and set `BUSINESS_OS_DB_PATH` to a path on that disk, such as `/var/data/business_os.sqlite`. Without persistent disk storage, SQLite data may reset when the service restarts or redeploys.
 
+Render notes:
+
+- Build command: `pip install -r requirements.txt`
+- Start command: `python3 -m streamlit run app.py --server.port $PORT --server.address 0.0.0.0`
+- For persistent data, mount a Render disk and point `BUSINESS_OS_DB_PATH` to that disk.
+
 ### SQLite Persistence Notes
 
 - Local runs store data in `data/business_os.sqlite` by default.
@@ -195,6 +245,23 @@ Health check:
 ```text
 http://localhost:8502/_stcore/health -> 200 ok
 ```
+
+## Demo Walkthrough
+
+1. Start on Dashboard and point out Total Patient Inquiries, Follow-Ups Needed, Active Patients, and Estimated Treatment Value.
+2. Open Patient Inquiries and add a realistic fake inquiry.
+3. Update one inquiry to `Consultation Scheduled` or `Active Patient`.
+4. Return to Dashboard to show KPIs recalculating after the update.
+5. Open Weekly Summary and review the Practice Performance Snapshot.
+6. Download the snapshot or patient inquiry CSV from the relevant download buttons.
+
+## Troubleshooting
+
+- If `streamlit run app.py` is not available, use `python3 -m streamlit run app.py`.
+- If the app opens with no demo data, confirm `data/chiropractor_sample_data.csv` exists and the SQLite database is empty.
+- If old demo rows appear, delete the local SQLite file and restart the app to reseed from the CSV.
+- If the app cannot write the database, check that `BUSINESS_OS_DB_PATH` points to a writable folder.
+- On Streamlit Community Cloud and Render without persistent disk storage, SQLite data may reset after restart or redeploy.
 
 ## Notes
 

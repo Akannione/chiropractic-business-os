@@ -1,116 +1,58 @@
 from __future__ import annotations
 
+import csv
 from datetime import date, datetime, timedelta
+from pathlib import Path
 
 
-def build_sample_leads(today: date | None = None) -> list[dict[str, object]]:
-    """Return realistic chiropractic demo inquiries with open, closed, overdue, and upcoming work."""
+SAMPLE_DATA_FILE = Path(__file__).resolve().parents[2] / "data" / "chiropractor_sample_data.csv"
+
+
+def build_sample_leads(today: date | None = None, csv_path: Path | None = None) -> list[dict[str, object]]:
+    """Load fake chiropractic demo inquiries from CSV and convert relative dates."""
     today = today or date.today()
-    now = datetime.now().replace(microsecond=0).isoformat(sep=" ")
+    path = csv_path or SAMPLE_DATA_FILE
+    if not path.exists():
+        raise FileNotFoundError(f"Sample data CSV was not found at {path}.")
 
-    return [
-        {
-            "name": "Maya Johnson",
-            "phone": "404-555-0128",
-            "email": "maya.johnson@example.com",
-            "service_needed": "Spinal Adjustment",
-            "source": "Referral",
-            "status": "Consultation Scheduled",
-            "estimated_value": 180.00,
-            "notes": "Referred by an existing patient. Wants help with lower back stiffness.",
-            "next_follow_up_date": (today - timedelta(days=2)).isoformat(),
-            "created_at": (today - timedelta(days=9)).isoformat() + " 09:15:00",
-            "updated_at": now,
-        },
-        {
-            "name": "Andre Walker",
-            "phone": "678-555-0191",
-            "email": "andre.walker@example.com",
-            "service_needed": "Sports Injury Treatment",
-            "source": "Google",
-            "status": "New Inquiry",
-            "estimated_value": 240.00,
-            "notes": "Found the practice on Google after a weekend running injury.",
-            "next_follow_up_date": (today + timedelta(days=1)).isoformat(),
-            "created_at": today.isoformat() + " 10:30:00",
-            "updated_at": now,
-        },
-        {
-            "name": "Priya Patel",
-            "phone": "470-555-0177",
-            "email": "priya.patel@example.com",
-            "service_needed": "Wellness Consultation",
-            "source": "Insurance",
-            "status": "Follow-Up Needed",
-            "estimated_value": 160.00,
-            "notes": "Asked whether her insurance covers a wellness visit.",
-            "next_follow_up_date": (today - timedelta(days=5)).isoformat(),
-            "created_at": (today - timedelta(days=18)).isoformat() + " 14:45:00",
-            "updated_at": now,
-        },
-        {
-            "name": "Chris Miller",
-            "phone": "770-555-0142",
-            "email": "chris.miller@example.com",
-            "service_needed": "Neck Pain Evaluation",
-            "source": "Phone Call",
-            "status": "Active Patient",
-            "estimated_value": 220.00,
-            "notes": "Called the office and booked after a first consultation.",
-            "next_follow_up_date": "",
-            "created_at": (today - timedelta(days=30)).isoformat() + " 11:00:00",
-            "updated_at": now,
-        },
-        {
-            "name": "Nia Brown",
-            "phone": "912-555-0184",
-            "email": "nia.brown@example.com",
-            "service_needed": "Prenatal Chiropractic Consultation",
-            "source": "Website",
-            "status": "Consultation Scheduled",
-            "estimated_value": 190.00,
-            "notes": "Submitted a website form asking about prenatal care options.",
-            "next_follow_up_date": today.isoformat(),
-            "created_at": (today - timedelta(days=4)).isoformat() + " 16:20:00",
-            "updated_at": now,
-        },
-        {
-            "name": "Jordan Lee",
-            "phone": "706-555-0109",
-            "email": "jordan.lee@example.com",
-            "service_needed": "Back Pain Consultation",
-            "source": "Referral",
-            "status": "Lost",
-            "estimated_value": 175.00,
-            "notes": "Chose another office closer to work.",
-            "next_follow_up_date": "",
-            "created_at": (today - timedelta(days=21)).isoformat() + " 13:10:00",
-            "updated_at": now,
-        },
-        {
-            "name": "Taylor Nguyen",
-            "phone": "404-555-0116",
-            "email": "taylor.nguyen@example.com",
-            "service_needed": "Posture Assessment",
-            "source": "Website",
-            "status": "New Inquiry",
-            "estimated_value": 150.00,
-            "notes": "Asked about posture issues from desk work.",
-            "next_follow_up_date": (today + timedelta(days=3)).isoformat(),
-            "created_at": (today - timedelta(days=1)).isoformat() + " 08:50:00",
-            "updated_at": now,
-        },
-        {
-            "name": "Sam Garcia",
-            "phone": "678-555-0155",
-            "email": "sam.garcia@example.com",
-            "service_needed": "Auto Accident Evaluation",
-            "source": "Phone Call",
-            "status": "Follow-Up Needed",
-            "estimated_value": 260.00,
-            "notes": "Called after a minor accident and needs a reminder to schedule.",
-            "next_follow_up_date": (today + timedelta(days=6)).isoformat(),
-            "created_at": (today - timedelta(days=11)).isoformat() + " 12:05:00",
-            "updated_at": now,
-        },
-    ]
+    rows: list[dict[str, object]] = []
+    with path.open(newline="", encoding="utf-8") as file:
+        for raw in csv.DictReader(file):
+            rows.append(_normalize_sample_row(raw, today))
+    return rows
+
+
+def _normalize_sample_row(raw: dict[str, str], today: date) -> dict[str, object]:
+    created_date = today + timedelta(days=_parse_int(raw.get("created_offset_days"), default=0))
+    followup_offset = raw.get("next_follow_up_offset_days", "").strip()
+    followup_date = ""
+    if followup_offset:
+        followup_date = (today + timedelta(days=_parse_int(followup_offset, default=0))).isoformat()
+
+    return {
+        "name": raw.get("name", "").strip(),
+        "phone": raw.get("phone", "").strip(),
+        "email": raw.get("email", "").strip(),
+        "service_needed": raw.get("service_needed", "").strip(),
+        "source": raw.get("source", "").strip(),
+        "status": raw.get("status", "").strip(),
+        "estimated_value": _parse_float(raw.get("estimated_value")),
+        "notes": raw.get("notes", "").strip(),
+        "next_follow_up_date": followup_date,
+        "created_at": f"{created_date.isoformat()} 09:00:00",
+        "updated_at": datetime.now().replace(microsecond=0).isoformat(sep=" "),
+    }
+
+
+def _parse_int(value: str | None, *, default: int) -> int:
+    try:
+        return int(str(value or "").strip())
+    except ValueError:
+        return default
+
+
+def _parse_float(value: str | None) -> float:
+    try:
+        return float(str(value or "0").strip())
+    except ValueError:
+        return 0.0
