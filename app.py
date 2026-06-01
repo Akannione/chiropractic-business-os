@@ -23,6 +23,7 @@ from business_os.db import (  # noqa: E402
     initialize_database,
     insert_lead,
     prepare_leads_frame,
+    reset_sample_data,
     seed_sample_data_if_empty,
     update_lead_followup,
 )
@@ -70,6 +71,10 @@ def get_db_path() -> Path:
     if not path.is_absolute():
         path = APP_ROOT / path
     return path
+
+
+def is_demo_mode() -> bool:
+    return os.environ.get("BUSINESS_OS_DEMO_MODE", "").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def bootstrap() -> pd.DataFrame:
@@ -286,6 +291,8 @@ def main() -> None:
         st.caption(f"Technical detail: {exc}")
         st.stop()
 
+    render_demo_tools()
+
     tabs = st.tabs(["Dashboard", "Patient Inquiries", "Weekly Summary", "Export"])
     with tabs[0]:
         render_dashboard(leads)
@@ -295,6 +302,23 @@ def main() -> None:
         render_weekly_report(leads)
     with tabs[3]:
         render_export(leads)
+
+
+def render_demo_tools() -> None:
+    if not is_demo_mode():
+        return
+
+    with st.sidebar:
+        st.markdown("### Demo Mode")
+        st.caption("Reset the demo to fresh fake chiropractic sample data before screenshots or client walkthroughs.")
+        if st.button("Reset demo data", help="Replace current records with the 15 fake sample inquiries from the CSV."):
+            try:
+                count = reset_sample_data(get_db_path())
+                st.success(f"Demo data reset with {count} patient inquiries.")
+                st.rerun()
+            except Exception as exc:
+                st.error("Demo data could not be reset.")
+                st.caption(f"Technical detail: {exc}")
 
 
 @st.dialog("KPI Help")

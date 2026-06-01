@@ -27,6 +27,24 @@ business_os_mvp/
     business_os.sqlite
     chiropractor_sample_data.csv
   exports/
+  marketing/
+    one_page_offer.md
+    outreach_assets.md
+  screenshots/
+    dashboard.png
+    inquiries.png
+    weekly_summary.png
+    export.png
+  sales_assets/
+    README.md
+    demo_video.mp4
+    one_page_offer.pdf
+    faq.pdf
+    pricing.pdf
+    discovery_questions.pdf
+    demo_script.pdf
+    onboarding_checklist.pdf
+    screenshots/
   src/
     business_os/
       __init__.py
@@ -76,6 +94,14 @@ BUSINESS_OS_DB_PATH=data/business_os.sqlite
 If this path is unset or blank, the app uses `data/business_os.sqlite`. If this path is relative, the app resolves it from the app folder. Use an absolute path only when the deployment host gives you persistent disk storage.
 
 Copy `.env.example` if your deployment platform or local workflow needs a reference value. The app reads `BUSINESS_OS_DB_PATH` from the process environment; it does not require a `.env` package.
+
+Optional demo mode:
+
+```bash
+BUSINESS_OS_DEMO_MODE=true
+```
+
+Demo mode shows a sidebar reset button that replaces current records with the fake chiropractic sample data. Use it for screenshots, outreach prep, and live demos only.
 
 ## Demo Workflow
 
@@ -130,6 +156,19 @@ To reseed from the CSV during local testing, stop the app and delete the local S
 rm data/business_os.sqlite
 python3 -m streamlit run app.py
 ```
+
+If `BUSINESS_OS_DEMO_MODE=true`, use the sidebar `Reset demo data` button to reseed without deleting the database manually.
+
+## Marketing And Sales Assets
+
+Optional outreach materials live alongside the codebase so the productized service is ready for June 15 outreach and client demos.
+
+- `marketing/one_page_offer.md`: editable one-page offer with headline, problem, solution, deliverables, audience, exclusions, pricing tiers, support options, and call-to-action.
+- `marketing/outreach_assets.md`: editable outreach copy including cold email, follow-up email, LinkedIn message, Facebook message, phone opener, discovery questions, and objection responses.
+- `screenshots/`: app screenshots for quick README, portfolio, or outreach use.
+- `sales_assets/`: distribution-ready PDFs, screenshot copies, and a placeholder demo video file.
+
+These files are optional sales collateral. They are not required by the core app and do not affect the database schema or Streamlit functionality.
 
 ## Demo Status Labels
 

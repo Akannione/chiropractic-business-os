@@ -116,6 +116,29 @@ def seed_sample_data_if_empty(db_path: Path) -> int:
         return len(rows)
 
 
+def reset_sample_data(db_path: Path) -> int:
+    """Replace current records with fresh fake chiropractic demo data."""
+    with connect(db_path) as connection:
+        connection.execute("DELETE FROM leads")
+        connection.execute("DELETE FROM sqlite_sequence WHERE name = 'leads'")
+        rows = build_sample_leads()
+        connection.executemany(
+            """
+            INSERT INTO leads (
+                name, phone, email, service_needed, source, status,
+                estimated_value, notes, next_follow_up_date, created_at, updated_at
+            )
+            VALUES (
+                :name, :phone, :email, :service_needed, :source, :status,
+                :estimated_value, :notes, :next_follow_up_date, :created_at, :updated_at
+            )
+            """,
+            rows,
+        )
+        connection.commit()
+        return len(rows)
+
+
 def format_date(value: date | datetime | str | None) -> str:
     if value is None:
         return ""
