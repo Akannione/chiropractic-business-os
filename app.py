@@ -41,12 +41,14 @@ EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 PHONE_PATTERN = re.compile(r"^\+?[0-9][0-9\s().-]{6,19}$")
 
 KPI_HELP = {
-    "Total inquiries": "Every patient inquiry currently saved in the Business OS.",
-    "New this week": "Patient inquiries created since Monday of the current week.",
-    "Needs follow-up": "Patient inquiries marked Follow-Up Needed or with a follow-up date due today or earlier.",
-    "Active patients": "Inquiries now marked Active Patient.",
-    "Overdue": "Patient inquiries needing follow-up with a date before today.",
-    "Estimated treatment value": "The total potential treatment revenue from patient inquiries that have not been marked Lost.",
+    "Total Patient Inquiries": "Every patient inquiry currently saved in the Business OS.",
+    "New This Week": "Patient inquiries created during the current week, starting Monday.",
+    "Follow-Ups Needed": "Inquiries marked Follow-Up Needed or due for follow-up today or earlier. Lost inquiries are excluded.",
+    "Overdue Follow-Ups": "Inquiries with a follow-up date before today. Lost inquiries are excluded.",
+    "Active Patients": "Patient inquiries currently marked Active Patient.",
+    "Estimated Treatment Value": "The total potential treatment revenue from patient inquiries that have not been marked Lost.",
+    "Conversion Rate": "The share of all patient inquiries that became Active Patients.",
+    "Top Inquiry Source": "The inquiry source with the highest number of patient inquiries.",
 }
 
 
@@ -140,7 +142,10 @@ def build_snapshot_rows(summary: dict[str, object]) -> list[tuple[str, str]]:
         ("Total Patient Inquiries", str(summary["total_inquiries"])),
         ("New This Week", str(summary["new_inquiries"])),
         ("Active Patients", str(summary["active_patients"])),
-        ("Follow-Ups Needed", str(summary["needs_followup"])),
+        (
+            "Follow-Ups Needed",
+            f"{summary['needs_followup']} ({percent(float(summary['followups_needed_percent']))} of inquiries)",
+        ),
         ("Overdue Follow-Ups", str(summary["overdue_followups"])),
         ("Estimated Treatment Value", money(float(summary["estimated_treatment_value"]))),
         ("Inquiry-to-Patient Conversion Rate", percent(float(summary["conversion_rate"]))),
@@ -270,17 +275,31 @@ def render_dashboard(leads: pd.DataFrame) -> None:
     )
 
     kpis = calculate_kpis(leads)
-    metric_cols = st.columns(6)
-    metric_cols[0].metric("Total inquiries", kpis["total_leads"], help=KPI_HELP["Total inquiries"])
-    metric_cols[1].metric("New this week", kpis["new_leads_this_week"], help=KPI_HELP["New this week"])
-    metric_cols[2].metric("Needs follow-up", kpis["followups_needed"], help=KPI_HELP["Needs follow-up"])
-    metric_cols[3].metric("Active patients", kpis["active_patients"], help=KPI_HELP["Active patients"])
-    metric_cols[4].metric("Overdue", kpis["overdue_followups"], help=KPI_HELP["Overdue"])
-    metric_cols[5].metric(
-        "Estimated treatment value",
-        money(kpis["estimated_treatment_value"]),
-        help=KPI_HELP["Estimated treatment value"],
+    metric_cols = st.columns(4)
+    metric_cols[0].metric("Total Patient Inquiries", kpis["total_leads"], help=KPI_HELP["Total Patient Inquiries"])
+    metric_cols[1].metric("New This Week", kpis["new_leads_this_week"], help=KPI_HELP["New This Week"])
+    metric_cols[2].metric(
+        "Follow-Ups Needed",
+        kpis["followups_needed"],
+        delta=f"{percent(kpis['followups_needed_percent'])} of inquiries",
+        delta_color="off",
+        help=KPI_HELP["Follow-Ups Needed"],
     )
+    metric_cols[3].metric("Overdue Follow-Ups", kpis["overdue_followups"], help=KPI_HELP["Overdue Follow-Ups"])
+
+    metric_cols = st.columns(4)
+    metric_cols[0].metric("Active Patients", kpis["active_patients"], help=KPI_HELP["Active Patients"])
+    metric_cols[1].metric(
+        "Conversion Rate",
+        percent(kpis["conversion_rate"]),
+        help=KPI_HELP["Conversion Rate"],
+    )
+    metric_cols[2].metric(
+        "Estimated Treatment Value",
+        money(kpis["estimated_treatment_value"]),
+        help=KPI_HELP["Estimated Treatment Value"],
+    )
+    metric_cols[3].metric("Top Inquiry Source", kpis["top_source"], help=KPI_HELP["Top Inquiry Source"])
 
     if leads.empty:
         st.info("No patient inquiries yet. Add one from the Patient Inquiries tab to start the demo.")
@@ -329,7 +348,7 @@ def render_dashboard(leads: pd.DataFrame) -> None:
         )
 
 
-def render_priority_signals(leads: pd.DataFrame, kpis: dict[str, float | int]) -> None:
+def render_priority_signals(leads: pd.DataFrame, kpis: dict[str, float | int | str]) -> None:
     due_today = filter_due_today(leads)
     overdue_count = int(kpis["overdue_followups"])
     active_count = int(kpis["active_patients"])
@@ -572,10 +591,25 @@ def render_weekly_report(leads: pd.DataFrame) -> None:
     st.markdown('<div class="report-box">', unsafe_allow_html=True)
     st.markdown(f"#### Week of {summary['week_start']} to {summary['week_end']}")
     metric_cols = st.columns(4)
-    metric_cols[0].metric("New inquiries", summary["new_inquiries"])
-    metric_cols[1].metric("Needs follow-up", summary["needs_followup"])
-    metric_cols[2].metric("Active patients", summary["active_patients"])
-    metric_cols[3].metric("Estimated treatment value", money(summary["estimated_treatment_value"]))
+    metric_cols[0].metric("Total Patient Inquiries", summary["total_inquiries"], help=KPI_HELP["Total Patient Inquiries"])
+    metric_cols[1].metric("New This Week", summary["new_inquiries"], help=KPI_HELP["New This Week"])
+    metric_cols[2].metric("Active Patients", summary["active_patients"], help=KPI_HELP["Active Patients"])
+    metric_cols[3].metric(
+        "Follow-Ups Needed",
+        summary["needs_followup"],
+        delta=f"{percent(summary['followups_needed_percent'])} of inquiries",
+        delta_color="off",
+        help=KPI_HELP["Follow-Ups Needed"],
+    )
+    metric_cols = st.columns(4)
+    metric_cols[0].metric("Overdue Follow-Ups", summary["overdue_followups"], help=KPI_HELP["Overdue Follow-Ups"])
+    metric_cols[1].metric(
+        "Estimated Treatment Value",
+        money(summary["estimated_treatment_value"]),
+        help=KPI_HELP["Estimated Treatment Value"],
+    )
+    metric_cols[2].metric("Conversion Rate", percent(summary["conversion_rate"]), help=KPI_HELP["Conversion Rate"])
+    metric_cols[3].metric("Top Inquiry Source", summary["top_source"], help=KPI_HELP["Top Inquiry Source"])
     st.write(summary["practice_readout"])
     if summary["followup_focus"]:
         st.markdown("#### Follow-Up Focus")
@@ -598,16 +632,26 @@ def render_weekly_report(leads: pd.DataFrame) -> None:
     )
 
     snapshot_cols = st.columns(4)
-    snapshot_cols[0].metric("Total Patient Inquiries", summary["total_inquiries"])
-    snapshot_cols[1].metric("New This Week", summary["new_inquiries"])
-    snapshot_cols[2].metric("Active Patients", summary["active_patients"])
-    snapshot_cols[3].metric("Follow-Ups Needed", summary["needs_followup"])
+    snapshot_cols[0].metric("Total Patient Inquiries", summary["total_inquiries"], help=KPI_HELP["Total Patient Inquiries"])
+    snapshot_cols[1].metric("New This Week", summary["new_inquiries"], help=KPI_HELP["New This Week"])
+    snapshot_cols[2].metric("Active Patients", summary["active_patients"], help=KPI_HELP["Active Patients"])
+    snapshot_cols[3].metric(
+        "Follow-Ups Needed",
+        summary["needs_followup"],
+        delta=f"{percent(summary['followups_needed_percent'])} of inquiries",
+        delta_color="off",
+        help=KPI_HELP["Follow-Ups Needed"],
+    )
 
     snapshot_cols = st.columns(4)
-    snapshot_cols[0].metric("Overdue Follow-Ups", summary["overdue_followups"])
-    snapshot_cols[1].metric("Estimated Treatment Value", money(summary["estimated_treatment_value"]))
-    snapshot_cols[2].metric("Conversion Rate", percent(summary["conversion_rate"]))
-    snapshot_cols[3].metric("Top Inquiry Source", summary["top_source"])
+    snapshot_cols[0].metric("Overdue Follow-Ups", summary["overdue_followups"], help=KPI_HELP["Overdue Follow-Ups"])
+    snapshot_cols[1].metric(
+        "Estimated Treatment Value",
+        money(summary["estimated_treatment_value"]),
+        help=KPI_HELP["Estimated Treatment Value"],
+    )
+    snapshot_cols[2].metric("Conversion Rate", percent(summary["conversion_rate"]), help=KPI_HELP["Conversion Rate"])
+    snapshot_cols[3].metric("Top Inquiry Source", summary["top_source"], help=KPI_HELP["Top Inquiry Source"])
 
     st.markdown("#### What This Means")
     st.write(summary["snapshot_summary"])

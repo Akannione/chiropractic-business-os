@@ -79,6 +79,17 @@ If this path is relative, the app resolves it from the `business_os_mvp/` folder
 4. Review the weekly practice summary and generate a Practice Performance Snapshot from the Weekly Summary tab.
 5. Download the snapshot, all inquiries, or the follow-up queue as CSV/text exports.
 
+## KPI Definitions
+
+- Total Patient Inquiries: count of all patient inquiries.
+- New This Week: inquiries created during the current calendar week, starting Monday.
+- Active Patients: inquiries marked `Active Patient`.
+- Follow-Ups Needed: inquiries marked `Follow-Up Needed` or due for follow-up today or earlier, excluding `Lost`.
+- Overdue Follow-Ups: inquiries with a follow-up date before today, excluding `Lost`.
+- Estimated Treatment Value: sum of `estimated_value` for all inquiries not marked `Lost`.
+- Inquiry-to-Patient Conversion Rate: `Active Patient` count divided by Total Patient Inquiries.
+- Top Inquiry Source: the source with the highest inquiry count, or `None` when there are no inquiries.
+
 ## Demo Status Labels
 
 - `New Inquiry`
@@ -136,7 +147,7 @@ requirements.txt
 BUSINESS_OS_DB_PATH = "data/business_os.sqlite"
 ```
 
-For a demo, the default relative SQLite path is fine. Streamlit Community Cloud storage can reset on redeploy, so treat the bundled SQLite database as demo data unless persistent storage is added later.
+If `BUSINESS_OS_DB_PATH` is unset or blank, the app defaults to `data/business_os.sqlite` relative to this app folder. For a demo, the default relative SQLite path is fine. Streamlit Community Cloud storage can reset on redeploy, so treat the bundled SQLite database as demo data unless persistent storage is added later.
 
 ### Render
 
@@ -165,6 +176,7 @@ For a real hosted demo, configure a Render persistent disk and set `BUSINESS_OS_
 ### SQLite Persistence Notes
 
 - Local runs store data in `data/business_os.sqlite` by default.
+- Blank or unset `BUSINESS_OS_DB_PATH` values use the same default path.
 - `BUSINESS_OS_DB_PATH` can point to a different relative or absolute SQLite path.
 - Streamlit Community Cloud does not guarantee persistent local disk storage across redeploys.
 - Render needs a persistent disk for SQLite data to survive restarts and redeploys.
