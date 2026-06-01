@@ -43,7 +43,7 @@ PHONE_PATTERN = re.compile(r"^\+?[0-9][0-9\s().-]{6,19}$")
 KPI_HELP = {
     "Total inquiries": "Every patient inquiry currently saved in the Business OS.",
     "New this week": "Patient inquiries created since Monday of the current week.",
-    "Needs follow-up": "Patient inquiries that are not Active Patient or Lost.",
+    "Needs follow-up": "Patient inquiries marked Follow-Up Needed or with a follow-up date due today or earlier.",
     "Active patients": "Inquiries now marked Active Patient.",
     "Overdue": "Patient inquiries needing follow-up with a date before today.",
     "Estimated treatment value": "The total potential treatment revenue from patient inquiries that have not been marked Lost.",
@@ -70,6 +70,10 @@ def bootstrap() -> pd.DataFrame:
 
 def money(value: float | int) -> str:
     return f"${float(value):,.0f}"
+
+
+def percent(value: float | int) -> str:
+    return f"{float(value):.1f}%"
 
 
 def get_plotly_express():
@@ -130,6 +134,34 @@ def export_csv_for_demo(frame: pd.DataFrame) -> bytes:
         raise ValueError("CSV export could not be prepared.") from exc
 
 
+def build_snapshot_rows(summary: dict[str, object]) -> list[tuple[str, str]]:
+    return [
+        ("Date Generated", date.today().isoformat()),
+        ("Total Patient Inquiries", str(summary["total_inquiries"])),
+        ("New This Week", str(summary["new_inquiries"])),
+        ("Active Patients", str(summary["active_patients"])),
+        ("Follow-Ups Needed", str(summary["needs_followup"])),
+        ("Overdue Follow-Ups", str(summary["overdue_followups"])),
+        ("Estimated Treatment Value", money(float(summary["estimated_treatment_value"]))),
+        ("Inquiry-to-Patient Conversion Rate", percent(float(summary["conversion_rate"]))),
+        ("Top Inquiry Source", str(summary["top_source"])),
+    ]
+
+
+def build_snapshot_text(summary: dict[str, object]) -> bytes:
+    lines = ["Practice Performance Snapshot", f"Date generated: {date.today().isoformat()}", ""]
+    for label, value in build_snapshot_rows(summary)[1:]:
+        lines.append(f"{label}: {value}")
+    lines.extend(["", "Plain-English Summary", str(summary["snapshot_summary"])])
+    return "\n".join(lines).encode("utf-8")
+
+
+def build_snapshot_csv(summary: dict[str, object]) -> bytes:
+    rows = build_snapshot_rows(summary)
+    rows.append(("Plain-English Summary", str(summary["snapshot_summary"])))
+    return pd.DataFrame(rows, columns=["Practice Snapshot Metric", "Value"]).to_csv(index=False).encode("utf-8")
+
+
 def filter_due_today(leads: pd.DataFrame) -> pd.DataFrame:
     if leads.empty or "next_follow_up_dt" not in leads.columns or "is_open" not in leads.columns:
         return pd.DataFrame()
@@ -163,6 +195,19 @@ def render_style() -> None:
         border-radius: 8px;
         padding: 1rem 1.15rem;
         background: #fbfcfe;
+    }
+    .snapshot-box {
+        border: 1px solid #bdd3ff;
+        border-radius: 8px;
+        padding: 1.1rem 1.2rem;
+        background: #f7faff;
+        margin-top: 1rem;
+    }
+    .snapshot-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #172033;
+        margin-bottom: 0.25rem;
     }
     .signal-box {
         border: 1px solid #d7dee8;
@@ -228,7 +273,7 @@ def render_dashboard(leads: pd.DataFrame) -> None:
     metric_cols = st.columns(6)
     metric_cols[0].metric("Total inquiries", kpis["total_leads"], help=KPI_HELP["Total inquiries"])
     metric_cols[1].metric("New this week", kpis["new_leads_this_week"], help=KPI_HELP["New this week"])
-    metric_cols[2].metric("Needs follow-up", kpis["open_leads"], help=KPI_HELP["Needs follow-up"])
+    metric_cols[2].metric("Needs follow-up", kpis["followups_needed"], help=KPI_HELP["Needs follow-up"])
     metric_cols[3].metric("Active patients", kpis["active_patients"], help=KPI_HELP["Active patients"])
     metric_cols[4].metric("Overdue", kpis["overdue_followups"], help=KPI_HELP["Overdue"])
     metric_cols[5].metric(
@@ -539,6 +584,55 @@ def render_weekly_report(leads: pd.DataFrame) -> None:
     else:
         st.success("No overdue follow-ups right now.")
     st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("### Practice Performance Snapshot")
+    st.caption("A printable snapshot the practice owner can use before a demo, check-in, or weekly review.")
+    st.markdown(
+        f"""
+<div class="snapshot-box">
+  <div class="snapshot-title">Practice Performance Snapshot</div>
+  <div class="section-note">Date generated: {date.today().isoformat()}</div>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+
+    snapshot_cols = st.columns(4)
+    snapshot_cols[0].metric("Total Patient Inquiries", summary["total_inquiries"])
+    snapshot_cols[1].metric("New This Week", summary["new_inquiries"])
+    snapshot_cols[2].metric("Active Patients", summary["active_patients"])
+    snapshot_cols[3].metric("Follow-Ups Needed", summary["needs_followup"])
+
+    snapshot_cols = st.columns(4)
+    snapshot_cols[0].metric("Overdue Follow-Ups", summary["overdue_followups"])
+    snapshot_cols[1].metric("Estimated Treatment Value", money(summary["estimated_treatment_value"]))
+    snapshot_cols[2].metric("Conversion Rate", percent(summary["conversion_rate"]))
+    snapshot_cols[3].metric("Top Inquiry Source", summary["top_source"])
+
+    st.markdown("#### What This Means")
+    st.write(summary["snapshot_summary"])
+
+    try:
+        snapshot_text = build_snapshot_text(summary)
+        snapshot_csv = build_snapshot_csv(summary)
+    except Exception:
+        st.error("Practice Snapshot export could not be prepared. Please refresh the app and try again.")
+        return
+
+    download_cols = st.columns(2)
+    download_cols[0].download_button(
+        "Download snapshot text",
+        data=snapshot_text,
+        file_name=f"practice_snapshot_{date.today().isoformat()}.txt",
+        mime="text/plain",
+        type="primary",
+    )
+    download_cols[1].download_button(
+        "Download snapshot CSV",
+        data=snapshot_csv,
+        file_name=f"practice_snapshot_{date.today().isoformat()}.csv",
+        mime="text/csv",
+    )
 
 
 def render_export(leads: pd.DataFrame) -> None:

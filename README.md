@@ -10,7 +10,7 @@ Prepared for a June 15 chiropractor demo. The app is intentionally focused on pr
 - SQLite patient inquiry database
 - KPI dashboard
 - Patient inquiry details with follow-up scheduling
-- Weekly practice summary
+- Weekly practice summary with a printable Practice Performance Snapshot
 - CSV export
 - Chiropractic demo sample data
 
@@ -76,8 +76,8 @@ If this path is relative, the app resolves it from the `business_os_mvp/` folder
 1. Open the Dashboard tab to review patient inquiries, follow-ups, and estimated treatment value.
 2. Add a patient inquiry from the Patient Inquiries tab.
 3. Use Inquiry Details and Follow-Up to update status or next follow-up date.
-4. Review the weekly practice summary from the Weekly Summary tab.
-5. Download all inquiries or the follow-up queue from the Export tab.
+4. Review the weekly practice summary and generate a Practice Performance Snapshot from the Weekly Summary tab.
+5. Download the snapshot, all inquiries, or the follow-up queue as CSV/text exports.
 
 ## Demo Status Labels
 
