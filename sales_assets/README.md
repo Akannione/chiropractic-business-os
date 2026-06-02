@@ -4,7 +4,8 @@ This folder contains optional outreach and demo materials for the Chiropractic B
 
 ## Contents
 
-- `demo_video.mp4`: silent walkthrough video using the current demo screens.
+- `demo_video.mp4`: narrated 3-4 minute walkthrough video using the current demo screens.
+- `demo_video_narration.md`: source narration script for the walkthrough video.
 - `screenshots/dashboard.png`: dashboard screenshot with populated KPIs.
 - `screenshots/inquiries.png`: patient inquiry workspace screenshot.
 - `screenshots/weekly_summary.png`: weekly summary and snapshot screenshot.
@@ -18,4 +19,4 @@ This folder contains optional outreach and demo materials for the Chiropractic B
 
 ## Usage
 
-Use these files during outreach, discovery calls, and client demos. The video is silent, so pair it with the `demo_script.pdf` during live walkthroughs or record a voiceover later if needed.
+Use these files during outreach, discovery calls, and client demos. The narrated video can be sent before a call or used as a backup walkthrough when a live demo is not practical. Pair it with the `demo_script.pdf` for live calls.

@@ -1,4 +1,4 @@
-# Sales Notes
+# Internal Sales Notes
 
 ## Positioning
 
@@ -36,6 +36,33 @@ Help the practice owner see:
 - What happens when someone asks about insurance but does not book?
 - Do you know which inquiry source produces the most active patients?
 - Would a weekly practice snapshot help you manage the front desk?
+
+## Outreach Notes Template
+
+```text
+Date:
+Practice:
+Contact / Role:
+Channel:
+Message sent:
+Response:
+Pain signal:
+Objection:
+Best phrase they used:
+Demo requested:
+Follow-up date:
+Next action:
+```
+
+## Objection Tracking Prompts
+
+- Did they say they already have an EHR, scheduler, CRM, or spreadsheet?
+- Did they worry about HIPAA, data privacy, or patient information?
+- Did they question whether inquiry follow-up is a big enough problem?
+- Did they hesitate on price or timing?
+- Did they ask for features outside the current scope?
+- Which response created the most trust?
+- Should this objection change the offer copy, demo script, or FAQ?
 
 ## Common Objections
 

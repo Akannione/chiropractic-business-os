@@ -1,6 +1,6 @@
-# Client Feedback Log
+# Internal Client Feedback Log
 
-Use this file after outreach calls and demos. Keep feedback specific, dated, and tied to buyer language.
+Use this internal file after outreach calls and demos. Keep feedback specific, dated, and tied to buyer language.
 
 ## Feedback Template
 
@@ -20,6 +20,19 @@ Follow-up action:
 Decision / next step:
 ```
 
+## Outreach Capture Prompts
+
+Use these prompts immediately after each outreach touchpoint:
+
+- Which part of the app did they understand fastest?
+- Which tab or metric needed extra explanation?
+- Did they describe a real missed follow-up or inquiry tracking problem?
+- Did they compare this to their EHR, scheduler, spreadsheet, or front-desk process?
+- What exact words did they use to describe the problem?
+- Did they ask for a feature, or were they describing a workflow gap?
+- What would make this feel trustworthy enough for a paid pilot?
+- What next action was agreed: send video, schedule demo, follow up, or close out?
+
 ## Starter Feedback Themes To Watch
 
 - Missed or delayed follow-ups
@@ -29,6 +42,14 @@ Decision / next step:
 - Concern about HIPAA or patient data handling
 - Desire for a simple front-desk workflow
 - Need for owner-level weekly reporting
+
+## Objection Capture Prompts
+
+- What objection did they raise first?
+- Was the objection about price, trust, time, compliance, workflow fit, or existing tools?
+- Did the objection block the deal or just require clarification?
+- Which response helped move the conversation forward?
+- What proof would have reduced concern: screenshot, walkthrough video, case study, sample export, or deployment explanation?
 
 ## Demo Questions To Ask
 

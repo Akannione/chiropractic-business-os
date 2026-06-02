@@ -182,20 +182,20 @@ Optional outreach materials live alongside the codebase so the productized servi
 - `marketing/one_page_offer.md`: editable one-page offer with headline, problem, solution, deliverables, audience, exclusions, pricing tiers, support options, and call-to-action.
 - `marketing/outreach_assets.md`: editable outreach copy including cold email, follow-up email, LinkedIn message, Facebook message, phone opener, discovery questions, and objection responses.
 - `screenshots/`: app screenshots for quick README, portfolio, or outreach use.
-- `sales_assets/`: distribution-ready PDFs, screenshot copies, and a placeholder demo video file.
+- `sales_assets/`: distribution-ready PDFs, screenshot copies, and the narrated demo video.
 - `sales_assets/revenue_model.csv`: simple revenue model for the $500, $1,500, and $3,000 offer tiers across 1, 5, 10, and 20 clients.
 
 These files are optional sales collateral. They are not required by the core app and do not affect the database schema or Streamlit functionality.
 
 ## Project Operating System
 
-The repository includes a lightweight internal operator system in `PROJECT_OS/` for future client work:
+The repository includes a lightweight internal operator system in `PROJECT_OS/` for future client work. These files are internal planning and sales-operations documents, not customer-facing app features:
 
-- `PROJECT_OS/ROADMAP.md`: near-term and deferred product direction.
-- `PROJECT_OS/BACKLOG.md`: possible future work grouped by priority.
-- `PROJECT_OS/CLIENT_FEEDBACK.md`: template for demo and client feedback.
-- `PROJECT_OS/SALES_NOTES.md`: positioning, buyer notes, objections, and pricing.
-- `PROJECT_OS/FEATURE_REQUESTS.md`: request log and decision rules.
+- `PROJECT_OS/ROADMAP.md`: internal near-term and deferred product direction.
+- `PROJECT_OS/BACKLOG.md`: internal possible future work grouped by priority.
+- `PROJECT_OS/CLIENT_FEEDBACK.md`: internal template for demo feedback, outreach reactions, and objections.
+- `PROJECT_OS/SALES_NOTES.md`: internal positioning, buyer notes, objections, and pricing.
+- `PROJECT_OS/FEATURE_REQUESTS.md`: internal request log and decision rules.
 
 Root-level copies of these files are kept for quick access. The `PROJECT_OS/` folder is the preferred place to use for ongoing client feedback, feature triage, and growth planning. These documents are for operating the project and should not be treated as committed feature scope.
 
