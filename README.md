@@ -27,9 +27,18 @@ business_os_mvp/
     business_os.sqlite
     chiropractor_sample_data.csv
   exports/
+  deploy_sop/
+    setup_checklist.md
+    deployment_checklist.md
+    data_import_checklist.md
+    training_checklist.md
+    handoff_checklist.md
+    monthly_support_checklist.md
   marketing/
     one_page_offer.md
     outreach_assets.md
+  portfolio/
+    portfolio_case_study.md
   screenshots/
     dashboard.png
     inquiries.png
@@ -44,6 +53,7 @@ business_os_mvp/
     discovery_questions.pdf
     demo_script.pdf
     onboarding_checklist.pdf
+    revenue_model.csv
     screenshots/
   src/
     business_os/
@@ -167,8 +177,38 @@ Optional outreach materials live alongside the codebase so the productized servi
 - `marketing/outreach_assets.md`: editable outreach copy including cold email, follow-up email, LinkedIn message, Facebook message, phone opener, discovery questions, and objection responses.
 - `screenshots/`: app screenshots for quick README, portfolio, or outreach use.
 - `sales_assets/`: distribution-ready PDFs, screenshot copies, and a placeholder demo video file.
+- `sales_assets/revenue_model.csv`: simple revenue model for the $500, $1,500, and $3,000 offer tiers across 1, 5, 10, and 20 clients.
 
 These files are optional sales collateral. They are not required by the core app and do not affect the database schema or Streamlit functionality.
+
+## Project Operating System
+
+The repository includes lightweight planning and feedback documents for future client work:
+
+- `ROADMAP.md`: near-term and deferred product direction.
+- `BACKLOG.md`: possible future work grouped by priority.
+- `CLIENT_FEEDBACK.md`: template for demo and client feedback.
+- `SALES_NOTES.md`: positioning, buyer notes, objections, and pricing.
+- `FEATURE_REQUESTS.md`: request log and decision rules.
+
+These documents are for operating the project and should not be treated as committed feature scope.
+
+## Deployment SOP
+
+The `deploy_sop/` folder contains repeatable client deployment checklists:
+
+- `setup_checklist.md`
+- `deployment_checklist.md`
+- `data_import_checklist.md`
+- `training_checklist.md`
+- `handoff_checklist.md`
+- `monthly_support_checklist.md`
+
+These SOP files support sales, setup, training, handoff, and support. They do not change the core app or database schema.
+
+## Portfolio Case Study
+
+The `portfolio/portfolio_case_study.md` file summarizes the project for portfolio marketing. It covers the problem, solution, architecture, features, technologies, business impact, lessons learned, future roadmap, and suitability.
 
 ## Demo Status Labels
 
