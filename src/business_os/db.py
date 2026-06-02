@@ -6,28 +6,29 @@ from pathlib import Path
 
 import pandas as pd
 
+from business_os.config import APP_CONFIG
 from business_os.sample_data import build_sample_leads
 
 
-STATUSES = ["New Inquiry", "Consultation Scheduled", "Active Patient", "Lost", "Follow-Up Needed"]
-CLOSED_STATUSES = {"Active Patient", "Lost"}
+STATUSES = list(APP_CONFIG.statuses)
+CLOSED_STATUSES = set(APP_CONFIG.closed_statuses)
 STATUS_ALIASES = {
-    "New": "New Inquiry",
-    "New Lead": "New Inquiry",
-    "Contacted": "Consultation Scheduled",
-    "Proposal Sent": "Follow-Up Needed",
-    "Estimate Sent": "Follow-Up Needed",
-    "Closed Won": "Active Patient",
-    "Won": "Active Patient",
-    "Closed Lost": "Lost",
+    "New": APP_CONFIG.statuses[0],
+    "New Lead": APP_CONFIG.statuses[0],
+    "Contacted": APP_CONFIG.statuses[1],
+    "Proposal Sent": APP_CONFIG.followup_needed_status,
+    "Estimate Sent": APP_CONFIG.followup_needed_status,
+    "Closed Won": APP_CONFIG.active_status,
+    "Won": APP_CONFIG.active_status,
+    "Closed Lost": APP_CONFIG.lost_status,
 }
 SOURCE_ALIASES = {
-    "LinkedIn": "Google",
-    "Facebook Group": "Website",
-    "Local Networking": "Referral",
-    "Cold Email": "Phone Call",
-    "Walk-In": "Phone Call",
-    "Other": "Phone Call",
+    "LinkedIn": APP_CONFIG.sources[0],
+    "Facebook Group": APP_CONFIG.sources[3],
+    "Local Networking": APP_CONFIG.sources[1],
+    "Cold Email": APP_CONFIG.sources[4],
+    "Walk-In": APP_CONFIG.sources[4],
+    "Other": APP_CONFIG.sources[4],
 }
 REQUIRED_COLUMNS = [
     "id",
@@ -117,7 +118,7 @@ def seed_sample_data_if_empty(db_path: Path) -> int:
 
 
 def reset_sample_data(db_path: Path) -> int:
-    """Replace current records with fresh fake chiropractic demo data."""
+    """Replace current records with fresh fake demo data."""
     with connect(db_path) as connection:
         connection.execute("DELETE FROM leads")
         connection.execute("DELETE FROM sqlite_sequence WHERE name = 'leads'")

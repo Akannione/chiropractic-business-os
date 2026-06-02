@@ -4,6 +4,8 @@ from datetime import date
 
 import pandas as pd
 
+from business_os.config import APP_CONFIG
+
 
 def _prepare_for_metrics(leads: pd.DataFrame, today: date | None = None) -> pd.DataFrame:
     prepared = leads.copy()
@@ -32,7 +34,7 @@ def _prepare_for_metrics(leads: pd.DataFrame, today: date | None = None) -> pd.D
     )
     prepared["created_at_dt"] = pd.to_datetime(created_source, errors="coerce", format="mixed")
     prepared["next_follow_up_dt"] = pd.to_datetime(followup_source, errors="coerce", format="mixed")
-    prepared["is_closed"] = prepared["status"].isin({"Active Patient", "Lost"})
+    prepared["is_closed"] = prepared["status"].isin(APP_CONFIG.closed_statuses)
     prepared["is_open"] = ~prepared["is_closed"]
     today = pd.Timestamp(today or date.today()).normalize()
     prepared["is_overdue"] = prepared["is_open"] & prepared["next_follow_up_dt"].notna() & (
@@ -66,13 +68,13 @@ def calculate_kpis(leads: pd.DataFrame, today: date | None = None) -> dict[str, 
     closed_leads = leads[leads["is_closed"]]
     new_this_week = leads[leads["created_at_dt"] >= week_start]
     pipeline_value = open_leads["estimated_value"].sum()
-    estimated_treatment_value = leads[~leads["status"].eq("Lost")]["estimated_value"].sum()
-    active_patients = leads[leads["status"].eq("Active Patient")]
-    not_lost = ~leads["status"].eq("Lost")
+    estimated_treatment_value = leads[~leads["status"].eq(APP_CONFIG.lost_status)]["estimated_value"].sum()
+    active_patients = leads[leads["status"].eq(APP_CONFIG.active_status)]
+    not_lost = ~leads["status"].eq(APP_CONFIG.lost_status)
     followups_needed = leads[
         not_lost
         & (
-            leads["status"].eq("Follow-Up Needed")
+            leads["status"].eq(APP_CONFIG.followup_needed_status)
             | (leads["next_follow_up_dt"].notna() & (leads["next_follow_up_dt"] <= today_ts))
         )
     ]
@@ -132,8 +134,8 @@ def build_weekly_summary(leads: pd.DataFrame, today: date | None = None) -> dict
             "conversion_rate": 0.0,
             "estimated_treatment_value": 0.0,
             "top_source": "None",
-            "practice_readout": "No patient inquiries are currently stored.",
-            "snapshot_summary": "No patient inquiries are currently stored. Add a few inquiries to generate a useful practice snapshot.",
+            "practice_readout": APP_CONFIG.no_records_message,
+            "snapshot_summary": APP_CONFIG.snapshot_empty_summary,
             "followup_focus": [],
         }
 
@@ -177,22 +179,22 @@ def build_snapshot_summary(kpis: dict[str, object], open_count: int, weekly_new_
     top_source = str(kpis.get("top_source", "None") or "None")
 
     if total == 0:
-        return "No patient inquiries are currently stored. Add a few inquiries to generate a useful practice snapshot."
+        return APP_CONFIG.snapshot_empty_summary
 
     urgency = (
         f"{overdue} overdue follow-up{'s' if overdue != 1 else ''} need attention first. "
         if overdue
         else "No follow-ups are overdue right now. "
     )
-    inquiry_word = "patient inquiry" if total == 1 else "patient inquiries"
-    active_word = "active patient" if active == 1 else "active patients"
+    inquiry_word = APP_CONFIG.entity_singular if total == 1 else APP_CONFIG.entity_plural
+    active_word = APP_CONFIG.active_status.lower() if active == 1 else f"{APP_CONFIG.active_status.lower()}s"
     followup_word = "inquiry" if followups_needed == 1 else "inquiries"
     return (
-        f"The practice has {total} {inquiry_word}, "
+        f"The {APP_CONFIG.workspace_label} has {total} {inquiry_word}, "
         f"with {weekly_new_count} added this week and {active} {active_word}. "
         f"{followups_needed} {followup_word} need follow-up, and "
         f"{urgency}"
-        f"Estimated Treatment Value is ${treatment_value:,.0f} from inquiries not marked Lost. "
+        f"{APP_CONFIG.value_label} is ${treatment_value:,.0f} from inquiries not marked {APP_CONFIG.lost_status}. "
         f"The inquiry-to-patient conversion rate is {conversion_rate:.1f}%, and the strongest inquiry source is {top_source}. "
-        f"There are {open_count} inquiries still moving through the practice pipeline."
+        f"There are {open_count} inquiries still moving through the {APP_CONFIG.workspace_label} pipeline."
     )

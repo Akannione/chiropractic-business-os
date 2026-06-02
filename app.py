@@ -27,40 +27,19 @@ from business_os.db import (  # noqa: E402
     seed_sample_data_if_empty,
     update_lead_followup,
 )
+from business_os.config import APP_CONFIG  # noqa: E402
 from business_os.reports import build_weekly_summary, calculate_kpis  # noqa: E402
 
 
-SOURCES = [
-    "Google",
-    "Referral",
-    "Insurance",
-    "Website",
-    "Phone Call",
-]
+SOURCES = list(APP_CONFIG.sources)
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 PHONE_PATTERN = re.compile(r"^\+?[0-9][0-9\s().-]{6,19}$")
-
-KPI_HELP = {
-    "Total Patient Inquiries": "Every patient inquiry currently saved in the Business OS.",
-    "New This Week": "Patient inquiries created during the current week, starting Monday.",
-    "Follow-Ups Needed": "Inquiries marked Follow-Up Needed or due for follow-up today or earlier. Lost inquiries are excluded.",
-    "Overdue Follow-Ups": "Inquiries with a follow-up date before today. Lost inquiries are excluded.",
-    "Active Patients": "Patient inquiries currently marked Active Patient.",
-    "Estimated Treatment Value": "The total potential treatment revenue from patient inquiries that have not been marked Lost.",
-    "Conversion Rate": "The share of all patient inquiries that became Active Patients.",
-    "Top Inquiry Source": "The inquiry source with the highest number of patient inquiries.",
-}
-PATIENT_EXPORT_COLUMNS = [
-    "name",
-    "phone",
-    "email",
-    "service_needed",
-    "source",
-    "status",
-    "estimated_value",
-    "notes",
-    "next_follow_up_date",
-]
+KPI_LABELS = APP_CONFIG.kpi_labels
+KPI_HELP = {KPI_LABELS[key]: value for key, value in APP_CONFIG.kpi_help.items()}
+PATIENT_EXPORT_COLUMNS = list(APP_CONFIG.export_columns)
+ENTITY_TITLE = APP_CONFIG.entity_singular.title()
+ENTITY_PLURAL_TITLE = APP_CONFIG.entity_plural.title()
+ENTITY_SENTENCE = APP_CONFIG.entity_singular.capitalize()
 
 
 def get_db_path() -> Path:
@@ -118,7 +97,7 @@ def validate_lead_form(name: str, phone: str, email: str, service_needed: str) -
     elif not EMAIL_PATTERN.match(email.strip()):
         errors.append("Enter a valid email address, such as owner@example.com.")
     if not service_needed.strip():
-        errors.append("Requested Service is required.")
+        errors.append(f"{APP_CONFIG.service_label} is required.")
     return errors
 
 
@@ -131,20 +110,7 @@ def safe_dataframe(frame: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
 
 
 def display_frame(frame: pd.DataFrame) -> pd.DataFrame:
-    labels = {
-        "id": "ID",
-        "name": "Patient Name",
-        "phone": "Phone",
-        "email": "Email",
-        "service_needed": "Requested Service",
-        "source": "Inquiry Source",
-        "status": "Status",
-        "estimated_value": "Estimated Treatment Value",
-        "notes": "Notes",
-        "next_follow_up_date": "Next Follow-Up Date",
-        "created_at": "Created",
-        "updated_at": "Updated",
-    }
+    labels = APP_CONFIG.display_labels
     return frame.rename(columns={key: value for key, value in labels.items() if key in frame.columns})
 
 
@@ -163,22 +129,22 @@ def export_csv_for_demo(frame: pd.DataFrame) -> bytes:
 def build_snapshot_rows(summary: dict[str, object]) -> list[tuple[str, str]]:
     return [
         ("Date Generated", date.today().isoformat()),
-        ("Total Patient Inquiries", str(summary["total_inquiries"])),
-        ("New This Week", str(summary["new_inquiries"])),
-        ("Active Patients", str(summary["active_patients"])),
+        (KPI_LABELS["total"], str(summary["total_inquiries"])),
+        (KPI_LABELS["new_this_week"], str(summary["new_inquiries"])),
+        (KPI_LABELS["active"], str(summary["active_patients"])),
         (
-            "Follow-Ups Needed",
+            KPI_LABELS["followups_needed"],
             f"{summary['needs_followup']} ({percent(float(summary['followups_needed_percent']))} of inquiries)",
         ),
-        ("Overdue Follow-Ups", str(summary["overdue_followups"])),
-        ("Estimated Treatment Value", money(float(summary["estimated_treatment_value"]))),
+        (KPI_LABELS["overdue_followups"], str(summary["overdue_followups"])),
+        (KPI_LABELS["value"], money(float(summary["estimated_treatment_value"]))),
         ("Inquiry-to-Patient Conversion Rate", percent(float(summary["conversion_rate"]))),
-        ("Top Inquiry Source", str(summary["top_source"])),
+        (KPI_LABELS["top_source"], str(summary["top_source"])),
     ]
 
 
 def build_snapshot_text(summary: dict[str, object]) -> bytes:
-    lines = ["Practice Performance Snapshot", f"Date generated: {date.today().isoformat()}", ""]
+    lines = [APP_CONFIG.snapshot_title, f"Date generated: {date.today().isoformat()}", ""]
     for label, value in build_snapshot_rows(summary)[1:]:
         lines.append(f"{label}: {value}")
     lines.extend(["", "Plain-English Summary", str(summary["snapshot_summary"])])
@@ -278,28 +244,28 @@ def render_style() -> None:
 
 def main() -> None:
     st.set_page_config(
-        page_title="Chiropractic Business OS",
+        page_title=APP_CONFIG.app_title,
         layout="wide",
         initial_sidebar_state="collapsed",
         menu_items={
-            "About": "A simple chiropractic practice dashboard for patient inquiries, follow-ups, and weekly performance.",
+            "About": APP_CONFIG.about_text,
         },
     )
     render_style()
 
-    st.title("Chiropractic Business OS")
-    st.caption("Patient inquiry capture, follow-up scheduling, weekly summaries, and CSV exports for a chiropractic practice.")
+    st.title(APP_CONFIG.app_title)
+    st.caption(APP_CONFIG.app_caption)
 
     try:
         leads = bootstrap()
     except Exception as exc:
-        st.error("The app could not load the patient inquiry database.")
+        st.error(f"The app could not load the {APP_CONFIG.entity_singular} database.")
         st.caption(f"Technical detail: {exc}")
         st.stop()
 
     render_demo_tools()
 
-    tabs = st.tabs(["Dashboard", "Patient Inquiries", "Weekly Summary", "Export"])
+    tabs = st.tabs(["Dashboard", ENTITY_PLURAL_TITLE, "Weekly Summary", "Export"])
     with tabs[0]:
         render_dashboard(leads)
     with tabs[1]:
@@ -320,7 +286,7 @@ def render_demo_tools() -> None:
         if st.button("Reset demo data", help="Replace current records with the 15 fake sample inquiries from the CSV."):
             try:
                 count = reset_sample_data(get_db_path())
-                st.success(f"Demo data reset with {count} patient inquiries.")
+                st.success(f"Demo data reset with {count} {APP_CONFIG.entity_plural}.")
                 st.rerun()
             except Exception as exc:
                 st.error("Demo data could not be reset.")
@@ -336,48 +302,48 @@ def render_kpi_help_dialog() -> None:
 
 
 def render_dashboard(leads: pd.DataFrame) -> None:
-    st.subheader("Practice Dashboard")
+    st.subheader(APP_CONFIG.dashboard_title)
     st.markdown(
-        '<div class="section-note">Start here: see the treatment value at risk, who needs follow-up, and which inquiries became active patients.</div>',
+        f'<div class="section-note">{APP_CONFIG.dashboard_description}</div>',
         unsafe_allow_html=True,
     )
 
     kpis = calculate_kpis(leads)
     top_cols = st.columns([1.15, 1, 1, 0.8])
     top_cols[0].metric(
-        "Estimated Treatment Value",
+        KPI_LABELS["value"],
         money(kpis["estimated_treatment_value"]),
-        help=KPI_HELP["Estimated Treatment Value"],
+        help=KPI_HELP[KPI_LABELS["value"]],
     )
     top_cols[1].metric(
-        "Follow-Ups Needed",
+        KPI_LABELS["followups_needed"],
         kpis["followups_needed"],
         delta=f"{percent(kpis['followups_needed_percent'])} of inquiries",
         delta_color="off",
-        help=KPI_HELP["Follow-Ups Needed"],
+        help=KPI_HELP[KPI_LABELS["followups_needed"]],
     )
-    top_cols[2].metric("Active Patients", kpis["active_patients"], help=KPI_HELP["Active Patients"])
+    top_cols[2].metric(KPI_LABELS["active"], kpis["active_patients"], help=KPI_HELP[KPI_LABELS["active"]])
     if top_cols[3].button("KPI Help", help="Open a quick explanation of each dashboard metric."):
         render_kpi_help_dialog()
 
     metric_cols = st.columns(5)
-    metric_cols[0].metric("Total Patient Inquiries", kpis["total_leads"], help=KPI_HELP["Total Patient Inquiries"])
-    metric_cols[1].metric("New This Week", kpis["new_leads_this_week"], help=KPI_HELP["New This Week"])
-    metric_cols[2].metric("Overdue Follow-Ups", kpis["overdue_followups"], help=KPI_HELP["Overdue Follow-Ups"])
+    metric_cols[0].metric(KPI_LABELS["total"], kpis["total_leads"], help=KPI_HELP[KPI_LABELS["total"]])
+    metric_cols[1].metric(KPI_LABELS["new_this_week"], kpis["new_leads_this_week"], help=KPI_HELP[KPI_LABELS["new_this_week"]])
+    metric_cols[2].metric(KPI_LABELS["overdue_followups"], kpis["overdue_followups"], help=KPI_HELP[KPI_LABELS["overdue_followups"]])
     metric_cols[3].metric(
-        "Conversion Rate",
+        KPI_LABELS["conversion_rate"],
         percent(kpis["conversion_rate"]),
-        help=KPI_HELP["Conversion Rate"],
+        help=KPI_HELP[KPI_LABELS["conversion_rate"]],
     )
-    metric_cols[4].metric("Top Inquiry Source", kpis["top_source"], help=KPI_HELP["Top Inquiry Source"])
+    metric_cols[4].metric(KPI_LABELS["top_source"], kpis["top_source"], help=KPI_HELP[KPI_LABELS["top_source"]])
 
     if leads.empty:
-        st.info("No patient inquiries yet. Add one from the Patient Inquiries tab to start the demo.")
+        st.info(f"No {APP_CONFIG.entity_plural} yet. Add one from the {ENTITY_PLURAL_TITLE} tab to start the demo.")
         return
 
     render_priority_signals(leads, kpis)
 
-    st.markdown("### Recent Patient Inquiries")
+    st.markdown(f"### Recent {ENTITY_PLURAL_TITLE}")
     st.caption("Recent records with the requested service, source, status, value, and next follow-up date.")
     st.dataframe(
         display_frame(
@@ -399,7 +365,7 @@ def render_dashboard(leads: pd.DataFrame) -> None:
                     y="leads",
                     title="Patient Inquiries by Status",
                     text_auto=True,
-                    labels={"status": "Status", "leads": "Patient inquiries"},
+                    labels={"status": APP_CONFIG.status_label, "leads": APP_CONFIG.entity_plural.title()},
                 ).update_layout(showlegend=False, margin=dict(l=10, r=10, t=50, b=10)),
                 width="stretch",
             )
@@ -410,7 +376,7 @@ def render_dashboard(leads: pd.DataFrame) -> None:
         source_counts = leads.groupby("source", as_index=False).size().rename(columns={"size": "leads"})
         st.dataframe(
             source_counts.sort_values("leads", ascending=False).rename(
-                columns={"source": "Inquiry Source", "leads": "Patient Inquiries"}
+                columns={"source": APP_CONFIG.source_label, "leads": APP_CONFIG.entity_plural.title()}
             ),
             width="stretch",
             hide_index=True,
@@ -460,7 +426,7 @@ def render_priority_signals(leads: pd.DataFrame, kpis: dict[str, float | int | s
     col4.markdown(
         f"""
 <div class="signal-box signal-money">
-  <div class="signal-label">Estimated Treatment Value</div>
+  <div class="signal-label">{APP_CONFIG.value_label}</div>
   <div class="signal-value">{money(treatment_value)}</div>
   <div class="section-note">All non-lost inquiries.</div>
 </div>
@@ -477,9 +443,9 @@ def render_priority_signals(leads: pd.DataFrame, kpis: dict[str, float | int | s
 
 
 def render_leads_workspace(leads: pd.DataFrame) -> None:
-    st.subheader("Patient Inquiries")
+    st.subheader(ENTITY_PLURAL_TITLE)
     st.markdown(
-        '<div class="section-note">Add patient inquiries, review requested services, and schedule follow-ups in one place.</div>',
+        f'<div class="section-note">Add {APP_CONFIG.entity_plural}, review requested services, and schedule follow-ups in one place.</div>',
         unsafe_allow_html=True,
     )
 
@@ -489,7 +455,7 @@ def render_leads_workspace(leads: pd.DataFrame) -> None:
 
 
 def render_lead_intake() -> None:
-    st.markdown("### Add Patient Inquiry")
+    st.markdown(f"### Add {ENTITY_TITLE}")
     st.caption("Use this form while the inquiry is fresh. Required fields help keep the follow-up list usable.")
 
     with st.form("lead_intake_form", clear_on_submit=True):
@@ -498,17 +464,17 @@ def render_lead_intake() -> None:
         phone = col2.text_input("Phone", help="Best phone number for appointment follow-up. Required.")
         email = col1.text_input("Email", help="Best email address for appointment follow-up. Required.")
         service_needed = col2.text_input(
-            "Requested Service",
-            help="Example: Spinal Adjustment, Sports Injury Treatment, or Wellness Consultation. Required.",
+            APP_CONFIG.service_label,
+            help=f"Example: {', '.join(APP_CONFIG.service_examples[:-1])}, or {APP_CONFIG.service_examples[-1]}. Required.",
         )
-        source = col1.selectbox("Inquiry source", SOURCES, help="Where this patient inquiry came from.")
-        status = col2.selectbox("Status", STATUSES, help="Current appointment or patient stage for this inquiry.")
+        source = col1.selectbox("Inquiry source", SOURCES, help=f"Where this {APP_CONFIG.entity_singular} came from.")
+        status = col2.selectbox(APP_CONFIG.status_label, STATUSES, help=f"Current appointment or patient stage for this {APP_CONFIG.entity_singular}.")
         estimated_value = col1.number_input(
-            "Estimated Treatment Value",
+            APP_CONFIG.value_label,
             min_value=0.0,
             value=180.0,
             step=25.0,
-            help="Estimated treatment value for this inquiry. This is used in the dashboard unless the inquiry is marked Lost.",
+            help=f"Estimated treatment value for this inquiry. This is used in the dashboard unless the inquiry is marked {APP_CONFIG.lost_status}.",
         )
         next_follow_up = col2.date_input(
             "Next follow-up date",
@@ -517,9 +483,9 @@ def render_lead_intake() -> None:
         )
         notes = st.text_area("Notes", height=120, help="Symptoms, insurance notes, appointment preference, or follow-up context.")
         submitted = st.form_submit_button(
-            "Save patient inquiry",
+            f"Save {APP_CONFIG.entity_singular}",
             type="primary",
-            help="Save this patient inquiry and update the dashboard immediately.",
+            help=f"Save this {APP_CONFIG.entity_singular} and update the dashboard immediately.",
         )
 
     if submitted:
@@ -541,17 +507,17 @@ def render_lead_intake() -> None:
                 notes=notes,
                 next_follow_up_date=next_follow_up.isoformat(),
             )
-            st.success(f"Patient inquiry #{lead_id} saved.")
+            st.success(f"{ENTITY_SENTENCE} #{lead_id} saved.")
             st.rerun()
         except Exception as exc:
-            st.error("The patient inquiry could not be saved. Please check the fields and try again.")
+            st.error(f"The {APP_CONFIG.entity_singular} could not be saved. Please check the fields and try again.")
             st.caption(f"Technical detail: {exc}")
 
 
 def render_lead_details(leads: pd.DataFrame) -> None:
     st.markdown("### Inquiry Details and Follow-Up")
     if leads.empty:
-        st.info("No patient inquiries yet. Add the first inquiry above, then it will appear here for follow-up.")
+        st.info(f"No {APP_CONFIG.entity_plural} yet. Add the first inquiry above, then it will appear here for follow-up.")
         return
     st.caption("Review one inquiry at a time and keep the next follow-up date current.")
 
@@ -559,7 +525,7 @@ def render_lead_details(leads: pd.DataFrame) -> None:
         "Inquiry view",
         ["Needs attention", "Due next 7 days", "Needs follow-up", "All inquiries"],
         horizontal=True,
-        help="Choose which patient inquiries to review or update.",
+        help=f"Choose which {APP_CONFIG.entity_plural} to review or update.",
     )
     today = pd.Timestamp.today().normalize()
     if mode == "Needs attention":
@@ -592,7 +558,7 @@ def render_lead_details(leads: pd.DataFrame) -> None:
         elif mode == "Needs attention":
             st.success("No overdue follow-ups right now.")
         else:
-            st.info("No patient inquiries match this view.")
+            st.info(f"No {APP_CONFIG.entity_plural} match this view.")
         return
 
     lead_options = {
@@ -618,19 +584,19 @@ def render_lead_details(leads: pd.DataFrame) -> None:
         st.write(f"**Name:** {selected['name']}")
         st.write(f"**Phone:** {selected['phone']}")
         st.write(f"**Email:** {selected['email']}")
-        st.write(f"**Requested Service:** {selected['service_needed']}")
-        st.write(f"**Inquiry source:** {selected['source']}")
-        st.write(f"**Estimated Treatment Value:** {money(selected['estimated_value'])}")
+        st.write(f"**{APP_CONFIG.service_label}:** {selected['service_needed']}")
+        st.write(f"**{APP_CONFIG.source_label}:** {selected['source']}")
+        st.write(f"**{APP_CONFIG.value_label}:** {money(selected['estimated_value'])}")
         st.write(f"**Created:** {selected['created_at']}")
 
     with action_col.form("lead_detail_update_form"):
         st.markdown("#### Update Inquiry")
         col1, col2 = st.columns(2)
         status = col1.selectbox(
-            "Status",
+            APP_CONFIG.status_label,
             STATUSES,
             index=STATUSES.index(selected["status"]) if selected["status"] in STATUSES else 0,
-            help="Use Active Patient when the inquiry becomes a patient, or Lost when they do not book.",
+            help=f"Use {APP_CONFIG.active_status} when the inquiry becomes a patient, or {APP_CONFIG.lost_status} when they do not book.",
         )
         next_follow_up = col2.date_input(
             "Next follow-up date",
@@ -639,7 +605,7 @@ def render_lead_details(leads: pd.DataFrame) -> None:
         )
         notes = st.text_area("Notes", value=str(selected["notes"] or ""), height=110, help="Update the latest context.")
         saved = st.form_submit_button(
-            "Update patient inquiry",
+            f"Update {APP_CONFIG.entity_singular}",
             type="primary",
             help="Save the selected status, notes, and next follow-up date.",
         )
@@ -650,47 +616,47 @@ def render_lead_details(leads: pd.DataFrame) -> None:
                 get_db_path(),
                 lead_id=selected_id,
                 status=status,
-                next_follow_up_date="" if status in {"Active Patient", "Lost"} else next_follow_up.isoformat(),
+                next_follow_up_date="" if status in APP_CONFIG.closed_statuses else next_follow_up.isoformat(),
                 notes=notes,
             )
-            st.success("Patient inquiry updated.")
+            st.success(f"{ENTITY_SENTENCE} updated.")
             st.rerun()
         except Exception as exc:
-            st.error("The patient inquiry could not be updated. Please try again.")
+            st.error(f"The {APP_CONFIG.entity_singular} could not be updated. Please try again.")
             st.caption(f"Technical detail: {exc}")
 
 
 def render_weekly_report(leads: pd.DataFrame) -> None:
-    st.subheader("Weekly Practice Summary")
+    st.subheader(APP_CONFIG.weekly_summary_title)
     summary = build_weekly_summary(leads)
     if leads.empty:
-        st.info("No weekly data yet. Add patient inquiries to generate a practice summary.")
+        st.info(APP_CONFIG.weekly_empty_message)
         return
-    st.caption("A simple owner-ready summary of inquiry activity, active patients, follow-up pressure, and estimated treatment value.")
+    st.caption(APP_CONFIG.weekly_summary_caption)
     if st.button("Weekly KPI Help", help="Open a quick explanation of the weekly performance metrics."):
         render_kpi_help_dialog()
     st.markdown('<div class="report-box">', unsafe_allow_html=True)
     st.markdown(f"#### Week of {summary['week_start']} to {summary['week_end']}")
     metric_cols = st.columns(4)
-    metric_cols[0].metric("Total Patient Inquiries", summary["total_inquiries"], help=KPI_HELP["Total Patient Inquiries"])
-    metric_cols[1].metric("New This Week", summary["new_inquiries"], help=KPI_HELP["New This Week"])
-    metric_cols[2].metric("Active Patients", summary["active_patients"], help=KPI_HELP["Active Patients"])
+    metric_cols[0].metric(KPI_LABELS["total"], summary["total_inquiries"], help=KPI_HELP[KPI_LABELS["total"]])
+    metric_cols[1].metric(KPI_LABELS["new_this_week"], summary["new_inquiries"], help=KPI_HELP[KPI_LABELS["new_this_week"]])
+    metric_cols[2].metric(KPI_LABELS["active"], summary["active_patients"], help=KPI_HELP[KPI_LABELS["active"]])
     metric_cols[3].metric(
-        "Follow-Ups Needed",
+        KPI_LABELS["followups_needed"],
         summary["needs_followup"],
         delta=f"{percent(summary['followups_needed_percent'])} of inquiries",
         delta_color="off",
-        help=KPI_HELP["Follow-Ups Needed"],
+        help=KPI_HELP[KPI_LABELS["followups_needed"]],
     )
     metric_cols = st.columns(4)
-    metric_cols[0].metric("Overdue Follow-Ups", summary["overdue_followups"], help=KPI_HELP["Overdue Follow-Ups"])
+    metric_cols[0].metric(KPI_LABELS["overdue_followups"], summary["overdue_followups"], help=KPI_HELP[KPI_LABELS["overdue_followups"]])
     metric_cols[1].metric(
-        "Estimated Treatment Value",
+        KPI_LABELS["value"],
         money(summary["estimated_treatment_value"]),
-        help=KPI_HELP["Estimated Treatment Value"],
+        help=KPI_HELP[KPI_LABELS["value"]],
     )
-    metric_cols[2].metric("Conversion Rate", percent(summary["conversion_rate"]), help=KPI_HELP["Conversion Rate"])
-    metric_cols[3].metric("Top Inquiry Source", summary["top_source"], help=KPI_HELP["Top Inquiry Source"])
+    metric_cols[2].metric(KPI_LABELS["conversion_rate"], percent(summary["conversion_rate"]), help=KPI_HELP[KPI_LABELS["conversion_rate"]])
+    metric_cols[3].metric(KPI_LABELS["top_source"], summary["top_source"], help=KPI_HELP[KPI_LABELS["top_source"]])
     st.write(summary["practice_readout"])
     if summary["followup_focus"]:
         st.markdown("#### Follow-Up Focus")
@@ -700,12 +666,12 @@ def render_weekly_report(leads: pd.DataFrame) -> None:
         st.success("No overdue follow-ups right now.")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("### Practice Performance Snapshot")
-    st.caption("A printable snapshot the practice owner can use before a demo, check-in, or weekly review.")
+    st.markdown(f"### {APP_CONFIG.snapshot_title}")
+    st.caption(f"A printable snapshot the {APP_CONFIG.owner_label} can use before a demo, check-in, or weekly review.")
     st.markdown(
         f"""
 <div class="snapshot-box">
-  <div class="snapshot-title">Practice Performance Snapshot</div>
+  <div class="snapshot-title">{APP_CONFIG.snapshot_title}</div>
   <div class="section-note">Date generated: {date.today().isoformat()}</div>
 </div>
 """,
@@ -713,26 +679,26 @@ def render_weekly_report(leads: pd.DataFrame) -> None:
     )
 
     snapshot_cols = st.columns(4)
-    snapshot_cols[0].metric("Total Patient Inquiries", summary["total_inquiries"], help=KPI_HELP["Total Patient Inquiries"])
-    snapshot_cols[1].metric("New This Week", summary["new_inquiries"], help=KPI_HELP["New This Week"])
-    snapshot_cols[2].metric("Active Patients", summary["active_patients"], help=KPI_HELP["Active Patients"])
+    snapshot_cols[0].metric(KPI_LABELS["total"], summary["total_inquiries"], help=KPI_HELP[KPI_LABELS["total"]])
+    snapshot_cols[1].metric(KPI_LABELS["new_this_week"], summary["new_inquiries"], help=KPI_HELP[KPI_LABELS["new_this_week"]])
+    snapshot_cols[2].metric(KPI_LABELS["active"], summary["active_patients"], help=KPI_HELP[KPI_LABELS["active"]])
     snapshot_cols[3].metric(
-        "Follow-Ups Needed",
+        KPI_LABELS["followups_needed"],
         summary["needs_followup"],
         delta=f"{percent(summary['followups_needed_percent'])} of inquiries",
         delta_color="off",
-        help=KPI_HELP["Follow-Ups Needed"],
+        help=KPI_HELP[KPI_LABELS["followups_needed"]],
     )
 
     snapshot_cols = st.columns(4)
-    snapshot_cols[0].metric("Overdue Follow-Ups", summary["overdue_followups"], help=KPI_HELP["Overdue Follow-Ups"])
+    snapshot_cols[0].metric(KPI_LABELS["overdue_followups"], summary["overdue_followups"], help=KPI_HELP[KPI_LABELS["overdue_followups"]])
     snapshot_cols[1].metric(
-        "Estimated Treatment Value",
+        KPI_LABELS["value"],
         money(summary["estimated_treatment_value"]),
-        help=KPI_HELP["Estimated Treatment Value"],
+        help=KPI_HELP[KPI_LABELS["value"]],
     )
-    snapshot_cols[2].metric("Conversion Rate", percent(summary["conversion_rate"]), help=KPI_HELP["Conversion Rate"])
-    snapshot_cols[3].metric("Top Inquiry Source", summary["top_source"], help=KPI_HELP["Top Inquiry Source"])
+    snapshot_cols[2].metric(KPI_LABELS["conversion_rate"], percent(summary["conversion_rate"]), help=KPI_HELP[KPI_LABELS["conversion_rate"]])
+    snapshot_cols[3].metric(KPI_LABELS["top_source"], summary["top_source"], help=KPI_HELP[KPI_LABELS["top_source"]])
 
     st.markdown("#### What This Means")
     st.write(summary["snapshot_summary"])
@@ -748,7 +714,7 @@ def render_weekly_report(leads: pd.DataFrame) -> None:
     download_cols[0].download_button(
         "Download snapshot text",
         data=snapshot_text,
-        file_name=f"practice_snapshot_{date.today().isoformat()}.txt",
+        file_name=f"{APP_CONFIG.export_filename_prefixes['snapshot']}_{date.today().isoformat()}.txt",
         mime="text/plain",
         type="primary",
         help="Download a plain-text Practice Performance Snapshot for sharing or printing.",
@@ -756,7 +722,7 @@ def render_weekly_report(leads: pd.DataFrame) -> None:
     download_cols[1].download_button(
         "Download snapshot CSV",
         data=snapshot_csv,
-        file_name=f"practice_snapshot_{date.today().isoformat()}.csv",
+        file_name=f"{APP_CONFIG.export_filename_prefixes['snapshot']}_{date.today().isoformat()}.csv",
         mime="text/csv",
         help="Download snapshot metrics in a spreadsheet-friendly CSV file.",
     )
@@ -773,7 +739,7 @@ def render_export(leads: pd.DataFrame) -> None:
     open_followups = safe_dataframe(leads[leads["is_open"]], PATIENT_EXPORT_COLUMNS) if not leads.empty else export_frame
 
     if export_frame.empty:
-        st.info("No export data yet. Add patient inquiries before downloading CSV files.")
+        st.info(f"No export data yet. Add {APP_CONFIG.entity_plural} before downloading CSV files.")
         return
 
     try:
@@ -787,7 +753,7 @@ def render_export(leads: pd.DataFrame) -> None:
     col1.download_button(
         "Download patient inquiry CSV",
         data=inquiries_csv,
-        file_name=f"patient_inquiries_{date.today().isoformat()}.csv",
+        file_name=f"{APP_CONFIG.export_filename_prefixes['inquiries']}_{date.today().isoformat()}.csv",
         mime="text/csv",
         type="primary",
         help="Download patient-friendly inquiry data with readable column names.",
@@ -795,7 +761,7 @@ def render_export(leads: pd.DataFrame) -> None:
     col2.download_button(
         "Download follow-up CSV",
         data=followups_csv,
-        file_name=f"patient_followups_{date.today().isoformat()}.csv",
+        file_name=f"{APP_CONFIG.export_filename_prefixes['followups']}_{date.today().isoformat()}.csv",
         mime="text/csv",
         help="Download patient inquiries that still need follow-up.",
     )

@@ -15,6 +15,12 @@ Prepared for a June 15 chiropractor demo. The app is intentionally focused on pr
 - CSV export
 - Chiropractic demo sample data
 
+## Configuration
+
+The app currently uses a chiropractic configuration in `src/business_os/config.py`. Core Business OS behavior such as inquiry tracking, follow-up tracking, KPI calculations, exports, and reporting remains reusable, while chiropractic-specific values such as statuses, sources, service examples, labels, terminology, demo data path, weekly summary wording, and export filename prefixes are centralized in configuration.
+
+This prepares the codebase for future industry templates without changing current Chiropractic Business OS functionality or the SQLite schema.
+
 ## Project Structure
 
 ```text
@@ -76,6 +82,7 @@ business_os_mvp/
   src/
     business_os/
       __init__.py
+      config.py
       db.py
       reports.py
       sample_data.py

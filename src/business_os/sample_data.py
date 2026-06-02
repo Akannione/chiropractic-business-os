@@ -4,12 +4,13 @@ import csv
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
+from business_os.config import APP_CONFIG
 
-SAMPLE_DATA_FILE = Path(__file__).resolve().parents[2] / "data" / "chiropractor_sample_data.csv"
+SAMPLE_DATA_FILE = Path(__file__).resolve().parents[2] / APP_CONFIG.sample_data_file
 
 
 def build_sample_leads(today: date | None = None, csv_path: Path | None = None) -> list[dict[str, object]]:
-    """Load fake chiropractic demo inquiries from CSV and convert relative dates."""
+    """Load fake demo inquiries from CSV and convert relative dates."""
     today = today or date.today()
     path = csv_path or SAMPLE_DATA_FILE
     if not path.exists():
