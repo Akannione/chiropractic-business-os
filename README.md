@@ -29,6 +29,18 @@ business_os_mvp/
     CLIENT_FEEDBACK.md
     SALES_NOTES.md
     FEATURE_REQUESTS.md
+    outreach/
+      outreach_tracker.csv
+      outreach_status_definitions.md
+      pipeline_definitions.md
+      weekly_outreach_review.md
+      outreach_metrics.md
+  DEMO_KIT/
+    demo_data.md
+    demo_walkthrough_checklist.md
+    screenshot_checklist.md
+    demo_reset_process.md
+    demo_troubleshooting_guide.md
   data/
     business_os.sqlite
     chiropractor_sample_data.csv
@@ -199,6 +211,30 @@ The repository includes a lightweight internal operator system in `PROJECT_OS/` 
 - `PROJECT_OS/FEATURE_REQUESTS.md`: internal request log and decision rules.
 
 Root-level copies of these files are kept for quick access. The `PROJECT_OS/` folder is the preferred place to use for ongoing client feedback, feature triage, and growth planning. These documents are for operating the project and should not be treated as committed feature scope.
+
+### Outreach Operating System
+
+The `PROJECT_OS/outreach/` folder supports tracking 100 chiropractic prospects before June 15:
+
+- `PROJECT_OS/outreach/outreach_tracker.csv`: prospect tracker for contact details, outreach status, pipeline stage, objections, responses, demos, proposals, wins, and notes.
+- `PROJECT_OS/outreach/outreach_status_definitions.md`: status definitions for consistent outreach tracking.
+- `PROJECT_OS/outreach/pipeline_definitions.md`: sales pipeline stage definitions.
+- `PROJECT_OS/outreach/weekly_outreach_review.md`: weekly review template for outreach activity, objections, responses, wins, losses, and next priorities.
+- `PROJECT_OS/outreach/outreach_metrics.md`: simple definitions for outreach volume, response rate, demo booking rate, proposal rate, and close rate.
+
+These files support sales tracking, demo follow-up, and client acquisition. They do not change the app, database schema, pricing, deployment setup, or product functionality.
+
+## Demo Kit
+
+The `DEMO_KIT/` folder contains repeatable sales-demo support materials:
+
+- `DEMO_KIT/demo_data.md`: demo data source, story, and safety notes.
+- `DEMO_KIT/demo_walkthrough_checklist.md`: consistent live-demo flow.
+- `DEMO_KIT/screenshot_checklist.md`: checklist for refreshing screenshots.
+- `DEMO_KIT/demo_reset_process.md`: reset steps before demos and screenshots.
+- `DEMO_KIT/demo_troubleshooting_guide.md`: common demo issues and fixes.
+
+The Demo Kit is operational documentation only. It does not change the Streamlit app or SQLite schema.
 
 ## Deployment SOP
 
