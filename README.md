@@ -183,6 +183,7 @@ Optional outreach materials live alongside the codebase so the productized servi
 - `marketing/outreach_assets.md`: editable outreach copy including cold email, follow-up email, LinkedIn message, Facebook message, phone opener, discovery questions, and objection responses.
 - `screenshots/`: app screenshots for quick README, portfolio, or outreach use.
 - `sales_assets/`: distribution-ready PDFs, screenshot copies, and the narrated demo video.
+- `sales_assets/objection_handling.md`: honest responses to common chiropractor objections during outreach.
 - `sales_assets/revenue_model.csv`: simple revenue model for the $500, $1,500, and $3,000 offer tiers across 1, 5, 10, and 20 clients.
 
 These files are optional sales collateral. They are not required by the core app and do not affect the database schema or Streamlit functionality.

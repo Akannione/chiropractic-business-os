@@ -14,6 +14,8 @@ What resonated:
 What confused them:
 Workflow pain mentioned:
 Objections:
+Response used:
+Did the response help:
 Pricing reaction:
 Requested changes:
 Follow-up action:
@@ -50,6 +52,7 @@ Use these prompts immediately after each outreach touchpoint:
 - Did the objection block the deal or just require clarification?
 - Which response helped move the conversation forward?
 - What proof would have reduced concern: screenshot, walkthrough video, case study, sample export, or deployment explanation?
+- Should this objection be added to or revised in `sales_assets/objection_handling.md`?
 
 ## Demo Questions To Ask
 

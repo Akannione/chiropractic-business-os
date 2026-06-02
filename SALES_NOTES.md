@@ -48,6 +48,8 @@ Message sent:
 Response:
 Pain signal:
 Objection:
+Response used:
+Response result:
 Best phrase they used:
 Demo requested:
 Follow-up date:
@@ -63,6 +65,7 @@ Next action:
 - Did they ask for features outside the current scope?
 - Which response created the most trust?
 - Should this objection change the offer copy, demo script, or FAQ?
+- Should this objection be captured in `sales_assets/objection_handling.md` for future calls?
 
 ## Common Objections
 

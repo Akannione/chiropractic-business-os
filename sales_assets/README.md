@@ -6,6 +6,7 @@ This folder contains optional outreach and demo materials for the Chiropractic B
 
 - `demo_video.mp4`: narrated 3-4 minute walkthrough video using the current demo screens.
 - `demo_video_narration.md`: source narration script for the walkthrough video.
+- `objection_handling.md`: honest responses to common chiropractor objections during outreach.
 - `screenshots/dashboard.png`: dashboard screenshot with populated KPIs.
 - `screenshots/inquiries.png`: patient inquiry workspace screenshot.
 - `screenshots/weekly_summary.png`: weekly summary and snapshot screenshot.

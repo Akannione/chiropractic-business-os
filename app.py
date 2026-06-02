@@ -81,7 +81,11 @@ def bootstrap() -> pd.DataFrame:
     EXPORT_DIR.mkdir(parents=True, exist_ok=True)
     db_path = get_db_path()
     initialize_database(db_path)
-    seed_sample_data_if_empty(db_path)
+    if is_demo_mode() and not st.session_state.get("demo_data_ready"):
+        reset_sample_data(db_path)
+        st.session_state["demo_data_ready"] = True
+    else:
+        seed_sample_data_if_empty(db_path)
     return prepare_leads_frame(fetch_leads(db_path))
 
 
@@ -212,6 +216,8 @@ def render_style() -> None:
         background: #ffffff;
         box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
     }
+    div[data-testid="stMetric"] * {color: #172033 !important;}
+    div[data-testid="stMetricDelta"] * {color: #526070 !important;}
     .section-note {
         color: #526070;
         font-size: 0.94rem;
@@ -332,64 +338,44 @@ def render_kpi_help_dialog() -> None:
 def render_dashboard(leads: pd.DataFrame) -> None:
     st.subheader("Practice Dashboard")
     st.markdown(
-        '<div class="section-note">A fast view of inquiry volume, patient conversion, treatment value, and follow-up risk.</div>',
+        '<div class="section-note">Start here: see the treatment value at risk, who needs follow-up, and which inquiries became active patients.</div>',
         unsafe_allow_html=True,
     )
-    if st.button("KPI Help", help="Open a quick explanation of each dashboard metric."):
-        render_kpi_help_dialog()
 
     kpis = calculate_kpis(leads)
-    metric_cols = st.columns(4)
-    metric_cols[0].metric("Total Patient Inquiries", kpis["total_leads"], help=KPI_HELP["Total Patient Inquiries"])
-    metric_cols[1].metric("New This Week", kpis["new_leads_this_week"], help=KPI_HELP["New This Week"])
-    metric_cols[2].metric(
+    top_cols = st.columns([1.15, 1, 1, 0.8])
+    top_cols[0].metric(
+        "Estimated Treatment Value",
+        money(kpis["estimated_treatment_value"]),
+        help=KPI_HELP["Estimated Treatment Value"],
+    )
+    top_cols[1].metric(
         "Follow-Ups Needed",
         kpis["followups_needed"],
         delta=f"{percent(kpis['followups_needed_percent'])} of inquiries",
         delta_color="off",
         help=KPI_HELP["Follow-Ups Needed"],
     )
-    metric_cols[3].metric("Overdue Follow-Ups", kpis["overdue_followups"], help=KPI_HELP["Overdue Follow-Ups"])
+    top_cols[2].metric("Active Patients", kpis["active_patients"], help=KPI_HELP["Active Patients"])
+    if top_cols[3].button("KPI Help", help="Open a quick explanation of each dashboard metric."):
+        render_kpi_help_dialog()
 
-    metric_cols = st.columns(4)
-    metric_cols[0].metric("Active Patients", kpis["active_patients"], help=KPI_HELP["Active Patients"])
-    metric_cols[1].metric(
+    metric_cols = st.columns(5)
+    metric_cols[0].metric("Total Patient Inquiries", kpis["total_leads"], help=KPI_HELP["Total Patient Inquiries"])
+    metric_cols[1].metric("New This Week", kpis["new_leads_this_week"], help=KPI_HELP["New This Week"])
+    metric_cols[2].metric("Overdue Follow-Ups", kpis["overdue_followups"], help=KPI_HELP["Overdue Follow-Ups"])
+    metric_cols[3].metric(
         "Conversion Rate",
         percent(kpis["conversion_rate"]),
         help=KPI_HELP["Conversion Rate"],
     )
-    metric_cols[2].metric(
-        "Estimated Treatment Value",
-        money(kpis["estimated_treatment_value"]),
-        help=KPI_HELP["Estimated Treatment Value"],
-    )
-    metric_cols[3].metric("Top Inquiry Source", kpis["top_source"], help=KPI_HELP["Top Inquiry Source"])
+    metric_cols[4].metric("Top Inquiry Source", kpis["top_source"], help=KPI_HELP["Top Inquiry Source"])
 
     if leads.empty:
         st.info("No patient inquiries yet. Add one from the Patient Inquiries tab to start the demo.")
         return
 
     render_priority_signals(leads, kpis)
-
-    status_counts = leads.groupby("status", as_index=False).size().rename(columns={"size": "leads"})
-    px = get_plotly_express()
-
-    st.markdown("### Inquiry Status")
-    st.caption("Shows where patient inquiries stand today.")
-    if px:
-        st.plotly_chart(
-            px.bar(
-                status_counts,
-                x="status",
-                y="leads",
-                title="Patient Inquiries by Status",
-                text_auto=True,
-                labels={"status": "Status", "leads": "Patient inquiries"},
-            ).update_layout(showlegend=False, margin=dict(l=10, r=10, t=50, b=10)),
-            width="stretch",
-        )
-    else:
-        st.bar_chart(status_counts.set_index("status")["leads"])
 
     st.markdown("### Recent Patient Inquiries")
     st.caption("Recent records with the requested service, source, status, value, and next follow-up date.")
@@ -401,6 +387,24 @@ def render_dashboard(leads: pd.DataFrame) -> None:
         hide_index=True,
         height=table_height(leads.head(10)),
     )
+
+    with st.expander("Optional inquiry status chart"):
+        status_counts = leads.groupby("status", as_index=False).size().rename(columns={"size": "leads"})
+        px = get_plotly_express()
+        if px:
+            st.plotly_chart(
+                px.bar(
+                    status_counts,
+                    x="status",
+                    y="leads",
+                    title="Patient Inquiries by Status",
+                    text_auto=True,
+                    labels={"status": "Status", "leads": "Patient inquiries"},
+                ).update_layout(showlegend=False, margin=dict(l=10, r=10, t=50, b=10)),
+                width="stretch",
+            )
+        else:
+            st.bar_chart(status_counts.set_index("status")["leads"])
 
     with st.expander("Optional inquiry source breakdown"):
         source_counts = leads.groupby("source", as_index=False).size().rename(columns={"size": "leads"})
