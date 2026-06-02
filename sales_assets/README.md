@@ -4,7 +4,7 @@ This folder contains optional outreach and demo materials for the Chiropractic B
 
 ## Contents
 
-- `demo_video.mp4`: placeholder file for a future recorded walkthrough.
+- `demo_video.mp4`: silent walkthrough video using the current demo screens.
 - `screenshots/dashboard.png`: dashboard screenshot with populated KPIs.
 - `screenshots/inquiries.png`: patient inquiry workspace screenshot.
 - `screenshots/weekly_summary.png`: weekly summary and snapshot screenshot.
@@ -18,4 +18,4 @@ This folder contains optional outreach and demo materials for the Chiropractic B
 
 ## Usage
 
-Use these files during outreach, discovery calls, and client demos. Replace the placeholder video with a real walkthrough before sending a public sales packet.
+Use these files during outreach, discovery calls, and client demos. The video is silent, so pair it with the `demo_script.pdf` during live walkthroughs or record a voiceover later if needed.
