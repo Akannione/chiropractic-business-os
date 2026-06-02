@@ -23,6 +23,12 @@ business_os_mvp/
   requirements.txt
   README.md
   .env.example
+  PROJECT_OS/
+    ROADMAP.md
+    BACKLOG.md
+    CLIENT_FEEDBACK.md
+    SALES_NOTES.md
+    FEATURE_REQUESTS.md
   data/
     business_os.sqlite
     chiropractor_sample_data.csv
@@ -183,15 +189,15 @@ These files are optional sales collateral. They are not required by the core app
 
 ## Project Operating System
 
-The repository includes lightweight planning and feedback documents for future client work:
+The repository includes a lightweight internal operator system in `PROJECT_OS/` for future client work:
 
-- `ROADMAP.md`: near-term and deferred product direction.
-- `BACKLOG.md`: possible future work grouped by priority.
-- `CLIENT_FEEDBACK.md`: template for demo and client feedback.
-- `SALES_NOTES.md`: positioning, buyer notes, objections, and pricing.
-- `FEATURE_REQUESTS.md`: request log and decision rules.
+- `PROJECT_OS/ROADMAP.md`: near-term and deferred product direction.
+- `PROJECT_OS/BACKLOG.md`: possible future work grouped by priority.
+- `PROJECT_OS/CLIENT_FEEDBACK.md`: template for demo and client feedback.
+- `PROJECT_OS/SALES_NOTES.md`: positioning, buyer notes, objections, and pricing.
+- `PROJECT_OS/FEATURE_REQUESTS.md`: request log and decision rules.
 
-These documents are for operating the project and should not be treated as committed feature scope.
+Root-level copies of these files are kept for quick access. The `PROJECT_OS/` folder is the preferred place to use for ongoing client feedback, feature triage, and growth planning. These documents are for operating the project and should not be treated as committed feature scope.
 
 ## Deployment SOP
 
