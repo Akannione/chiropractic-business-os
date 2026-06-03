@@ -4,6 +4,10 @@
 
 Thank you for choosing the Chiropractic Business OS. This setup is designed to help your practice track patient inquiries, follow up consistently, and review weekly practice activity with less uncertainty.
 
+The goal is to make setup simple, organized, and low-disruption for your team.
+
+This setup does not replace or modify your EHR, scheduling, billing, or insurance systems.
+
 ## 2. What You Purchased
 
 - Patient Inquiry Tracker
@@ -37,3 +41,5 @@ Thank you for choosing the Chiropractic Business OS. This setup is designed to h
 - Track every inquiry
 - Update statuses consistently
 - Review follow-ups weekly
+
+During the first week, the focus is simply getting every inquiry entered and every follow-up visible.

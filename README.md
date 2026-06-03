@@ -36,6 +36,8 @@ business_os_mvp/
     SALES_NOTES.md
     FEATURE_REQUESTS.md
     trust_audit.md
+    sales/
+      qualification_scorecard.md
     client_delivery/
       client_onboarding_packet.md
       client_onboarding_packet.pdf
@@ -52,6 +54,7 @@ business_os_mvp/
     prospect_management/
       chiropractic_prospect_tracker.xlsx
       prospect_tracker_guide.md
+      qualification_scorecard.md
     sales_training/
       competitive_positioning_guide.md
       discovery_call_simulation.md
@@ -260,6 +263,7 @@ The repository includes a lightweight internal operator system in `PROJECT_OS/` 
 - `PROJECT_OS/SALES_NOTES.md`: internal positioning, buyer notes, objections, and pricing.
 - `PROJECT_OS/FEATURE_REQUESTS.md`: internal request log and decision rules.
 - `PROJECT_OS/trust_audit.md`: internal record of customer-facing trust findings, copy changes, future trust improvements, and proof assets needed after the first client.
+- `PROJECT_OS/sales/qualification_scorecard.md`: quick sales qualification scorecard for prioritizing chiropractic prospects during outreach.
 
 Root-level copies of these files are kept for quick access. The `PROJECT_OS/` folder is the preferred place to use for ongoing client feedback, feature triage, and growth planning. These documents are for operating the project and should not be treated as committed feature scope.
 
@@ -294,6 +298,7 @@ The `PROJECT_OS/prospect_management/` folder contains a more complete prospect m
 
 - `PROJECT_OS/prospect_management/chiropractic_prospect_tracker.xlsx`: spreadsheet tracker with `Prospects` and `Metrics` sheets, dropdowns for outreach/pipeline statuses, proposal/demo tracking, objection tracking, and formula-driven metrics.
 - `PROJECT_OS/prospect_management/prospect_tracker_guide.md`: operating guide for using the workbook, reviewing weekly pipeline metrics, and logging objections/follow-ups.
+- `PROJECT_OS/prospect_management/qualification_scorecard.md`: detailed 1-100 qualification scorecard for scoring practice size, inquiry volume, tracking method, follow-up process, reporting maturity, and openness to technology.
 
 These files are operational sales assets only. They do not change application logic, database schema, pricing, deployment behavior, or product functionality.
 

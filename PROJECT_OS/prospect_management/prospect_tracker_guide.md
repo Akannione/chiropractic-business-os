@@ -81,6 +81,25 @@ Review the tracker once per week:
 
 Use `PROJECT_OS/outreach/weekly_outreach_review.md` for the written weekly review.
 
+## Qualification Scorecard
+
+Use `PROJECT_OS/prospect_management/qualification_scorecard.md` to prioritize the 100 chiropractic practices in the tracker.
+
+Recommended workflow:
+
+1. Score each prospect before outreach using public information where available.
+2. Enter the score in the tracker notes if there is no dedicated score column.
+3. Prioritize `Ideal Prospect` and `Strong Prospect` practices for calls, demos, and follow-ups.
+4. Re-score the prospect after a discovery call using what you learned about inquiry volume, tracking method, follow-up process, reporting maturity, and openness to technology.
+5. Log red flags in `Notes` and objections in `Objection`.
+
+Qualification thresholds:
+
+- 80-100: Ideal Prospect
+- 65-79: Strong Prospect
+- 50-64: Possible Fit
+- Below 50: Low Priority
+
 ## Pipeline Metric Formulas
 
 The `Metrics` sheet includes formulas/placeholders for:
