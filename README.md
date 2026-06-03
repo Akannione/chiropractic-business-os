@@ -88,6 +88,14 @@ business_os_mvp/
       final_pre_outreach_checklist.md
       first_client_milestones.md
       post_demo_feedback_form.md
+      outreach_metrics_tracker.md
+    first_client_learning/
+      outreach_lessons.md
+      discovery_call_lessons.md
+      demo_feedback.md
+      proposal_feedback.md
+      onboarding_feedback.md
+      first_client_retrospective.md
     deployment_rehearsal/
       deployment_rehearsal_report.md
       deployment_rehearsal_report_v2.md
@@ -377,8 +385,22 @@ The `PROJECT_OS/launch/` folder supports final outreach certification and launch
 - `PROJECT_OS/launch/final_pre_outreach_checklist.md`: final checklist for demo, sales materials, call preparation, prospecting setup, and delivery readiness.
 - `PROJECT_OS/launch/first_client_milestones.md`: milestone tracker from first reply through first testimonial, with success criteria for each step.
 - `PROJECT_OS/launch/post_demo_feedback_form.md`: post-demo form for qualification score, objections, interest level, next step, and lessons learned.
+- `PROJECT_OS/launch/outreach_metrics_tracker.md`: outreach KPI tracker for prospects, contacts attempted, responses, discovery calls, demos, proposals, clients, weekly targets, and conversion calculations.
 
 These files certify execution readiness only. They do not change app code, database schema, pricing, deployment behavior, or product functionality.
+
+### First Client Learning
+
+The `PROJECT_OS/first_client_learning/` folder captures what real outreach, demos, proposals, onboarding, and deployment teach after launch:
+
+- `PROJECT_OS/first_client_learning/outreach_lessons.md`: template for outreach message used, response received, lessons learned, and recommended changes.
+- `PROJECT_OS/first_client_learning/discovery_call_lessons.md`: template for qualification score, objections, questions asked, confusing areas, and call lessons.
+- `PROJECT_OS/first_client_learning/demo_feedback.md`: template for demo date, attendee, questions, confusing sections, strongest sections, and improvement ideas.
+- `PROJECT_OS/first_client_learning/proposal_feedback.md`: template for proposal package, objections, pricing concerns, requested changes, and outcome.
+- `PROJECT_OS/first_client_learning/onboarding_feedback.md`: template for onboarding issues, training issues, deployment issues, support requests, and first-week review.
+- `PROJECT_OS/first_client_learning/first_client_retrospective.md`: retrospective for what went well, what went poorly, surprises, process improvements, sales improvements, product ideas, and next actions.
+
+These files are learning and operating templates only. They do not change app code, database schema, pricing, deployment behavior, or product functionality.
 
 ### Client Success
 
