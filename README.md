@@ -235,6 +235,8 @@ Optional outreach materials live alongside the codebase so the productized servi
 - `sales_assets/`: distribution-ready PDFs, screenshot copies, and the narrated demo video.
 - `sales_assets/objection_handling.md`: honest responses to common chiropractor objections during outreach.
 - `sales_assets/revenue_model.csv`: simple revenue model for the $500, $1,500, and $3,000 offer tiers across 1, 5, 10, and 20 clients.
+- `sales_assets/roi_calculator.md`: conservative missed-follow-up ROI calculator explanation for discovery and pricing conversations.
+- `sales_assets/roi_calculator.csv`: example ROI calculator row for quick spreadsheet use.
 
 These files are optional sales collateral. The customer-facing collateral now uses consistent trust language: who the offer is for, what it is not, a simple onboarding timeline, support options, and conservative non-guaranteed ROI framing. They are not required by the core app and do not affect the database schema or Streamlit functionality.
 

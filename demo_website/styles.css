@@ -316,6 +316,76 @@ video {
   margin-top: 24px;
 }
 
+.roi-calculator {
+  margin-top: 24px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--soft);
+  padding: clamp(20px, 4vw, 32px);
+}
+
+.roi-calculator p {
+  color: var(--muted);
+  max-width: 760px;
+}
+
+.calculator-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.calculator-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.calculator-form input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: var(--ink);
+  background: #ffffff;
+  font: inherit;
+}
+
+.calculator-results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.calculator-results article {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 18px;
+}
+
+.calculator-results span,
+.calculator-results small {
+  display: block;
+  color: var(--muted);
+}
+
+.calculator-results strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--green-dark);
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
+  line-height: 1;
+}
+
+.calculator-results small {
+  margin-top: 10px;
+}
+
 .screenshot-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -391,6 +461,8 @@ footer {
   .feature-grid,
   .fit-grid,
   .two-column,
+  .calculator-form,
+  .calculator-results,
   .screenshot-grid,
   .split {
     grid-template-columns: 1fr;

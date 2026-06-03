@@ -61,6 +61,8 @@ Conservative example:
 
 This example is not a guarantee. It shows why tracking inquiries in one place and reviewing follow-ups consistently can matter.
 
+Even recovering one or two missed patient opportunities can help justify the setup cost. Use conservative numbers and treat the calculation as an estimate, not a promise.
+
 ## Exclusions
 
 - No EHR integration

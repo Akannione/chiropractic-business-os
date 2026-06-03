@@ -29,6 +29,7 @@ Use this during outreach and discovery calls. Keep responses honest: the current
 | 23 | We are worried about patient privacy. | That concern is appropriate. The demo uses fake data. Real data should only be used after deciding hosting, access, retention, and compliance expectations. |
 | 24 | How do we know it will improve revenue? | The app does not guarantee revenue. It helps make follow-up gaps, active patients, inquiry sources, and estimated treatment value visible so the practice can act faster. |
 | 25 | Why should we trust this? | Start with the demo, fake data, screenshots, exports, and a narrow pilot. Trust should come from a clear workflow, transparent limitations, and measurable follow-up improvement. |
+| 26 | How do I know this will pay for itself? | Use the simple missed-follow-up calculation: monthly inquiries x missed follow-up rate x recovery rate x average new patient value. For example, 20 inquiries/month x 20% missed follow-up x 50% recovery x $500 average value = $1,000 estimated recovered monthly value. This is an estimate, not a guarantee. |
 
 ## How To Use This
 

@@ -184,6 +184,41 @@
             </ul>
           </article>
         </div>
+        <div class="roi-calculator" aria-labelledby="roi-calculator-title">
+          <div>
+            <p class="eyebrow">Estimate</p>
+            <h3 id="roi-calculator-title">Missed follow-up ROI calculator</h3>
+            <p>
+              Use conservative numbers to estimate potential revenue at risk from missed follow-ups.
+              This is a conversation tool, not a guarantee of recovered revenue.
+            </p>
+          </div>
+          <form class="calculator-form" aria-label="Missed follow-up ROI calculator">
+            <label>
+              Monthly inquiries
+              <input id="monthly-inquiries" type="number" inputmode="numeric" min="0" step="1" value="20" />
+            </label>
+            <label>
+              Estimated patient value
+              <input id="patient-value" type="number" inputmode="decimal" min="0" step="50" value="500" />
+            </label>
+            <label>
+              Missed follow-up percentage
+              <input id="missed-rate" type="number" inputmode="decimal" min="0" max="100" step="1" value="20" />
+            </label>
+          </form>
+          <div class="calculator-results" aria-live="polite">
+            <article>
+              <span>Potential revenue at risk</span>
+              <strong id="revenue-at-risk">$2,000</strong>
+            </article>
+            <article>
+              <span>Potential revenue recovered</span>
+              <strong id="revenue-recovered">$1,000</strong>
+              <small>Assumes 50% of missed follow-ups are recovered.</small>
+            </article>
+          </div>
+        </div>
         <a class="button primary section-cta" href="#contact">Request a demo walkthrough</a>
       </section>
 
@@ -270,5 +305,40 @@
     <footer>
       <p>Chiropractic Business OS is a focused demo and pilot workflow, not an EHR, scheduler, billing system, or patient portal.</p>
     </footer>
+    <script>
+      const monthlyInquiries = document.getElementById("monthly-inquiries");
+      const patientValue = document.getElementById("patient-value");
+      const missedRate = document.getElementById("missed-rate");
+      const revenueAtRisk = document.getElementById("revenue-at-risk");
+      const revenueRecovered = document.getElementById("revenue-recovered");
+      const recoveryRate = 0.5;
+      const currency = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      });
+
+      function cleanNumber(value) {
+        const number = Number(value);
+        return Number.isFinite(number) && number > 0 ? number : 0;
+      }
+
+      function updateCalculator() {
+        const inquiries = cleanNumber(monthlyInquiries.value);
+        const value = cleanNumber(patientValue.value);
+        const missedPercentage = Math.min(cleanNumber(missedRate.value), 100) / 100;
+        const missedInquiries = inquiries * missedPercentage;
+        const atRisk = missedInquiries * value;
+        const recovered = atRisk * recoveryRate;
+
+        revenueAtRisk.textContent = currency.format(atRisk);
+        revenueRecovered.textContent = currency.format(recovered);
+      }
+
+      [monthlyInquiries, patientValue, missedRate].forEach((input) => {
+        input.addEventListener("input", updateCalculator);
+      });
+      updateCalculator();
+    </script>
   </body>
 </html>

@@ -40,6 +40,7 @@ The landing page is written for chiropractic practice owners who may be skeptica
 - who it is not for
 - what it does not do
 - a conservative ROI example
+- a lightweight missed-follow-up ROI calculator
 - trust language around simplicity, seeing inquiries in one place, follow-up consistency, and faster onboarding
 
 ## Scope

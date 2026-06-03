@@ -17,10 +17,14 @@ This folder contains optional outreach and demo materials for the Chiropractic B
 - `discovery_questions.pdf`: discovery call question list.
 - `demo_script.pdf`: short walkthrough script.
 - `onboarding_checklist.pdf`: practice onboarding checklist.
+- `roi_calculator.md`: simple missed-follow-up ROI calculator explanation for sales conversations.
+- `roi_calculator.csv`: example ROI calculator row for quick spreadsheet use.
 
 ## Usage
 
 Use these files during outreach, discovery calls, and client demos. The narrated video can be sent before a call or used as a backup walkthrough when a live demo is not practical. Pair it with the `demo_script.pdf` for live calls.
+
+Use the ROI calculator during discovery calls, pricing conversations, or when a prospect asks whether the setup can pay for itself. Keep the math conservative and state clearly that the output is an estimate, not a guarantee.
 
 ## Who This Is For
 
