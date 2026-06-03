@@ -35,6 +35,9 @@ business_os_mvp/
     CLIENT_FEEDBACK.md
     SALES_NOTES.md
     FEATURE_REQUESTS.md
+    prospect_management/
+      chiropractic_prospect_tracker.xlsx
+      prospect_tracker_guide.md
     outreach/
       outreach_tracker.csv
       outreach_status_definitions.md
@@ -230,6 +233,15 @@ The `PROJECT_OS/outreach/` folder supports tracking 100 chiropractic prospects b
 - `PROJECT_OS/outreach/outreach_metrics.md`: simple definitions for outreach volume, response rate, demo booking rate, proposal rate, and close rate.
 
 These files support sales tracking, demo follow-up, and client acquisition. They do not change the app, database schema, pricing, deployment setup, or product functionality.
+
+### Prospect Management
+
+The `PROJECT_OS/prospect_management/` folder contains a more complete prospect management workbook for tracking up to 100 chiropractic practices before outreach begins:
+
+- `PROJECT_OS/prospect_management/chiropractic_prospect_tracker.xlsx`: spreadsheet tracker with `Prospects` and `Metrics` sheets, dropdowns for outreach/pipeline statuses, proposal/demo tracking, objection tracking, and formula-driven metrics.
+- `PROJECT_OS/prospect_management/prospect_tracker_guide.md`: operating guide for using the workbook, reviewing weekly pipeline metrics, and logging objections/follow-ups.
+
+These files are operational sales assets only. They do not change application logic, database schema, pricing, deployment behavior, or product functionality.
 
 ## Demo Kit
 
