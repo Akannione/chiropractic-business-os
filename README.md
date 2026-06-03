@@ -37,6 +37,8 @@ business_os_mvp/
     FEATURE_REQUESTS.md
     trust_audit.md
     client_delivery/
+      client_onboarding_packet.md
+      client_onboarding_packet.pdf
       client_data_import_template.csv
       training_session_script.md
       client_handoff_document.md
@@ -265,6 +267,8 @@ Root-level copies of these files are kept for quick access. The `PROJECT_OS/` fo
 
 The `PROJECT_OS/client_delivery/` folder contains first-client onboarding and handoff materials:
 
+- `PROJECT_OS/client_delivery/client_onboarding_packet.md`: one-page client onboarding packet to send immediately after a chiropractor signs.
+- `PROJECT_OS/client_delivery/client_onboarding_packet.pdf`: PDF version of the one-page onboarding packet.
 - `PROJECT_OS/client_delivery/client_data_import_template.csv`: simple starter import template with five example rows.
 - `PROJECT_OS/client_delivery/training_session_script.md`: 30-minute training agenda covering dashboard, inquiry, follow-up, weekly review, export, and Q&A workflows.
 - `PROJECT_OS/client_delivery/client_handoff_document.md`: client-facing handoff structure for access, exports, monthly review, support, and troubleshooting.
