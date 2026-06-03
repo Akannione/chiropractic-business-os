@@ -36,6 +36,11 @@ business_os_mvp/
     SALES_NOTES.md
     FEATURE_REQUESTS.md
     trust_audit.md
+    client_delivery/
+      client_data_import_template.csv
+      training_session_script.md
+      client_handoff_document.md
+      implementation_timeline.md
     client_success/
       client_health_score.md
       quarterly_business_review_template.md
@@ -255,6 +260,17 @@ The repository includes a lightweight internal operator system in `PROJECT_OS/` 
 - `PROJECT_OS/trust_audit.md`: internal record of customer-facing trust findings, copy changes, future trust improvements, and proof assets needed after the first client.
 
 Root-level copies of these files are kept for quick access. The `PROJECT_OS/` folder is the preferred place to use for ongoing client feedback, feature triage, and growth planning. These documents are for operating the project and should not be treated as committed feature scope.
+
+### Client Delivery
+
+The `PROJECT_OS/client_delivery/` folder contains first-client onboarding and handoff materials:
+
+- `PROJECT_OS/client_delivery/client_data_import_template.csv`: simple starter import template with five example rows.
+- `PROJECT_OS/client_delivery/training_session_script.md`: 30-minute training agenda covering dashboard, inquiry, follow-up, weekly review, export, and Q&A workflows.
+- `PROJECT_OS/client_delivery/client_handoff_document.md`: client-facing handoff structure for access, exports, monthly review, support, and troubleshooting.
+- `PROJECT_OS/client_delivery/implementation_timeline.md`: four-day setup, data import, training, and go-live plan.
+
+These files support delivery speed and repeatability for the first paying client. They do not change app code, database schema, pricing, deployment behavior, or product functionality.
 
 ### Outreach Operating System
 
