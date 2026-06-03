@@ -65,8 +65,13 @@ business_os_mvp/
       prospect_tracker_guide.md
       qualification_scorecard.md
       targeting_framework.md
+      top20_selection_framework.md
+      top_20_selection_framework.md
       first_20_prospect_strategy.md
       discovery_call_data_collection.md
+      prospect_acquisition_playbook.md
+      prospect_research_checklist.md
+      outreach_launch_readiness.md
     sales_training/
       competitive_positioning_guide.md
       discovery_call_simulation.md
@@ -327,8 +332,13 @@ The `PROJECT_OS/prospect_management/` folder contains a more complete prospect m
 - `PROJECT_OS/prospect_management/prospect_tracker_guide.md`: operating guide for using the workbook, reviewing weekly pipeline metrics, and logging objections/follow-ups.
 - `PROJECT_OS/prospect_management/qualification_scorecard.md`: detailed 1-100 qualification scorecard for scoring practice size, inquiry volume, tracking method, follow-up process, reporting maturity, and openness to technology.
 - `PROJECT_OS/prospect_management/targeting_framework.md`: Tier 1, Tier 2, and Tier 3 targeting framework for outreach priority and follow-up intensity.
+- `PROJECT_OS/prospect_management/top20_selection_framework.md`: workflow for selecting the highest-priority 20 practices from a pool of 100.
+- `PROJECT_OS/prospect_management/top_20_selection_framework.md`: criteria-based top-20 framework with automatic Tier 1 indicators, red flags, and tie-breakers.
 - `PROJECT_OS/prospect_management/first_20_prospect_strategy.md`: recommendations for selecting the first 20 outreach prospects by geography, practice size, marketing activity, website quality, and technology signals.
 - `PROJECT_OS/prospect_management/discovery_call_data_collection.md`: discovery questions for improving qualification scores after calls.
+- `PROJECT_OS/prospect_management/prospect_acquisition_playbook.md`: Georgia-focused playbook for building, scoring, and ranking 100 chiropractic practices.
+- `PROJECT_OS/prospect_management/prospect_research_checklist.md`: per-practice research checklist for core contact details and qualification signals.
+- `PROJECT_OS/prospect_management/outreach_launch_readiness.md`: readiness checklist for launching outreach after 100 prospects are researched and scored.
 
 These files are operational sales assets only. They do not change application logic, database schema, pricing, deployment behavior, or product functionality.
 
