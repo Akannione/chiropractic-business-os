@@ -2,23 +2,23 @@
 
 ## Headline
 
-Turn chiropractic patient inquiries into booked consultations and active patients with a simple practice dashboard.
+See chiropractic patient inquiries, follow-ups, and estimated treatment value in one simple Practice Performance Dashboard.
 
 ## Problem
 
-Many chiropractic practices receive inquiries from Google, referrals, insurance questions, website forms, and phone calls, but the follow-up process often lives in notebooks, inboxes, sticky notes, or memory. That makes it easy to miss follow-ups, lose potential patients, and understate the value of the practice pipeline.
+Many chiropractic practices receive inquiries from Google, referrals, insurance questions, website forms, and phone calls, but follow-up often lives in notebooks, inboxes, sticky notes, spreadsheets, or memory. That makes it easy to miss follow-ups, lose track of interested patients, and underestimate open treatment value.
 
 ## Solution
 
-The Chiropractic Business OS is a lightweight lead and follow-up dashboard built for practice owners who want clear visibility without adopting a complex EHR, scheduling platform, or CRM.
+The Chiropractic Business OS is a lightweight inquiry and follow-up dashboard built for practice owners who want to see inquiries in one place without adopting a complex EHR, scheduling platform, or CRM.
 
-It tracks patient inquiries, follow-up dates, inquiry status, estimated treatment value, weekly performance, and simple practice snapshots in one demo-ready dashboard.
+It tracks patient inquiries, follow-up dates, inquiry status, estimated treatment value, weekly performance, and simple practice snapshots in one demo-ready Practice Performance Dashboard.
 
 ## Deliverables
 
 - Patient inquiry intake form
 - Patient inquiry database using SQLite
-- Dashboard with core practice KPIs
+- Practice Performance Dashboard with core practice metrics
 - Follow-up tracking inside patient inquiry details
 - Weekly Practice Summary
 - Practice Performance Snapshot
@@ -30,9 +30,36 @@ It tracks patient inquiries, follow-up dates, inquiry status, estimated treatmen
 
 - Solo chiropractic practices
 - Small chiropractic offices
+- Offices using spreadsheets or notebooks
 - Practice owners who need better inquiry follow-up
 - Clinics that are not ready for a full CRM implementation
-- Practices preparing to improve front-desk workflow visibility
+- Practices preparing to see front-desk inquiry activity in one place
+- Practices struggling with follow-up consistency
+
+## Who This Is For
+
+- Solo chiropractors
+- Small chiropractic practices
+- Offices using spreadsheets
+- Practices struggling with follow-up consistency
+
+## What This Is Not
+
+- Not an EHR
+- Not billing software
+- Not insurance software
+- Not scheduling software
+
+## Simple ROI Example
+
+Conservative example:
+
+- 10 inquiries/month
+- 2 missed follow-up opportunities
+- 1 recovered patient opportunity
+- Potential value recovered through better follow-up review
+
+This example is not a guarantee. It shows why tracking inquiries in one place and reviewing follow-ups consistently can matter.
 
 ## Exclusions
 
@@ -42,6 +69,13 @@ It tracks patient inquiries, follow-up dates, inquiry status, estimated treatmen
 - No patient portal
 - No insurance billing automation
 - No HIPAA-grade production hosting included in the MVP
+
+## Onboarding Timeline
+
+1. Setup: configure the demo or hosted environment.
+2. Data Import: load approved sample or practice inquiry data.
+3. Training: walk the owner or front desk through the daily and weekly workflow.
+4. Go Live: start reviewing inquiries, follow-ups, and weekly performance.
 
 ## Pricing Tiers
 
@@ -70,10 +104,13 @@ It tracks patient inquiries, follow-up dates, inquiry status, estimated treatmen
 ## Support Options
 
 - One-time setup support
+- Onboarding support
+- Training support
+- Monthly review support
 - Monthly maintenance retainer
 - Quarterly dashboard review
 - Training session for owner or front desk
 
 ## Call To Action
 
-Book a 20-minute walkthrough to see how the practice can track patient inquiries, prevent missed follow-ups, and understand estimated treatment value without adding a complex system.
+Book a 20-minute walkthrough to see how the practice can track patient inquiries, reduce missed opportunities, improve follow-up consistency, and understand estimated treatment value without adding a complex system.

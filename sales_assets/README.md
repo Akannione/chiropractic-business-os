@@ -21,3 +21,34 @@ This folder contains optional outreach and demo materials for the Chiropractic B
 ## Usage
 
 Use these files during outreach, discovery calls, and client demos. The narrated video can be sent before a call or used as a backup walkthrough when a live demo is not practical. Pair it with the `demo_script.pdf` for live calls.
+
+## Who This Is For
+
+- Solo chiropractors
+- Small chiropractic practices
+- Offices using spreadsheets
+- Practices struggling with follow-up consistency
+
+## What This Is Not
+
+- Not an EHR
+- Not billing software
+- Not insurance software
+- Not scheduling software
+
+## Simple Onboarding Timeline
+
+1. Setup
+2. Data Import
+3. Training
+4. Go Live
+
+## Support Options
+
+- Onboarding support
+- Training support
+- Monthly review support
+
+## Trust Notes
+
+Use conservative language during outreach. The Chiropractic Business OS helps practices see inquiries in one place, improve follow-up consistency, reduce missed opportunities, and review estimated treatment value. It does not guarantee revenue or replace clinical, billing, insurance, or scheduling systems.

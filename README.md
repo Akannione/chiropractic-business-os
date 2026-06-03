@@ -35,6 +35,7 @@ business_os_mvp/
     CLIENT_FEEDBACK.md
     SALES_NOTES.md
     FEATURE_REQUESTS.md
+    trust_audit.md
     client_success/
       client_health_score.md
       quarterly_business_review_template.md
@@ -175,7 +176,7 @@ The `demo_website/` folder contains a simple static landing page for outreach:
 - `demo_website/styles.css`: lightweight responsive styling.
 - `demo_website/README.md`: local opening instructions and scope notes.
 
-The page uses the existing app screenshots and `sales_assets/demo_video.mp4`. It is a marketing website only. It is not a SaaS frontend, does not add authentication, and does not change app functionality, pricing, deployment logic, or the SQLite schema.
+The page uses the existing app screenshots and `sales_assets/demo_video.mp4`. It also includes fit, non-fit, trust, and conservative ROI language for June 15 outreach. It is a marketing website only. It is not a SaaS frontend, does not add authentication, and does not change app functionality, pricing, deployment logic, or the SQLite schema.
 
 ## KPI Definitions
 
@@ -235,7 +236,7 @@ Optional outreach materials live alongside the codebase so the productized servi
 - `sales_assets/objection_handling.md`: honest responses to common chiropractor objections during outreach.
 - `sales_assets/revenue_model.csv`: simple revenue model for the $500, $1,500, and $3,000 offer tiers across 1, 5, 10, and 20 clients.
 
-These files are optional sales collateral. They are not required by the core app and do not affect the database schema or Streamlit functionality.
+These files are optional sales collateral. The customer-facing collateral now uses consistent trust language: who the offer is for, what it is not, a simple onboarding timeline, support options, and conservative non-guaranteed ROI framing. They are not required by the core app and do not affect the database schema or Streamlit functionality.
 
 ## Project Operating System
 
@@ -246,6 +247,7 @@ The repository includes a lightweight internal operator system in `PROJECT_OS/` 
 - `PROJECT_OS/CLIENT_FEEDBACK.md`: internal template for demo feedback, outreach reactions, and objections.
 - `PROJECT_OS/SALES_NOTES.md`: internal positioning, buyer notes, objections, and pricing.
 - `PROJECT_OS/FEATURE_REQUESTS.md`: internal request log and decision rules.
+- `PROJECT_OS/trust_audit.md`: internal record of customer-facing trust findings, copy changes, future trust improvements, and proof assets needed after the first client.
 
 Root-level copies of these files are kept for quick access. The `PROJECT_OS/` folder is the preferred place to use for ongoing client feedback, feature triage, and growth planning. These documents are for operating the project and should not be treated as committed feature scope.
 

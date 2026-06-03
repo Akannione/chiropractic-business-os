@@ -202,6 +202,8 @@ h3 {
 
 .three-column,
 .feature-grid,
+.fit-grid,
+.two-column,
 .screenshot-grid {
   display: grid;
   gap: 18px;
@@ -215,8 +217,18 @@ h3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.fit-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.two-column {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .three-column article,
 .feature-grid article,
+.fit-grid article,
+.two-column article,
 .faq-list details {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -226,6 +238,8 @@ h3 {
 
 .three-column p,
 .feature-grid p,
+.fit-grid p,
+.two-column p,
 .faq-list p {
   margin: 0;
   color: var(--muted);
@@ -273,6 +287,33 @@ video {
   height: 10px;
   border-radius: 50%;
   background: var(--green);
+}
+
+.plain-list {
+  margin: 18px 0 0;
+  padding-left: 20px;
+  color: var(--muted);
+}
+
+.plain-list li {
+  margin: 10px 0;
+}
+
+.text-link {
+  display: inline-flex;
+  margin-top: 22px;
+  color: var(--green-dark);
+  font-weight: 800;
+  text-decoration: none;
+  border-bottom: 2px solid var(--green);
+}
+
+.text-link:hover {
+  color: var(--green);
+}
+
+.section-cta {
+  margin-top: 24px;
 }
 
 .screenshot-grid {
@@ -348,6 +389,8 @@ footer {
 
   .three-column,
   .feature-grid,
+  .fit-grid,
+  .two-column,
   .screenshot-grid,
   .split {
     grid-template-columns: 1fr;
