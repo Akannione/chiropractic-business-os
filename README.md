@@ -78,6 +78,16 @@ business_os_mvp/
       sales_call_scorecard.md
       chiropractic_objection_library.md
       top_10_demo_killers.md
+      simulation_library.md
+      discovery_call_evaluation_scorecard.md
+      common_sales_mistakes.md
+      rapid_response_guide.md
+      20_call_rehearsal_tracker.md
+    launch/
+      outreach_readiness_audit.md
+      final_pre_outreach_checklist.md
+      first_client_milestones.md
+      post_demo_feedback_form.md
     deployment_rehearsal/
       deployment_rehearsal_report.md
       deployment_rehearsal_report_v2.md
@@ -351,8 +361,24 @@ The `PROJECT_OS/sales_training/` folder supports chiropractor outreach practice:
 - `PROJECT_OS/sales_training/sales_call_scorecard.md`: post-call scoring for clarity, confidence, pricing, EHR boundary, privacy, ROI, and next-step close.
 - `PROJECT_OS/sales_training/chiropractic_objection_library.md`: 30 common objections with the reason behind each objection, wrong response, and better response.
 - `PROJECT_OS/sales_training/top_10_demo_killers.md`: common demo mistakes, why they hurt trust, and better approaches.
+- `PROJECT_OS/sales_training/simulation_library.md`: 20 simulated chiropractic prospect profiles for discovery-call rehearsal.
+- `PROJECT_OS/sales_training/discovery_call_evaluation_scorecard.md`: 1-5 scorecard for rapport, discovery, qualification, objection handling, positioning, and close.
+- `PROJECT_OS/sales_training/common_sales_mistakes.md`: guide to avoiding talking too much, pitching too early, feature dumping, arguing, overpromising ROI, and attacking existing software.
+- `PROJECT_OS/sales_training/rapid_response_guide.md`: short responses to common questions about Excel, Google Sheets, HubSpot, EHRs, ROI, staff adoption, and support.
+- `PROJECT_OS/sales_training/20_call_rehearsal_tracker.md`: tracker for 20 simulated discovery calls before outreach begins.
 
 These files are sales training documents only. They do not change app code, database schema, pricing, deployment behavior, or product functionality.
+
+### Launch Readiness
+
+The `PROJECT_OS/launch/` folder supports final outreach certification and launch discipline:
+
+- `PROJECT_OS/launch/outreach_readiness_audit.md`: readiness audit covering product, demo, website, proposal, discovery call, qualification system, deployment process, onboarding, and client success.
+- `PROJECT_OS/launch/final_pre_outreach_checklist.md`: final checklist for demo, sales materials, call preparation, prospecting setup, and delivery readiness.
+- `PROJECT_OS/launch/first_client_milestones.md`: milestone tracker from first reply through first testimonial, with success criteria for each step.
+- `PROJECT_OS/launch/post_demo_feedback_form.md`: post-demo form for qualification score, objections, interest level, next step, and lessons learned.
+
+These files certify execution readiness only. They do not change app code, database schema, pricing, deployment behavior, or product functionality.
 
 ### Client Success
 
