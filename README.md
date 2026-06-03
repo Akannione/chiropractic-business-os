@@ -35,6 +35,12 @@ business_os_mvp/
     CLIENT_FEEDBACK.md
     SALES_NOTES.md
     FEATURE_REQUESTS.md
+    client_success/
+      client_health_score.md
+      quarterly_business_review_template.md
+      feedback_collection_template.md
+      client_testimonial_request.md
+      retention_playbook.md
     prospect_management/
       chiropractic_prospect_tracker.xlsx
       prospect_tracker_guide.md
@@ -57,6 +63,10 @@ business_os_mvp/
     screenshot_checklist.md
     demo_reset_process.md
     demo_troubleshooting_guide.md
+  demo_website/
+    index.html
+    styles.css
+    README.md
   data/
     business_os.sqlite
     chiropractor_sample_data.csv
@@ -156,6 +166,16 @@ Demo mode shows a sidebar reset button that replaces current records with the fa
 4. Use Inquiry Details and Follow-Up to update status or next follow-up date.
 5. Review the weekly practice summary and generate a Practice Performance Snapshot from the Weekly Summary tab.
 6. Download the snapshot, all inquiries, or the follow-up queue as CSV/text exports.
+
+## Demo Website
+
+The `demo_website/` folder contains a simple static landing page for outreach:
+
+- `demo_website/index.html`: marketing page with hero, problem, solution, features, screenshots, demo video, FAQ, and contact sections.
+- `demo_website/styles.css`: lightweight responsive styling.
+- `demo_website/README.md`: local opening instructions and scope notes.
+
+The page uses the existing app screenshots and `sales_assets/demo_video.mp4`. It is a marketing website only. It is not a SaaS frontend, does not add authentication, and does not change app functionality, pricing, deployment logic, or the SQLite schema.
 
 ## KPI Definitions
 
@@ -259,6 +279,18 @@ The `PROJECT_OS/sales_training/` folder supports chiropractor outreach practice:
 - `PROJECT_OS/sales_training/sales_call_scorecard.md`: post-call scoring for clarity, confidence, pricing, EHR boundary, privacy, ROI, and next-step close.
 
 These files are sales training documents only. They do not change app code, database schema, pricing, deployment behavior, or product functionality.
+
+### Client Success
+
+The `PROJECT_OS/client_success/` folder supports retention, client feedback, referrals, and future testimonials after a practice starts using the system:
+
+- `PROJECT_OS/client_success/client_health_score.md`: Green, Yellow, and Red client health framework with recommended actions.
+- `PROJECT_OS/client_success/quarterly_business_review_template.md`: quarterly KPI review, trend review, wins, challenges, and next-quarter goal template.
+- `PROJECT_OS/client_success/feedback_collection_template.md`: structured prompts for feature requests, frustrations, favorite functionality, ROI feedback, and testimonial opportunities.
+- `PROJECT_OS/client_success/client_testimonial_request.md`: scripts for requesting testimonials, referrals, and case study participation.
+- `PROJECT_OS/client_success/retention_playbook.md`: monthly check-in, quarterly review, renewal, referral, warning-sign, and recovery processes.
+
+These documents are operating assets only. They do not change app code, database schema, pricing, deployment behavior, or product functionality.
 
 ### Deployment Rehearsal
 
