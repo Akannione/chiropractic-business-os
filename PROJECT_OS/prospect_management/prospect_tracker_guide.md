@@ -100,6 +100,43 @@ Qualification thresholds:
 - 50-64: Possible Fit
 - Below 50: Low Priority
 
+## Tier Assignment Process
+
+Use `PROJECT_OS/prospect_management/targeting_framework.md` to convert qualification scores into outreach tiers:
+
+- Tier 1: Score 80-100.
+- Tier 2: Score 65-79.
+- Tier 3: Score 50-64.
+
+Record the tier in `Notes` if the workbook does not have a dedicated tier column. Tier 1 prospects should receive the most direct outreach and fastest follow-up.
+
+## Re-Scoring Process
+
+Re-score a prospect after every useful discovery call or reply.
+
+Update the score when you learn more about:
+
+- monthly inquiry volume
+- current tracking method
+- follow-up process
+- reporting process
+- decision-maker clarity
+- technology openness
+
+If a prospect moves up or down a tier, update `Priority`, `Pipeline Stage`, and `Next Follow-Up Date`.
+
+## Priority Ordering Process
+
+Use this order for June 15 outreach:
+
+1. Tier 1 prospects with clear owner or office-manager contact info.
+2. Tier 1 prospects with strong website or Google activity but weaker contact info.
+3. Tier 2 prospects with obvious follow-up or spreadsheet pain.
+4. Tier 2 prospects with good inquiry signals but unknown decision-maker.
+5. Tier 3 prospects only if they have an unusually strong signal or respond positively.
+
+Do not over-prioritize low-scoring prospects just because they are easy to contact.
+
 ## Pipeline Metric Formulas
 
 The `Metrics` sheet includes formulas/placeholders for:

@@ -38,6 +38,10 @@ business_os_mvp/
     trust_audit.md
     sales/
       qualification_scorecard.md
+      proposal_template.md
+      proposal_checklist.md
+      proposal_workflow.md
+      proposal_tracking.md
     client_delivery/
       client_onboarding_packet.md
       client_onboarding_packet.pdf
@@ -55,6 +59,9 @@ business_os_mvp/
       chiropractic_prospect_tracker.xlsx
       prospect_tracker_guide.md
       qualification_scorecard.md
+      targeting_framework.md
+      first_20_prospect_strategy.md
+      discovery_call_data_collection.md
     sales_training/
       competitive_positioning_guide.md
       discovery_call_simulation.md
@@ -263,9 +270,20 @@ The repository includes a lightweight internal operator system in `PROJECT_OS/` 
 - `PROJECT_OS/SALES_NOTES.md`: internal positioning, buyer notes, objections, and pricing.
 - `PROJECT_OS/FEATURE_REQUESTS.md`: internal request log and decision rules.
 - `PROJECT_OS/trust_audit.md`: internal record of customer-facing trust findings, copy changes, future trust improvements, and proof assets needed after the first client.
-- `PROJECT_OS/sales/qualification_scorecard.md`: quick sales qualification scorecard for prioritizing chiropractic prospects during outreach.
 
 Root-level copies of these files are kept for quick access. The `PROJECT_OS/` folder is the preferred place to use for ongoing client feedback, feature triage, and growth planning. These documents are for operating the project and should not be treated as committed feature scope.
+
+### Sales
+
+The `PROJECT_OS/sales/` folder supports proposal and close-stage execution:
+
+- `PROJECT_OS/sales/qualification_scorecard.md`: quick sales qualification scorecard for prioritizing chiropractic prospects during outreach.
+- `PROJECT_OS/sales/proposal_template.md`: client-facing proposal template with summary, challenges, recommended solution, deliverables, timeline, training, support, pricing, next steps, and signature section.
+- `PROJECT_OS/sales/proposal_checklist.md`: pre-send checklist for discovery, qualification, demo, package selection, pricing, and onboarding packet readiness.
+- `PROJECT_OS/sales/proposal_workflow.md`: proposal flow from Discovery Call to Demo to Proposal to Decision to Onboarding to Go Live.
+- `PROJECT_OS/sales/proposal_tracking.md`: simple proposal tracking table for package, value, status, follow-up date, outcome, and notes.
+
+These files support sales execution only. They do not change app code, database schema, pricing, deployment behavior, or product functionality.
 
 ### Client Delivery
 
@@ -299,6 +317,9 @@ The `PROJECT_OS/prospect_management/` folder contains a more complete prospect m
 - `PROJECT_OS/prospect_management/chiropractic_prospect_tracker.xlsx`: spreadsheet tracker with `Prospects` and `Metrics` sheets, dropdowns for outreach/pipeline statuses, proposal/demo tracking, objection tracking, and formula-driven metrics.
 - `PROJECT_OS/prospect_management/prospect_tracker_guide.md`: operating guide for using the workbook, reviewing weekly pipeline metrics, and logging objections/follow-ups.
 - `PROJECT_OS/prospect_management/qualification_scorecard.md`: detailed 1-100 qualification scorecard for scoring practice size, inquiry volume, tracking method, follow-up process, reporting maturity, and openness to technology.
+- `PROJECT_OS/prospect_management/targeting_framework.md`: Tier 1, Tier 2, and Tier 3 targeting framework for outreach priority and follow-up intensity.
+- `PROJECT_OS/prospect_management/first_20_prospect_strategy.md`: recommendations for selecting the first 20 outreach prospects by geography, practice size, marketing activity, website quality, and technology signals.
+- `PROJECT_OS/prospect_management/discovery_call_data_collection.md`: discovery questions for improving qualification scores after calls.
 
 These files are operational sales assets only. They do not change application logic, database schema, pricing, deployment behavior, or product functionality.
 
