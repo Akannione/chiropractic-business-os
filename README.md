@@ -38,6 +38,13 @@ business_os_mvp/
     prospect_management/
       chiropractic_prospect_tracker.xlsx
       prospect_tracker_guide.md
+    sales_training/
+      competitive_positioning_guide.md
+      discovery_call_simulation.md
+      sales_call_scorecard.md
+    deployment_rehearsal/
+      deployment_rehearsal_report.md
+      manual_deployment_steps.md
     outreach/
       outreach_tracker.csv
       outreach_status_definitions.md
@@ -242,6 +249,25 @@ The `PROJECT_OS/prospect_management/` folder contains a more complete prospect m
 - `PROJECT_OS/prospect_management/prospect_tracker_guide.md`: operating guide for using the workbook, reviewing weekly pipeline metrics, and logging objections/follow-ups.
 
 These files are operational sales assets only. They do not change application logic, database schema, pricing, deployment behavior, or product functionality.
+
+### Sales Training
+
+The `PROJECT_OS/sales_training/` folder supports chiropractor outreach practice:
+
+- `PROJECT_OS/sales_training/competitive_positioning_guide.md`: positioning against Excel, Google Sheets, HubSpot, Salesforce, and chiropractic EHR systems.
+- `PROJECT_OS/sales_training/discovery_call_simulation.md`: skeptical chiropractor scenario, difficult sales questions, strong answers, and scoring rubric.
+- `PROJECT_OS/sales_training/sales_call_scorecard.md`: post-call scoring for clarity, confidence, pricing, EHR boundary, privacy, ROI, and next-step close.
+
+These files are sales training documents only. They do not change app code, database schema, pricing, deployment behavior, or product functionality.
+
+### Deployment Rehearsal
+
+The `PROJECT_OS/deployment_rehearsal/` folder documents a simulated new-client deployment:
+
+- `PROJECT_OS/deployment_rehearsal/deployment_rehearsal_report.md`: rehearsal result, evidence, friction found, and handoff completion status.
+- `PROJECT_OS/deployment_rehearsal/manual_deployment_steps.md`: manual operator steps for client intake, database setup, production import, verification, exports, and handoff.
+
+These files reduce deployment friction by documenting the manual path before client delivery. They do not change deployment logic or app behavior.
 
 ## Demo Kit
 
