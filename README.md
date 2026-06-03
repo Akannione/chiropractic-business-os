@@ -49,8 +49,11 @@ business_os_mvp/
       competitive_positioning_guide.md
       discovery_call_simulation.md
       sales_call_scorecard.md
+      chiropractic_objection_library.md
+      top_10_demo_killers.md
     deployment_rehearsal/
       deployment_rehearsal_report.md
+      deployment_rehearsal_report_v2.md
       manual_deployment_steps.md
     outreach/
       outreach_tracker.csv
@@ -281,6 +284,8 @@ The `PROJECT_OS/sales_training/` folder supports chiropractor outreach practice:
 - `PROJECT_OS/sales_training/competitive_positioning_guide.md`: positioning against Excel, Google Sheets, HubSpot, Salesforce, and chiropractic EHR systems.
 - `PROJECT_OS/sales_training/discovery_call_simulation.md`: skeptical chiropractor scenario, difficult sales questions, strong answers, and scoring rubric.
 - `PROJECT_OS/sales_training/sales_call_scorecard.md`: post-call scoring for clarity, confidence, pricing, EHR boundary, privacy, ROI, and next-step close.
+- `PROJECT_OS/sales_training/chiropractic_objection_library.md`: 30 common objections with the reason behind each objection, wrong response, and better response.
+- `PROJECT_OS/sales_training/top_10_demo_killers.md`: common demo mistakes, why they hurt trust, and better approaches.
 
 These files are sales training documents only. They do not change app code, database schema, pricing, deployment behavior, or product functionality.
 
@@ -301,6 +306,7 @@ These documents are operating assets only. They do not change app code, database
 The `PROJECT_OS/deployment_rehearsal/` folder documents a simulated new-client deployment:
 
 - `PROJECT_OS/deployment_rehearsal/deployment_rehearsal_report.md`: rehearsal result, evidence, friction found, and handoff completion status.
+- `PROJECT_OS/deployment_rehearsal/deployment_rehearsal_report_v2.md`: second deployment rehearsal focused on `client signs -> deploy -> train -> done`, unclear instructions, repeated actions, and improvement opportunities.
 - `PROJECT_OS/deployment_rehearsal/manual_deployment_steps.md`: manual operator steps for client intake, database setup, production import, verification, exports, and handoff.
 
 These files reduce deployment friction by documenting the manual path before client delivery. They do not change deployment logic or app behavior.

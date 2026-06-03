@@ -59,7 +59,9 @@ Conservative example:
 - 1 recovered patient opportunity
 - Potential value recovered through better follow-up review
 
-This example is not a guarantee. It shows why tracking inquiries in one place and reviewing follow-ups consistently can matter.
+This estimate is intended for discussion purposes only. Results will vary by practice and are not guaranteed.
+
+It shows why tracking inquiries in one place and reviewing follow-ups consistently can matter.
 
 Even recovering one or two missed patient opportunities can help justify the setup cost. Use conservative numbers and treat the calculation as an estimate, not a promise.
 

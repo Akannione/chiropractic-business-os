@@ -38,6 +38,8 @@ potential recovered revenue = 2 x $500 = $1,000/month
 
 ## Disclaimer
 
-This is an estimate, not a guarantee. Actual results depend on inquiry volume, staff usage, follow-up quality, patient demand, and the practice's existing workflow.
+This estimate is intended for discussion purposes only. Results will vary by practice and are not guaranteed.
+
+Actual results depend on inquiry volume, staff usage, follow-up quality, patient demand, and the practice's existing workflow.
 
 Use conservative numbers. The goal is to help the practice owner understand the possible cost of missed follow-ups, not to promise revenue.
