@@ -42,6 +42,10 @@ business_os_mvp/
       proposal_checklist.md
       proposal_workflow.md
       proposal_tracking.md
+      discovery_call_playbook.md
+      discovery_call_scorecard.md
+      discovery_call_notes_template.md
+      discovery_call_flow.md
     client_delivery/
       client_onboarding_packet.md
       client_onboarding_packet.pdf
@@ -55,6 +59,7 @@ business_os_mvp/
       feedback_collection_template.md
       client_testimonial_request.md
       retention_playbook.md
+      success_story_template.md
     prospect_management/
       chiropractic_prospect_tracker.xlsx
       prospect_tracker_guide.md
@@ -282,6 +287,10 @@ The `PROJECT_OS/sales/` folder supports proposal and close-stage execution:
 - `PROJECT_OS/sales/proposal_checklist.md`: pre-send checklist for discovery, qualification, demo, package selection, pricing, and onboarding packet readiness.
 - `PROJECT_OS/sales/proposal_workflow.md`: proposal flow from Discovery Call to Demo to Proposal to Decision to Onboarding to Go Live.
 - `PROJECT_OS/sales/proposal_tracking.md`: simple proposal tracking table for package, value, status, follow-up date, outcome, and notes.
+- `PROJECT_OS/sales/discovery_call_playbook.md`: consultative discovery call framework with opening, rapport, process questions, qualification checkpoints, objections, and recommended next steps.
+- `PROJECT_OS/sales/discovery_call_scorecard.md`: post-call scorecard for qualification score, pain score, urgency score, buying likelihood, objections, and next step.
+- `PROJECT_OS/sales/discovery_call_notes_template.md`: structured notes template for practice overview, current workflow, inquiry process, follow-up process, reporting, pain points, objections, and next action.
+- `PROJECT_OS/sales/discovery_call_flow.md`: simple call flow from Introduction to Discovery to Qualification to Pain Identification to Demo Invitation to Next Steps.
 
 These files support sales execution only. They do not change app code, database schema, pricing, deployment behavior, or product functionality.
 
@@ -344,6 +353,7 @@ The `PROJECT_OS/client_success/` folder supports retention, client feedback, ref
 - `PROJECT_OS/client_success/feedback_collection_template.md`: structured prompts for feature requests, frustrations, favorite functionality, ROI feedback, and testimonial opportunities.
 - `PROJECT_OS/client_success/client_testimonial_request.md`: scripts for requesting testimonials, referrals, and case study participation.
 - `PROJECT_OS/client_success/retention_playbook.md`: monthly check-in, quarterly review, renewal, referral, warning-sign, and recovery processes.
+- `PROJECT_OS/client_success/success_story_template.md`: future client success story template for practice profile, challenge, previous workflow, solution, results, client quote, and lessons learned.
 
 These documents are operating assets only. They do not change app code, database schema, pricing, deployment behavior, or product functionality.
 
