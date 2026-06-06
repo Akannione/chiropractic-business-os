@@ -1,19 +1,63 @@
 # Chiropractic Business OS MVP
 
-A simple Streamlit + SQLite operating dashboard for a chiropractic practice. It stores patient inquiries, tracks follow-ups, shows Estimated Treatment Value, generates an on-screen weekly practice summary, and exports CSV files.
+A chiropractic practice operating dashboard for patient inquiries, follow-ups, estimated treatment value, weekly summaries, and CSV exports.
+
+The project now includes a full-stack implementation using the requested standard stack:
+
+- Backend: Node.js + TypeScript
+- Database: MongoDB
+- Frontend: React + TypeScript
+
+The original Streamlit + SQLite MVP remains available as a legacy/reference implementation during migration.
 
 Prepared for a June 15 chiropractor demo. The app is intentionally focused on practice-owner clarity, patient inquiry follow-up, and treatment revenue visibility.
 
 ## Features
 
 - Patient inquiry intake form
-- SQLite patient inquiry database
+- MongoDB patient inquiry database in the full-stack version
 - KPI dashboard
 - KPI help dialog and plain-language tooltips
 - Patient inquiry details with follow-up scheduling
 - Weekly practice summary with a printable Practice Performance Snapshot
 - CSV export
 - Chiropractic demo sample data
+
+## Full-Stack Implementation
+
+The full-stack app is organized with standard frontend/backend separation:
+
+```text
+business_os_mvp/
+  backend/
+    src/
+      config/
+      controllers/
+      data/
+      middleware/
+      models/
+      routes/
+      services/
+      utils/
+  frontend/
+    src/
+      services/
+      styles/
+      utils/
+      App.tsx
+      main.tsx
+      types.ts
+```
+
+Why this structure:
+
+- React owns the practice-owner user interface.
+- Node.js/Express owns the API layer.
+- MongoDB stores patient inquiries.
+- TypeScript keeps frontend/backend contracts explicit.
+- Controllers, services, models, routes, and utilities are separated so the codebase is easier to maintain.
+
+Detailed setup and rationale are documented in `FULLSTACK_README.md`.
 
 ## Configuration
 
@@ -25,9 +69,20 @@ This prepares the codebase for future industry templates without changing curren
 
 ```text
 business_os_mvp/
+  backend/
+    package.json
+    tsconfig.json
+    src/
+  frontend/
+    package.json
+    tsconfig.json
+    vite.config.ts
+    src/
   app.py
   requirements.txt
+  package.json
   README.md
+  FULLSTACK_README.md
   .env.example
   PROJECT_OS/
     ROADMAP.md
@@ -159,6 +214,38 @@ business_os_mvp/
 
 ## Setup
 
+### Full-Stack Setup
+
+From this repository folder:
+
+```bash
+npm run install:all
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
+
+Start MongoDB locally, then run:
+
+```bash
+npm run dev:backend
+npm run dev:frontend
+```
+
+Open:
+
+```text
+http://localhost:5173
+```
+
+Use these checks after dependencies are installed:
+
+```bash
+npm run typecheck
+npm run build
+```
+
+### Legacy Streamlit Setup
+
 From this repository folder:
 
 ```bash
@@ -167,7 +254,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Run
+## Run Legacy Streamlit App
 
 ```bash
 streamlit run app.py
