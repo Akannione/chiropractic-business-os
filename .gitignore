@@ -6,6 +6,7 @@ node_modules/
 dist/
 backend/dist/
 frontend/dist/
+.mongo-data/
 *.sqlite
 *.sqlite-*
 exports/*.csv
