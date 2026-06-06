@@ -41,6 +41,9 @@ business_os_mvp/
       utils/
   frontend/
     src/
+      components/
+      hooks/
+      pages/
       services/
       styles/
       utils/
@@ -55,7 +58,8 @@ Why this structure:
 - Node.js/Express owns the API layer.
 - MongoDB stores patient inquiries.
 - TypeScript keeps frontend/backend contracts explicit.
-- Controllers, services, models, routes, and utilities are separated so the codebase is easier to maintain.
+- Frontend components, pages, hooks, services, and utilities are separated so UI changes stay easy to read.
+- Backend controllers, services, models, routes, and utilities are separated so API changes stay maintainable.
 
 Detailed setup and rationale are documented in `FULLSTACK_README.md`.
 

@@ -1,3 +1,5 @@
+export type View = 'dashboard' | 'inquiries' | 'summary' | 'exports';
+
 export type InquiryStatus =
   | 'New Inquiry'
   | 'Consultation Scheduled'
@@ -47,4 +49,3 @@ export type AppConfig = {
   demoMode: boolean;
   kpiHelp: Record<string, string>;
 };
-

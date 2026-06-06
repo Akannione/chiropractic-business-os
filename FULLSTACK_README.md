@@ -64,6 +64,9 @@ The frontend is organized by responsibility:
 ```text
 frontend/
   src/
+    components/
+    hooks/
+    pages/
     services/
     styles/
     utils/
@@ -72,7 +75,7 @@ frontend/
     types.ts
 ```
 
-The current UI is intentionally simple and practice-owner focused, matching the demo-readiness goal.
+The current UI is intentionally simple and practice-owner focused, matching the demo-readiness goal. `App.tsx` now only wires application state to pages. Reusable display pieces live in `components/`, screen-level views live in `pages/`, API access lives in `services/`, shared data loading lives in `hooks/`, and formatting helpers live in `utils/`.
 
 ## Why This Structure
 
@@ -82,6 +85,7 @@ The previous MVP was useful for fast validation, but Streamlit and SQLite are no
 - Node.js/Express owns API behavior.
 - MongoDB owns persistence.
 - TypeScript keeps contracts clear across the frontend and backend.
+- The frontend is split into pages, components, hooks, services, and utilities so layout, data loading, and API access do not live in one large file.
 - README documentation explains setup, environment variables, and verification.
 
 This makes the project easier to extend, deploy, and reuse for future industry templates.
