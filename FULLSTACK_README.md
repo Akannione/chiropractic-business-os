@@ -6,7 +6,7 @@ This project now includes a full-stack implementation using the requested standa
 - Database: MongoDB
 - Frontend: React with Vite and TypeScript
 
-The existing Streamlit + SQLite MVP remains in place as a legacy/reference implementation while the new app lives in separated `backend/` and `frontend/` folders.
+The existing Streamlit + SQLite MVP is now explicitly separated under `legacy/streamlit_sqlite/`. The current app lives in separated `backend/` and `frontend/` folders.
 
 ## What Was Built
 
@@ -194,10 +194,15 @@ The goal was stack migration and architecture separation, not new product scope.
 
 ## Legacy App
 
-The original Streamlit app remains available:
+The original Streamlit app remains available only as a labeled legacy reference:
 
 ```bash
+cd legacy/streamlit_sqlite
 python3 -m streamlit run app.py
 ```
 
 It can be used as a reference while the React/Node/Mongo version becomes the main implementation.
+
+## Runtime Troubleshooting
+
+Known local runtime issues and fixes are documented in `docs/RUNTIME_TROUBLESHOOTING.md`, including Codex sandbox port-binding errors, duplicate server processes, MongoDB startup checks, and the correct Vite startup commands.

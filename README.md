@@ -8,7 +8,7 @@ The project now includes a full-stack implementation using the requested standar
 - Database: MongoDB
 - Frontend: React + TypeScript
 
-The original Streamlit + SQLite MVP remains available as a legacy/reference implementation during migration.
+The original Streamlit + SQLite MVP is explicitly separated under `legacy/streamlit_sqlite/` as a reference implementation. The primary app is now the Node.js, React, and MongoDB version.
 
 Prepared for a June 15 chiropractor demo. The app is intentionally focused on practice-owner clarity, patient inquiry follow-up, and treatment revenue visibility.
 
@@ -65,9 +65,9 @@ Detailed setup and rationale are documented in `FULLSTACK_README.md`.
 
 ## Configuration
 
-The app currently uses a chiropractic configuration in `src/business_os/config.py`. Core Business OS behavior such as inquiry tracking, follow-up tracking, KPI calculations, exports, and reporting remains reusable, while chiropractic-specific values such as statuses, sources, service examples, labels, terminology, demo data path, weekly summary wording, and export filename prefixes are centralized in configuration.
+The primary full-stack app stores chiropractic-specific options in `backend/src/config/constants.ts`, including statuses, sources, service examples, KPI help text, and demo-mode constants.
 
-This prepares the codebase for future industry templates without changing current Chiropractic Business OS functionality or the SQLite schema.
+The legacy Streamlit version has its own Python configuration in `legacy/streamlit_sqlite/src/business_os/config.py`. That file is legacy-only and should not be confused with the current full-stack app.
 
 ## Project Structure
 
@@ -82,12 +82,11 @@ business_os_mvp/
     tsconfig.json
     vite.config.ts
     src/
-  app.py
-  requirements.txt
   package.json
   README.md
   FULLSTACK_README.md
-  .env.example
+  docs/
+    RUNTIME_TROUBLESHOOTING.md
   PROJECT_OS/
     ROADMAP.md
     BACKLOG.md
@@ -175,10 +174,17 @@ business_os_mvp/
     index.html
     styles.css
     README.md
-  data/
-    business_os.sqlite
-    chiropractor_sample_data.csv
-  exports/
+  legacy/
+    streamlit_sqlite/
+      README.md
+      app.py
+      requirements.txt
+      run_app.sh
+      data/
+        chiropractor_sample_data.csv
+      exports/
+      src/
+        business_os/
   deploy_sop/
     setup_checklist.md
     deployment_checklist.md
@@ -207,13 +213,6 @@ business_os_mvp/
     onboarding_checklist.pdf
     revenue_model.csv
     screenshots/
-  src/
-    business_os/
-      __init__.py
-      config.py
-      db.py
-      reports.py
-      sample_data.py
 ```
 
 ## Setup
@@ -250,9 +249,12 @@ npm run build
 
 ### Legacy Streamlit Setup
 
-From this repository folder:
+The previous Python Streamlit MVP is kept only for reference in `legacy/streamlit_sqlite/`.
+
+From that legacy folder:
 
 ```bash
+cd legacy/streamlit_sqlite
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -261,42 +263,47 @@ pip install -r requirements.txt
 ## Run Legacy Streamlit App
 
 ```bash
-streamlit run app.py
-```
-
-If the `streamlit` command is not on your PATH, use:
-
-```bash
+cd legacy/streamlit_sqlite
 python3 -m streamlit run app.py
 ```
 
-Or run the included launcher:
+Or run the included legacy launcher:
 
 ```bash
+cd legacy/streamlit_sqlite
 ./run_app.sh
 ```
 
-The app initializes `data/business_os.sqlite` automatically and seeds chiropractic sample inquiries when the database is empty.
+The legacy app initializes `legacy/streamlit_sqlite/data/business_os.sqlite` automatically and seeds chiropractic sample inquiries when the database is empty.
+
+## Runtime Troubleshooting
+
+See `docs/RUNTIME_TROUBLESHOOTING.md` for the known local development issues and fixes:
+
+- Codex sandbox `EPERM` errors when binding local ports
+- MongoDB not running
+- Backend or frontend port already in use
+- Correct Vite/frontend startup commands
+- Fast verification checklist
 
 ## Environment Variables
 
-Optional database path:
+Full-stack backend environment variables live in `backend/.env.example`:
 
 ```bash
-BUSINESS_OS_DB_PATH=data/business_os.sqlite
-```
-
-If this path is unset or blank, the app uses `data/business_os.sqlite`. If this path is relative, the app resolves it from the app folder. Use an absolute path only when the deployment host gives you persistent disk storage.
-
-Copy `.env.example` if your deployment platform or local workflow needs a reference value. The app reads `BUSINESS_OS_DB_PATH` from the process environment; it does not require a `.env` package.
-
-Optional demo mode:
-
-```bash
+PORT=4000
+MONGODB_URI=mongodb://127.0.0.1:27017/chiropractic_business_os
+CORS_ORIGIN=http://localhost:5173
 BUSINESS_OS_DEMO_MODE=true
 ```
 
-Demo mode shows a sidebar reset button that replaces current records with the fake chiropractic sample data. Use it for screenshots, outreach prep, and live demos only.
+Frontend environment variables live in `frontend/.env.example`:
+
+```bash
+VITE_API_BASE_URL=http://localhost:4000/api
+```
+
+Legacy Streamlit environment variables live in `legacy/streamlit_sqlite/.env.example`.
 
 ## Demo Workflow
 
@@ -315,7 +322,7 @@ The `demo_website/` folder contains a simple static landing page for outreach:
 - `demo_website/styles.css`: lightweight responsive styling.
 - `demo_website/README.md`: local opening instructions and scope notes.
 
-The page uses the existing app screenshots and `sales_assets/demo_video.mp4`. It also includes fit, non-fit, trust, and conservative ROI language for June 15 outreach. It is a marketing website only. It is not a SaaS frontend, does not add authentication, and does not change app functionality, pricing, deployment logic, or the SQLite schema.
+The page uses the existing app screenshots and `sales_assets/demo_video.mp4`. It also includes fit, non-fit, trust, and conservative ROI language for June 15 outreach. It is a marketing website only. It is not a SaaS frontend, does not add authentication, and does not change app functionality, pricing, or deployment logic.
 
 ## KPI Definitions
 
@@ -332,37 +339,15 @@ These definitions are also available inside the app through the `KPI Help` and `
 
 ## Sample Data
 
-Demo inquiries are stored in:
+The current full-stack app seeds realistic fake chiropractic patient inquiries from `backend/src/data/sampleData.ts` when the MongoDB inquiry collection is empty.
 
-```text
-data/chiropractor_sample_data.csv
-```
-
-When the SQLite database is empty, the app reads this CSV and inserts the sample patient inquiries into the existing `leads` table. Existing database records are never overwritten, so the CSV is only used for first-time seeding.
-
-To replace or extend the demo data:
-
-1. Edit `data/chiropractor_sample_data.csv`.
-2. Keep the same CSV headers.
-3. Use fake patient names, phone numbers, and emails only.
-4. Use the supported status and source labels listed below.
-5. Use `created_offset_days` and `next_follow_up_offset_days` to keep demo dates fresh relative to the day the database is seeded.
-
-Date offset examples:
-
-- `next_follow_up_offset_days = -2` creates an overdue follow-up.
-- `next_follow_up_offset_days = 0` creates a follow-up due today.
-- `next_follow_up_offset_days = 3` creates a future follow-up.
-- Leave `next_follow_up_offset_days` blank for no scheduled follow-up.
-
-To reseed from the CSV during local testing, stop the app and delete the local SQLite file:
+Demo mode can also reset MongoDB demo data from the app when:
 
 ```bash
-rm data/business_os.sqlite
-python3 -m streamlit run app.py
+BUSINESS_OS_DEMO_MODE=true
 ```
 
-If `BUSINESS_OS_DEMO_MODE=true`, use the sidebar `Reset demo data` button to reseed without deleting the database manually.
+The legacy Streamlit sample CSV is still available at `legacy/streamlit_sqlite/data/chiropractor_sample_data.csv`, but it is only used by the legacy app.
 
 ## Marketing And Sales Assets
 
@@ -377,7 +362,7 @@ Optional outreach materials live alongside the codebase so the productized servi
 - `sales_assets/roi_calculator.md`: conservative missed-follow-up ROI calculator explanation for discovery and pricing conversations.
 - `sales_assets/roi_calculator.csv`: example ROI calculator row for quick spreadsheet use.
 
-These files are optional sales collateral. The customer-facing collateral now uses consistent trust language: who the offer is for, what it is not, a simple onboarding timeline, support options, and conservative non-guaranteed ROI framing. They are not required by the core app and do not affect the database schema or Streamlit functionality.
+These files are optional sales collateral. The customer-facing collateral now uses consistent trust language: who the offer is for, what it is not, a simple onboarding timeline, support options, and conservative non-guaranteed ROI framing. They are not required by the core app and do not affect the database schema or app functionality.
 
 ## Project Operating System
 
@@ -526,7 +511,7 @@ The `DEMO_KIT/` folder contains repeatable sales-demo support materials:
 - `DEMO_KIT/demo_reset_process.md`: reset steps before demos and screenshots.
 - `DEMO_KIT/demo_troubleshooting_guide.md`: common demo issues and fixes.
 
-The Demo Kit is operational documentation only. It does not change the Streamlit app or SQLite schema.
+The Demo Kit is operational documentation only. It does not change the app or database schema.
 
 ## Deployment SOP
 
@@ -563,7 +548,7 @@ The `portfolio/portfolio_case_study.md` file summarizes the project for portfoli
 
 ## Database Fields
 
-The SQLite table is still named `leads` internally to preserve the original MVP schema. In the app and exports, these records are shown as patient inquiries. The help and visual polish updates did not change the database schema.
+The current full-stack app stores patient inquiries in MongoDB using the `Inquiry` model. The public API exposes these fields:
 
 - `id`
 - `name`
@@ -580,88 +565,48 @@ The SQLite table is still named `leads` internally to preserve the original MVP 
 
 ## Deployment
 
-### Streamlit Community Cloud
+The current deployment target is the full-stack app.
 
-1. Push this project to GitHub.
-2. In Streamlit Community Cloud, create a new app from the repository.
-3. Set the main file path to:
+### Backend
 
-```text
-app.py
-```
+- App folder: `backend/`
+- Build command: `npm install && npm run build`
+- Start command: `npm start`
+- Required environment variable: `MONGODB_URI`
+- Optional environment variables: `PORT`, `CORS_ORIGIN`, `BUSINESS_OS_DEMO_MODE`
 
-4. Streamlit will install dependencies from:
+### Frontend
 
-```text
-requirements.txt
-```
+- App folder: `frontend/`
+- Build command: `npm install && npm run build`
+- Output folder: `dist`
+- Required environment variable: `VITE_API_BASE_URL`
 
-5. Optional environment variable in Streamlit secrets:
+### Legacy Streamlit Deployment
 
-```toml
-BUSINESS_OS_DB_PATH = "data/business_os.sqlite"
-```
+The old Streamlit app is now under `legacy/streamlit_sqlite/`. Only use Streamlit Community Cloud or Python-based Render deployment if you intentionally want to deploy the legacy version.
 
-If `BUSINESS_OS_DB_PATH` is unset or blank, the app defaults to `data/business_os.sqlite` relative to this app folder. For a demo, the default relative SQLite path is fine. Streamlit Community Cloud storage can reset on redeploy, so treat the bundled SQLite database as demo data unless persistent storage is added later.
+Legacy paths:
 
-Streamlit Community Cloud notes:
-
-- Main file path: `app.py`
-- Dependencies: installed from `requirements.txt`
-- Optional secret: `BUSINESS_OS_DB_PATH = "data/business_os.sqlite"`
-- SQLite local storage can reset on app restart or redeploy.
-
-### Render
-
-1. Create a new Render Web Service from the GitHub repository.
-2. Use Python as the runtime.
-3. Set the build command:
-
-```bash
-pip install -r requirements.txt
-```
-
-4. Set the start command:
-
-```bash
-python3 -m streamlit run app.py --server.port $PORT --server.address 0.0.0.0
-```
-
-5. Optional environment variable:
-
-```text
-BUSINESS_OS_DB_PATH=data/business_os.sqlite
-```
-
-For a real hosted demo, configure a Render persistent disk and set `BUSINESS_OS_DB_PATH` to a path on that disk, such as `/var/data/business_os.sqlite`. Without persistent disk storage, SQLite data may reset when the service restarts or redeploys.
-
-Render notes:
-
-- Build command: `pip install -r requirements.txt`
-- Start command: `python3 -m streamlit run app.py --server.port $PORT --server.address 0.0.0.0`
-- For persistent data, mount a Render disk and point `BUSINESS_OS_DB_PATH` to that disk.
-
-### SQLite Persistence Notes
-
-- Local runs store data in `data/business_os.sqlite` by default.
-- Blank or unset `BUSINESS_OS_DB_PATH` values use the same default path.
-- `BUSINESS_OS_DB_PATH` can point to a different relative or absolute SQLite path.
-- Streamlit Community Cloud does not guarantee persistent local disk storage across redeploys.
-- Render needs a persistent disk for SQLite data to survive restarts and redeploys.
-- For the June 15 demo, the bundled SQLite sample data is suitable as demo data.
+- Main file: `legacy/streamlit_sqlite/app.py`
+- Requirements file: `legacy/streamlit_sqlite/requirements.txt`
+- SQLite default: `legacy/streamlit_sqlite/data/business_os.sqlite`
 
 ## Local Run Confirmation
 
-The app has been verified locally with:
+The current full-stack app has been verified locally with:
 
 ```bash
-python3 -m streamlit run app.py
+npm run typecheck
+npm run build
+curl http://localhost:4000/api/health
+curl -I http://localhost:5173
 ```
 
-Health check:
+Backend health check:
 
 ```text
-http://localhost:8502/_stcore/health -> 200 ok
+{"ok":true,"service":"Chiropractic Business OS API"}
 ```
 
 ## Demo Walkthrough
@@ -676,12 +621,12 @@ http://localhost:8502/_stcore/health -> 200 ok
 
 ## Troubleshooting
 
-- If `streamlit run app.py` is not available, use `python3 -m streamlit run app.py`.
-- If the app opens with no demo data, confirm `data/chiropractor_sample_data.csv` exists and the SQLite database is empty.
-- If old demo rows appear, delete the local SQLite file and restart the app to reseed from the CSV.
-- If the app cannot write the database, check that `BUSINESS_OS_DB_PATH` points to a writable folder.
-- On Streamlit Community Cloud and Render without persistent disk storage, SQLite data may reset after restart or redeploy.
+- Use `docs/RUNTIME_TROUBLESHOOTING.md` for known local development issues.
+- If Codex reports `EPERM` while starting local servers, run the server command with approved escalation or run it manually in your terminal.
+- If the backend says port `4000` is already in use, check `curl http://localhost:4000/api/health` before starting a duplicate process.
+- If Vite says port `5173` is already in use, check `curl -I http://localhost:5173`.
+- If the frontend loads without data, check MongoDB and the backend health endpoint first.
 
 ## Notes
 
-This MVP intentionally does not include authentication, payments, external APIs, or AI features. It is built to stay simple and demo-ready for a chiropractic practice owner.
+This MVP intentionally does not include authentication, payments, external APIs, EHR features, scheduling, insurance workflows, or AI features. It is built to stay simple and demo-ready for a chiropractic practice owner.
