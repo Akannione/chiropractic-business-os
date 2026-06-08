@@ -1,18 +1,19 @@
 import { Request, Response } from 'express';
-import { FOLLOW_UP_NEEDED_STATUS, KPI_HELP, SERVICES, SOURCES, STATUSES } from '../config/constants.js';
+import { KPI_HELP, SERVICES, SOURCES, STATUSES } from '../config/constants.js';
 import { env } from '../config/env.js';
 import { HttpError } from '../middleware/errorHandler.js';
 import { Inquiry } from '../models/Inquiry.js';
 import { calculateKpis } from '../services/kpiService.js';
 import { buildWeeklySummary } from '../services/reportService.js';
 import { createInquiry, listInquiries, updateInquiry } from '../services/inquiryService.js';
+import { createAutomatedInquiry, normalizeSource } from '../services/automationService.js';
+import { importInquiryCsv, mapExternalRow } from '../services/importService.js';
 import { resetSampleData, seedSampleDataIfEmpty } from '../services/seedService.js';
-import { formatDate, startOfToday } from '../utils/date.js';
+import { formatDate } from '../utils/date.js';
 import { toCsv } from '../utils/csv.js';
 
 const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const phonePattern = /^\+?[0-9][0-9\s().-]{6,19}$/;
-const defaultPublicEstimatedValue = 200;
 
 function validateInquiryBody(body: Record<string, unknown>) {
   const errors: string[] = [];
@@ -36,10 +37,6 @@ function validatePublicInquiryBody(body: Record<string, unknown>) {
     errors.push('Choose a valid inquiry source.');
   }
   if (errors.length) throw new HttpError(400, errors.join(' '));
-}
-
-function todayIso() {
-  return formatDate(startOfToday());
 }
 
 function serializeInquiry(inquiry: any) {
@@ -75,19 +72,29 @@ export async function postInquiry(req: Request, res: Response) {
 
 export async function postPublicInquiry(req: Request, res: Response) {
   validatePublicInquiryBody(req.body);
-  const source = (SOURCES as readonly string[]).includes(String(req.body.source)) ? String(req.body.source) : 'Website';
-  const inquiry = await createInquiry({
+  const inquiry = await createAutomatedInquiry({
     name: String(req.body.name || ''),
     phone: String(req.body.phone || ''),
     email: String(req.body.email || ''),
     service_needed: String(req.body.service_needed || ''),
-    source,
-    status: FOLLOW_UP_NEEDED_STATUS,
-    estimated_value: defaultPublicEstimatedValue,
-    notes: String(req.body.notes || 'Submitted from public intake form.'),
-    next_follow_up_date: todayIso(),
-  });
+    source: normalizeSource(req.body.source),
+    notes: String(req.body.notes || ''),
+  }, 'public intake form');
   res.status(201).json(serializeInquiry(inquiry.toJSON()));
+}
+
+export async function postWebhookInquiry(req: Request, res: Response) {
+  const mapped = mapExternalRow(req.body as Record<string, string>);
+  validatePublicInquiryBody(mapped as Record<string, unknown>);
+  const inquiry = await createAutomatedInquiry(mapped, 'webhook intake');
+  res.status(201).json(serializeInquiry(inquiry.toJSON()));
+}
+
+export async function postImportCsv(req: Request, res: Response) {
+  const csvText = typeof req.body === 'string' ? req.body : String(req.body?.csv || '');
+  if (!csvText.trim()) throw new HttpError(400, 'CSV content is required.');
+  const result = await importInquiryCsv(csvText);
+  res.status(result.failed ? 207 : 201).json(result);
 }
 
 export async function patchInquiry(req: Request, res: Response) {

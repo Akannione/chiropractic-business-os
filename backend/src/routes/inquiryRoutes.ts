@@ -8,15 +8,19 @@ import {
   getWeeklySummary,
   patchInquiry,
   postDemoReset,
+  postImportCsv,
   postInquiry,
   postPublicInquiry,
   postSeed,
+  postWebhookInquiry,
 } from '../controllers/inquiryController.js';
 
 export const inquiryRouter = Router();
 
 inquiryRouter.get('/config', getConfig);
 inquiryRouter.post('/public/inquiries', asyncHandler(postPublicInquiry));
+inquiryRouter.post('/webhooks/inquiries', asyncHandler(postWebhookInquiry));
+inquiryRouter.post('/imports/inquiries.csv', asyncHandler(postImportCsv));
 inquiryRouter.get('/inquiries', asyncHandler(getInquiries));
 inquiryRouter.post('/inquiries', asyncHandler(postInquiry));
 inquiryRouter.patch('/inquiries/:id', asyncHandler(patchInquiry));

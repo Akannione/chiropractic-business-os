@@ -8,6 +8,7 @@ export const app = express();
 
 app.use(cors({ origin: env.corsOrigin }));
 app.use(express.json());
+app.use(express.text({ type: ['text/csv', 'text/plain'], limit: '1mb' }));
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, service: 'Chiropractic Business OS API' });
@@ -16,4 +17,3 @@ app.get('/api/health', (_req, res) => {
 app.use('/api', inquiryRouter);
 app.use(notFound);
 app.use(errorHandler);
-

@@ -13,6 +13,13 @@ export function startOfWeek(today = startOfToday()): Date {
   return value;
 }
 
+export function addDays(value: Date, days: number): Date {
+  const next = new Date(value);
+  next.setDate(next.getDate() + days);
+  next.setHours(0, 0, 0, 0);
+  return next;
+}
+
 export function parseDateOnly(value: unknown): Date | null {
   if (!value) return null;
   const text = String(value);

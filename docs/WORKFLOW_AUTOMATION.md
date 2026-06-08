@@ -41,6 +41,10 @@ The backend automatically creates a MongoDB patient inquiry with:
 
 This means staff no longer needs to manually enter every website inquiry. Staff only needs to review the dashboard, follow up, update status, and add notes.
 
+## Website Embed
+
+Use the snippets in `docs/INTAKE_EMBED_SNIPPETS.md` to place the intake form on a practice website or link to it from call-to-action buttons.
+
 ## Source Tracking
 
 The public form supports simple source tracking through query parameters:
@@ -59,6 +63,82 @@ This makes it possible to use different links in different places:
 - Referral partner link: `/intake?source=Referral`
 - Insurance inquiry link: `/intake?source=Insurance`
 
+## Internal Email Notification
+
+When SMTP environment variables are configured, the backend sends an internal email notification each time an automated inquiry is created through the public form, webhook, or CSV import.
+
+Backend environment variables:
+
+```bash
+INTERNAL_NOTIFICATION_EMAIL=owner@example.com
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=Chiropractic Business OS <no-reply@example.com>
+```
+
+If these are not configured, inquiries still save normally and email notification is skipped.
+
+## Source And Service Follow-Up Rules
+
+The backend applies simple default follow-up rules:
+
+- Google, Referral, Website, and Phone Call: follow up today
+- Insurance: follow up tomorrow
+- Wellness Consultation: follow up in two days
+- Prenatal Chiropractic Consultation: follow up tomorrow
+- Urgent services such as Sports Injury Treatment, Spinal Adjustment, Neck Pain Evaluation, and Back Pain Consultation: follow up today
+
+The backend also applies simple service-based estimated treatment values when no explicit value is provided.
+
+## Webhook Intake
+
+No-code form tools can submit JSON to:
+
+```text
+POST /api/webhooks/inquiries
+```
+
+Accepted field names:
+
+- `name`, `patient_name`, or `full_name`
+- `phone`
+- `email`
+- `service_needed`, `requested_service`, or `service`
+- `source`
+- `notes`, `message`, or `Message`
+
+Example:
+
+```json
+{
+  "full_name": "Jordan Example",
+  "phone": "404-555-0198",
+  "email": "jordan@example.com",
+  "requested_service": "Sports Injury Treatment",
+  "source": "Google",
+  "message": "Submitted from website form provider."
+}
+```
+
+## CSV Import
+
+Existing client inquiries can be imported with:
+
+```text
+POST /api/imports/inquiries.csv
+```
+
+Send the CSV body as `text/csv`.
+
+Example file:
+
+```text
+docs/CSV_IMPORT_EXAMPLE.csv
+```
+
 ## Recommended Practice Workflow
 
 1. Patient submits the public intake form.
@@ -75,7 +155,7 @@ These are practical ways to push automation further while keeping the system sim
 
 ### 1. Website Embed
 
-Embed the public intake form link or page inside a practice website so website inquiries go directly into Business OS.
+Implemented with `docs/INTAKE_EMBED_SNIPPETS.md`.
 
 Value:
 
@@ -84,7 +164,7 @@ Value:
 
 ### 2. Google Business Profile Link
 
-Use `/intake?source=Google` as the website or appointment-request link on Google Business Profile.
+Implemented with `/intake?source=Google`.
 
 Value:
 
@@ -93,7 +173,7 @@ Value:
 
 ### 3. Referral Partner Links
 
-Give referral partners a dedicated link:
+Implemented with:
 
 ```text
 /intake?source=Referral
@@ -106,12 +186,7 @@ Value:
 
 ### 4. Auto Follow-Up Due Date Rules
 
-The current public intake endpoint sets follow-up due today. A simple future improvement could set follow-up due date by source or service:
-
-- Website inquiry: today
-- Referral inquiry: today
-- Insurance inquiry: tomorrow
-- Wellness consultation: next business day
+Implemented with source and requested-service rules.
 
 Value:
 
@@ -119,7 +194,7 @@ Value:
 
 ### 5. Email Notification
 
-Send a simple internal email to the practice when a public inquiry arrives.
+Implemented as optional SMTP email notification.
 
 Value:
 
@@ -132,7 +207,7 @@ Boundary:
 
 ### 6. CSV Import For Existing Leads
 
-Use a simple import path for a practice's existing inquiry list.
+Implemented as `POST /api/imports/inquiries.csv`.
 
 Value:
 
@@ -145,7 +220,7 @@ Boundary:
 
 ### 7. Lightweight Webhook Intake
 
-Add a generic webhook endpoint for no-code form tools such as Typeform, Tally, Jotform, or website builders.
+Implemented as `POST /api/webhooks/inquiries`.
 
 Value:
 

@@ -88,6 +88,9 @@ business_os_mvp/
   FULLSTACK_README.md
   docs/
     RUNTIME_TROUBLESHOOTING.md
+    WORKFLOW_AUTOMATION.md
+    INTAKE_EMBED_SNIPPETS.md
+    CSV_IMPORT_EXAMPLE.csv
   PROJECT_OS/
     ROADMAP.md
     BACKLOG.md
@@ -307,6 +310,14 @@ Source-specific links:
 ```
 
 See `docs/WORKFLOW_AUTOMATION.md` for the full automation workflow and next practical automation opportunities.
+
+Additional automation assets:
+
+- `docs/INTAKE_EMBED_SNIPPETS.md`: website iframe/button, Google Business Profile, referral, insurance, and phone-call intake links.
+- `docs/CSV_IMPORT_EXAMPLE.csv`: example import file for existing client inquiries.
+- `POST /api/webhooks/inquiries`: lightweight webhook intake for form tools.
+- `POST /api/imports/inquiries.csv`: CSV import endpoint for onboarding existing inquiries.
+- Optional SMTP variables in `backend/.env.example`: internal email notification on new automated inquiries.
 
 ## Environment Variables
 
