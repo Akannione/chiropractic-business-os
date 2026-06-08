@@ -53,11 +53,14 @@ The frontend is a React + Vite app written in TypeScript. It provides:
 - KPI cards with plain-language help text
 - Patient inquiry table
 - Patient inquiry intake form
+- Public patient inquiry form for website/referral intake
 - Quick status updates
 - Follow-up focus panel
 - Weekly Practice Summary
 - CSV export download
 - Demo reset button when the backend is in demo mode
+
+The public intake page is available at `/intake`. It submits to `POST /api/public/inquiries`, which creates an inquiry automatically with `Follow-Up Needed`, source tracking, today's follow-up date, and a default estimated treatment value.
 
 The frontend is organized by responsibility:
 

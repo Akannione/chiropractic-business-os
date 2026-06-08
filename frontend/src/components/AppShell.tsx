@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Download, FileText, LayoutDashboard, Plus, RefreshCw, Users } from 'lucide-react';
+import { Download, FileText, Globe2, LayoutDashboard, Plus, RefreshCw, Users } from 'lucide-react';
 import type { AppConfig, View } from '../types';
 
 type AppShellProps = {
@@ -45,6 +45,9 @@ export function AppShell({
           </NavButton>
           <NavButton icon={<Download />} active={view === 'exports'} onClick={() => onViewChange('exports')}>
             Exports
+          </NavButton>
+          <NavButton icon={<Globe2 />} active={view === 'public-intake'} onClick={() => onViewChange('public-intake')}>
+            Public Intake
           </NavButton>
         </nav>
         {config?.demoMode && (

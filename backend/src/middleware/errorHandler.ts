@@ -13,6 +13,12 @@ export function notFound(_req: Request, _res: Response, next: NextFunction) {
   next(new HttpError(404, 'The requested resource was not found.'));
 }
 
+export function asyncHandler(handler: (req: Request, res: Response, next: NextFunction) => Promise<void>) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    handler(req, res, next).catch(next);
+  };
+}
+
 export function errorHandler(error: Error, _req: Request, res: Response, _next: NextFunction) {
   const statusCode = error instanceof HttpError ? error.statusCode : 500;
   res.status(statusCode).json({
@@ -22,4 +28,3 @@ export function errorHandler(error: Error, _req: Request, res: Response, _next: 
         : error.message,
   });
 }
-

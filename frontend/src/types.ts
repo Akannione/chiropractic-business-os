@@ -1,4 +1,4 @@
-export type View = 'dashboard' | 'inquiries' | 'summary' | 'exports';
+export type View = 'dashboard' | 'inquiries' | 'summary' | 'exports' | 'public-intake';
 
 export type InquiryStatus =
   | 'New Inquiry'
@@ -22,6 +22,15 @@ export type Inquiry = {
   next_follow_up_date: string;
   created_at: string;
   updated_at: string;
+};
+
+export type PublicInquiryInput = {
+  name: string;
+  phone: string;
+  email: string;
+  service_needed: string;
+  source?: InquirySource;
+  notes?: string;
 };
 
 export type Kpis = {

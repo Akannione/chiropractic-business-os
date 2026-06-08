@@ -15,6 +15,7 @@ Prepared for a June 15 chiropractor demo. The app is intentionally focused on pr
 ## Features
 
 - Patient inquiry intake form
+- Public patient inquiry form for automated website/referral intake
 - MongoDB patient inquiry database in the full-stack version
 - KPI dashboard
 - KPI help dialog and plain-language tooltips
@@ -285,6 +286,27 @@ See `docs/RUNTIME_TROUBLESHOOTING.md` for the known local development issues and
 - Backend or frontend port already in use
 - Correct Vite/frontend startup commands
 - Fast verification checklist
+
+## Workflow Automation
+
+The app includes a public intake page for automated inquiry capture:
+
+```text
+http://localhost:5173/intake
+```
+
+The public form submits to `POST /api/public/inquiries`, creates a MongoDB patient inquiry automatically, sets the status to `Follow-Up Needed`, assigns a follow-up date for today, and labels the source as `Website` unless a valid source is passed in the URL.
+
+Source-specific links:
+
+```text
+/intake?source=Website
+/intake?source=Google
+/intake?source=Referral
+/intake?source=Insurance
+```
+
+See `docs/WORKFLOW_AUTOMATION.md` for the full automation workflow and next practical automation opportunities.
 
 ## Environment Variables
 

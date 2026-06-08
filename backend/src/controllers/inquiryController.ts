@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { KPI_HELP, SERVICES, SOURCES, STATUSES } from '../config/constants.js';
+import { FOLLOW_UP_NEEDED_STATUS, KPI_HELP, SERVICES, SOURCES, STATUSES } from '../config/constants.js';
 import { env } from '../config/env.js';
 import { HttpError } from '../middleware/errorHandler.js';
 import { Inquiry } from '../models/Inquiry.js';
@@ -7,11 +7,12 @@ import { calculateKpis } from '../services/kpiService.js';
 import { buildWeeklySummary } from '../services/reportService.js';
 import { createInquiry, listInquiries, updateInquiry } from '../services/inquiryService.js';
 import { resetSampleData, seedSampleDataIfEmpty } from '../services/seedService.js';
-import { formatDate } from '../utils/date.js';
+import { formatDate, startOfToday } from '../utils/date.js';
 import { toCsv } from '../utils/csv.js';
 
 const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const phonePattern = /^\+?[0-9][0-9\s().-]{6,19}$/;
+const defaultPublicEstimatedValue = 200;
 
 function validateInquiryBody(body: Record<string, unknown>) {
   const errors: string[] = [];
@@ -23,6 +24,22 @@ function validateInquiryBody(body: Record<string, unknown>) {
   if (!(STATUSES as readonly string[]).includes(String(body.status))) errors.push('Choose a valid status.');
   if (Number(body.estimated_value || 0) < 0) errors.push('Estimated Treatment Value cannot be negative.');
   if (errors.length) throw new HttpError(400, errors.join(' '));
+}
+
+function validatePublicInquiryBody(body: Record<string, unknown>) {
+  const errors: string[] = [];
+  if (!String(body.name || '').trim()) errors.push('Patient name is required.');
+  if (!phonePattern.test(String(body.phone || '').trim())) errors.push('Enter a valid phone number.');
+  if (!emailPattern.test(String(body.email || '').trim())) errors.push('Enter a valid email address.');
+  if (!String(body.service_needed || '').trim()) errors.push('Requested Service is required.');
+  if (body.source && !(SOURCES as readonly string[]).includes(String(body.source))) {
+    errors.push('Choose a valid inquiry source.');
+  }
+  if (errors.length) throw new HttpError(400, errors.join(' '));
+}
+
+function todayIso() {
+  return formatDate(startOfToday());
 }
 
 function serializeInquiry(inquiry: any) {
@@ -53,6 +70,23 @@ export async function getInquiries(_req: Request, res: Response) {
 export async function postInquiry(req: Request, res: Response) {
   validateInquiryBody(req.body);
   const inquiry = await createInquiry(req.body);
+  res.status(201).json(serializeInquiry(inquiry.toJSON()));
+}
+
+export async function postPublicInquiry(req: Request, res: Response) {
+  validatePublicInquiryBody(req.body);
+  const source = (SOURCES as readonly string[]).includes(String(req.body.source)) ? String(req.body.source) : 'Website';
+  const inquiry = await createInquiry({
+    name: String(req.body.name || ''),
+    phone: String(req.body.phone || ''),
+    email: String(req.body.email || ''),
+    service_needed: String(req.body.service_needed || ''),
+    source,
+    status: FOLLOW_UP_NEEDED_STATUS,
+    estimated_value: defaultPublicEstimatedValue,
+    notes: String(req.body.notes || 'Submitted from public intake form.'),
+    next_follow_up_date: todayIso(),
+  });
   res.status(201).json(serializeInquiry(inquiry.toJSON()));
 }
 

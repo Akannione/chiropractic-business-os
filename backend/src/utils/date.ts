@@ -15,7 +15,11 @@ export function startOfWeek(today = startOfToday()): Date {
 
 export function parseDateOnly(value: unknown): Date | null {
   if (!value) return null;
-  const parsed = new Date(String(value));
+  const text = String(value);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+  const parsed = match
+    ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+    : new Date(text);
   if (Number.isNaN(parsed.getTime())) return null;
   parsed.setHours(0, 0, 0, 0);
   return parsed;
@@ -23,6 +27,8 @@ export function parseDateOnly(value: unknown): Date | null {
 
 export function formatDate(value: Date | null | undefined): string {
   if (!value) return '';
-  return value.toISOString().slice(0, 10);
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
-
