@@ -1,4 +1,4 @@
-import { AppConfig, Inquiry, Kpis, PublicInquiryInput, WeeklySummary } from '../types';
+import { AppConfig, ImportPreview, ImportResult, Inquiry, Kpis, PublicInquiryInput, WeeklySummary } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
 
@@ -25,6 +25,18 @@ export const api = {
     request<Inquiry>('/public/inquiries', { method: 'POST', body: JSON.stringify(payload) }),
   updateInquiry: (id: string, payload: Partial<Inquiry>) =>
     request<Inquiry>(`/inquiries/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  previewImportCsv: (csvText: string) =>
+    request<ImportPreview>('/imports/inquiries.csv/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/csv' },
+      body: csvText,
+    }),
+  importCsv: (csvText: string) =>
+    request<ImportResult>('/imports/inquiries.csv', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/csv' },
+      body: csvText,
+    }),
   resetDemo: () => request<{ inserted: number }>('/demo/reset', { method: 'POST' }),
   exportUrl: `${API_BASE_URL}/exports/inquiries.csv`,
 };

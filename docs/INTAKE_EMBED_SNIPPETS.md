@@ -22,6 +22,14 @@ Replace `https://your-business-os-domain.com` with the deployed frontend URL.
 ></iframe>
 ```
 
+## Recommended Homepage CTA Copy
+
+```text
+Request a Chiropractic Follow-Up
+```
+
+Use this button copy near the top of the practice website and again near the contact section. It is clear without promising appointment scheduling or clinical advice.
+
 ## Google Business Profile Link
 
 Use this as the website/contact link in Google Business Profile:
@@ -51,3 +59,9 @@ Staff can use this when entering phone calls manually through the public intake 
 ```text
 https://your-business-os-domain.com/intake?source=Phone%20Call
 ```
+
+## Staff Workflow After Submission
+
+1. A submitted inquiry appears in the dashboard as `Follow-Up Needed`.
+2. Staff handles it from `Today's Follow-Up Workflow`.
+3. Staff can mark it `Consultation Scheduled`, `Active Patient`, `Lost`, or push the follow-up to tomorrow.

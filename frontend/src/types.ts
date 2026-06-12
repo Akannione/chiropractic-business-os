@@ -58,3 +58,30 @@ export type AppConfig = {
   demoMode: boolean;
   kpiHelp: Record<string, string>;
 };
+
+export type ImportPreviewRow = {
+  rowNumber: number;
+  name: string;
+  phone: string;
+  email: string;
+  service_needed: string;
+  source: InquirySource;
+  estimated_value: number;
+  duplicate: boolean;
+  errors: string[];
+};
+
+export type ImportPreview = {
+  rows: ImportPreviewRow[];
+  totalRows: number;
+  importableRows: number;
+  duplicateRows: number;
+  errorRows: number;
+};
+
+export type ImportResult = {
+  imported: number;
+  skippedDuplicates: number;
+  failed: number;
+  errors: string[];
+};

@@ -52,13 +52,19 @@ Required JSON fields:
 
 ### `PATCH /inquiries/:id`
 
-Updates inquiry status, notes, and follow-up date.
+Updates inquiry details, status, notes, and follow-up date.
 
 JSON body:
 
 ```json
 {
+  "name": "Jordan Smith",
+  "phone": "404-555-0198",
+  "email": "jordan@example.com",
+  "service_needed": "Spinal Adjustment",
+  "source": "Website",
   "status": "Consultation Scheduled",
+  "estimated_value": 250,
   "notes": "Booked consultation.",
   "next_follow_up_date": "2026-06-14"
 }
@@ -89,6 +95,8 @@ JSON body:
 }
 ```
 
+Public and webhook intake routes include a lightweight in-memory rate limit to reduce accidental spam.
+
 ### `POST /webhooks/inquiries`
 
 Creates a patient inquiry from a no-code form tool or website builder.
@@ -102,9 +110,44 @@ Accepted field aliases:
 - `source`
 - `notes`, `message`, `Message`
 
+### `POST /imports/inquiries.csv/preview`
+
+Previews an existing inquiry CSV before import. The response flags duplicate emails or phone numbers and rows with missing required fields.
+
+Header:
+
+```text
+Content-Type: text/csv
+```
+
+Response:
+
+```json
+{
+  "totalRows": 1,
+  "importableRows": 1,
+  "duplicateRows": 0,
+  "errorRows": 0,
+  "rows": [
+    {
+      "rowNumber": 2,
+      "name": "Morgan Allen",
+      "phone": "404-555-0121",
+      "email": "morgan@example.com",
+      "service_needed": "Spinal Adjustment",
+      "source": "Website",
+      "estimated_value": 200,
+      "duplicate": false,
+      "errors": []
+    }
+  ]
+}
+```
+
 ### `POST /imports/inquiries.csv`
 
 Imports existing inquiries from a CSV request body.
+Duplicate emails or phone numbers are skipped. Rows with missing required fields are returned as errors.
 
 Header:
 
@@ -122,7 +165,7 @@ Morgan Allen,404-555-0121,morgan@example.com,Spinal Adjustment,Website,Imported 
 Response:
 
 ```json
-{"imported":1,"failed":0,"errors":[]}
+{"imported":1,"skippedDuplicates":0,"failed":0,"errors":[]}
 ```
 
 ## Reports

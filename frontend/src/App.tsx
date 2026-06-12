@@ -36,12 +36,20 @@ function StaffApp() {
       onViewChange={setView}
       onDemoReset={resetDemoData}
     >
-      {view === 'dashboard' && <DashboardPage kpis={kpis} config={config} inquiries={inquiries} />}
+      {view === 'dashboard' && (
+        <DashboardPage
+          kpis={kpis}
+          config={config}
+          inquiries={inquiries}
+          onChanged={refreshWithMessage}
+          setError={setError}
+        />
+      )}
       {view === 'inquiries' && (
         <InquiriesPage config={config} inquiries={inquiries} onChanged={refreshWithMessage} setError={setError} />
       )}
       {view === 'summary' && <WeeklySummaryPage summary={summary} />}
-      {view === 'exports' && <ExportsPage inquiries={inquiries} />}
+      {view === 'exports' && <ExportsPage inquiries={inquiries} onChanged={refreshWithMessage} setError={setError} />}
       {view === 'public-intake' && <PublicInquiryPage config={config} />}
     </AppShell>
   );

@@ -128,10 +128,17 @@ Example:
 Existing client inquiries can be imported with:
 
 ```text
+POST /api/imports/inquiries.csv/preview
+```
+
+Then:
+
+```text
 POST /api/imports/inquiries.csv
 ```
 
 Send the CSV body as `text/csv`.
+The preview step flags duplicates and rows that need cleanup before the import runs. The import step skips duplicate email or phone matches instead of inserting them again.
 
 Example file:
 
@@ -145,8 +152,8 @@ docs/CSV_IMPORT_EXAMPLE.csv
 2. Business OS creates the inquiry automatically.
 3. Dashboard updates when staff opens or refreshes the app.
 4. Staff starts with Follow-Ups Needed.
-5. Staff contacts the patient.
-6. Staff updates status to `Consultation Scheduled`, `Active Patient`, `Lost`, or keeps it as `Follow-Up Needed`.
+5. Staff uses the dashboard workflow buttons to mark a consultation scheduled, move the inquiry to Active Patient, push the follow-up to tomorrow, or mark the inquiry Lost.
+6. Staff opens Patient Inquiries when deeper notes or contact details need to be edited.
 7. Owner reviews weekly performance.
 
 ## Next Automation Opportunities

@@ -290,6 +290,37 @@ textarea {
   justify-content: space-between;
 }
 
+.import-card input {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.summary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.summary-actions button,
+.summary-actions a,
+.workflow-actions button {
+  border: 1px solid #cfd8e3;
+  border-radius: 8px;
+  background: #fff;
+  color: #172033;
+  padding: 9px 11px;
+  cursor: pointer;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.summary-actions button:hover,
+.summary-actions a:hover,
+.workflow-actions button:hover {
+  border-color: #176b4d;
+  color: #176b4d;
+}
+
 .public-page {
   min-height: 100vh;
   display: grid;
@@ -405,11 +436,47 @@ textarea {
   color: #176b4d;
 }
 
+.workflow-list {
+  display: grid;
+  gap: 10px;
+}
+
+.workflow-item {
+  border: 1px solid #d9e1ea;
+  border-radius: 8px;
+  background: #fff;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto minmax(260px, auto);
+  gap: 12px;
+  align-items: center;
+  padding: 13px;
+}
+
+.workflow-item strong,
+.workflow-item span,
+.workflow-item small {
+  display: block;
+}
+
+.workflow-item span,
+.workflow-item small {
+  color: #657386;
+  margin-top: 3px;
+}
+
+.workflow-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 @media (max-width: 1000px) {
   .app-shell { grid-template-columns: 1fr; }
   .sidebar { position: static; }
   nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .kpi-grid, .kpi-grid.small, .dashboard-grid, .form-grid, .detail-grid, .filter-grid { grid-template-columns: 1fr; }
+  .kpi-grid, .kpi-grid.small, .dashboard-grid, .form-grid, .detail-grid, .filter-grid, .workflow-item { grid-template-columns: 1fr; }
+  .workflow-actions { justify-content: flex-start; }
 }
 
 @media (max-width: 640px) {
@@ -418,4 +485,24 @@ textarea {
   .inquiry-form { grid-template-columns: 1fr; }
   .inquiry-list-meta { justify-items: start; }
   nav { grid-template-columns: 1fr; }
+}
+
+@media print {
+  .sidebar,
+  .topbar,
+  .summary-actions {
+    display: none;
+  }
+
+  .app-shell,
+  .content {
+    display: block;
+    padding: 0;
+  }
+
+  .panel,
+  .summary-card,
+  .kpi-card {
+    break-inside: avoid;
+  }
 }

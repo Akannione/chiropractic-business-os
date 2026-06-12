@@ -13,10 +13,12 @@ A focused full-stack web app for chiropractic practices to capture patient inqui
 
 - Captures patient inquiries from staff entry and public intake forms
 - Tracks inquiry status and follow-up dates
+- Shows a dashboard follow-up workflow with one-click actions for urgent inquiries
 - Shows practice KPIs such as active patients, follow-ups needed, overdue follow-ups, estimated treatment value, and inquiry-to-patient rate
-- Provides a weekly practice summary
+- Provides a printable and downloadable weekly practice summary
 - Exports patient inquiries as CSV
 - Supports automated intake from website links, Google/referral source links, webhook payloads, and CSV imports
+- Previews CSV imports and skips duplicate email or phone matches
 - Optionally sends internal email notifications for new automated inquiries when SMTP is configured
 
 ## Project Structure
@@ -118,6 +120,7 @@ VITE_API_BASE_URL=http://localhost:4000/api
 ```
 
 SMTP variables are optional. If they are not configured, inquiry creation still works and notification is skipped.
+Public and webhook intake routes include a lightweight in-memory rate limit to reduce accidental spam. For a production deployment with multiple backend instances, replace this with platform-level or shared-store rate limiting.
 
 ## Automation Paths
 
@@ -136,8 +139,16 @@ POST /api/webhooks/inquiries
 CSV import:
 
 ```text
+POST /api/imports/inquiries.csv/preview
+```
+
+Then:
+
+```text
 POST /api/imports/inquiries.csv
 ```
+
+The preview route flags duplicate email or phone matches and rows with missing required fields before the import runs.
 
 Useful source links:
 

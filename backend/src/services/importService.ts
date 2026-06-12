@@ -1,6 +1,23 @@
-import { AutomatedInquiryInput, createAutomatedInquiry, normalizeSource } from './automationService.js';
+import {
+  AutomatedInquiryInput,
+  createAutomatedInquiry,
+  estimateTreatmentValue,
+  normalizeSource,
+} from './automationService.js';
+import { Inquiry } from '../models/Inquiry.js';
 
 type CsvRow = Record<string, string>;
+
+type ImportPreviewRow = AutomatedInquiryInput & {
+  rowNumber: number;
+  source: string;
+  estimated_value: number;
+  duplicate: boolean;
+  errors: string[];
+};
+
+const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const phonePattern = /^\+?[0-9][0-9\s().-]{6,19}$/;
 
 function parseCsvLine(line: string) {
   const values: string[] = [];
@@ -62,12 +79,87 @@ export function mapExternalRow(row: CsvRow): AutomatedInquiryInput {
   };
 }
 
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function normalizePhone(value: string) {
+  return value.replace(/\D/g, '');
+}
+
+function validatePreviewRow(row: AutomatedInquiryInput) {
+  const errors: string[] = [];
+  if (!row.name.trim()) errors.push('Patient name is required.');
+  if (!phonePattern.test(row.phone.trim())) errors.push('Enter a valid phone number.');
+  if (!emailPattern.test(row.email.trim())) errors.push('Enter a valid email address.');
+  if (!row.service_needed.trim()) errors.push('Requested Service is required.');
+  return errors;
+}
+
+export async function previewInquiryCsv(csvText: string) {
+  const rows = parseInquiryCsv(csvText).map(mapExternalRow);
+  const existing = await Inquiry.find({}, { email: 1, phone: 1 }).lean();
+  const existingContacts = new Set<string>();
+  for (const inquiry of existing) {
+    const email = normalizeEmail(String(inquiry.email || ''));
+    const phone = normalizePhone(String(inquiry.phone || ''));
+    if (email) existingContacts.add(`email:${email}`);
+    if (phone) existingContacts.add(`phone:${phone}`);
+  }
+  const seenContacts = new Set<string>();
+
+  const previewRows: ImportPreviewRow[] = rows.map((row, index) => {
+    const email = normalizeEmail(row.email);
+    const phone = normalizePhone(row.phone);
+    const emailKey = email ? `email:${email}` : '';
+    const phoneKey = phone ? `phone:${phone}` : '';
+    const duplicate =
+      Boolean(emailKey && existingContacts.has(emailKey)) ||
+      Boolean(phoneKey && existingContacts.has(phoneKey)) ||
+      Boolean(emailKey && seenContacts.has(emailKey)) ||
+      Boolean(phoneKey && seenContacts.has(phoneKey));
+    if (emailKey) seenContacts.add(emailKey);
+    if (phoneKey) seenContacts.add(phoneKey);
+
+    return {
+      rowNumber: index + 2,
+      name: row.name,
+      phone: row.phone,
+      email: row.email,
+      service_needed: row.service_needed,
+      source: normalizeSource(row.source),
+      estimated_value: estimateTreatmentValue(row.service_needed, row.estimated_value),
+      duplicate,
+      errors: validatePreviewRow(row),
+    };
+  });
+
+  return {
+    rows: previewRows,
+    totalRows: previewRows.length,
+    importableRows: previewRows.filter((row) => !row.duplicate && row.errors.length === 0).length,
+    duplicateRows: previewRows.filter((row) => row.duplicate).length,
+    errorRows: previewRows.filter((row) => row.errors.length > 0).length,
+  };
+}
+
 export async function importInquiryCsv(csvText: string) {
+  const preview = await previewInquiryCsv(csvText);
   const rows = parseInquiryCsv(csvText).map(mapExternalRow);
   let imported = 0;
+  let skippedDuplicates = 0;
   const errors: string[] = [];
 
   for (const [index, row] of rows.entries()) {
+    const previewRow = preview.rows[index];
+    if (previewRow?.duplicate) {
+      skippedDuplicates += 1;
+      continue;
+    }
+    if (previewRow?.errors.length) {
+      errors.push(`Row ${previewRow.rowNumber}: ${previewRow.errors.join(' ')}`);
+      continue;
+    }
     try {
       await createAutomatedInquiry(row, 'CSV import');
       imported += 1;
@@ -76,5 +168,5 @@ export async function importInquiryCsv(csvText: string) {
     }
   }
 
-  return { imported, failed: errors.length, errors };
+  return { imported, skippedDuplicates, failed: errors.length, errors };
 }

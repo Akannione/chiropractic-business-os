@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { HttpError } from '../middleware/errorHandler.js';
 import { createAutomatedInquiry, normalizeSource } from '../services/automationService.js';
-import { importInquiryCsv, mapExternalRow } from '../services/importService.js';
+import { importInquiryCsv, mapExternalRow, previewInquiryCsv } from '../services/importService.js';
 import { serializeInquiry } from '../serializers/inquirySerializer.js';
 import { validatePublicInquiryBody } from '../validators/inquiryValidators.js';
 
@@ -33,4 +33,10 @@ export async function postImportCsv(req: Request, res: Response) {
   if (!csvText.trim()) throw new HttpError(400, 'CSV content is required.');
   const result = await importInquiryCsv(csvText);
   res.status(result.failed ? 207 : 201).json(result);
+}
+
+export async function postImportCsvPreview(req: Request, res: Response) {
+  const csvText = typeof req.body === 'string' ? req.body : String(req.body?.csv || '');
+  if (!csvText.trim()) throw new HttpError(400, 'CSV content is required.');
+  res.json(await previewInquiryCsv(csvText));
 }
