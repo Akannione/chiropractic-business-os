@@ -35,17 +35,22 @@ export async function createInquiry(input: InquiryInput) {
 
 export async function updateInquiry(
   id: string,
-  input: Pick<InquiryInput, 'status' | 'notes' | 'next_follow_up_date'>,
+  input: Partial<InquiryInput>,
 ) {
   return Inquiry.findByIdAndUpdate(
     id,
     {
-      status: input.status,
-      notes: input.notes?.trim() || '',
-      next_follow_up_date: parseDateOnly(input.next_follow_up_date),
+      ...(input.name !== undefined ? { name: input.name.trim() } : {}),
+      ...(input.phone !== undefined ? { phone: input.phone.trim() } : {}),
+      ...(input.email !== undefined ? { email: input.email.trim() } : {}),
+      ...(input.service_needed !== undefined ? { service_needed: input.service_needed.trim() } : {}),
+      ...(input.source !== undefined ? { source: input.source } : {}),
+      ...(input.status !== undefined ? { status: input.status } : {}),
+      ...(input.estimated_value !== undefined ? { estimated_value: Number(input.estimated_value || 0) } : {}),
+      ...(input.notes !== undefined ? { notes: input.notes?.trim() || '' } : {}),
+      ...(input.next_follow_up_date !== undefined ? { next_follow_up_date: parseDateOnly(input.next_follow_up_date) } : {}),
       updated_at: new Date(),
     },
     { new: true, runValidators: true },
   );
 }
-

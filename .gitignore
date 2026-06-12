@@ -13,3 +13,6 @@ exports/*.csv
 exports/*.txt
 !exports/.gitkeep
 .DS_Store
+.agents/
+.codex/
+AGENTS.md

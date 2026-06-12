@@ -23,7 +23,7 @@ export const api = {
     request<Inquiry>('/inquiries', { method: 'POST', body: JSON.stringify(payload) }),
   createPublicInquiry: (payload: PublicInquiryInput) =>
     request<Inquiry>('/public/inquiries', { method: 'POST', body: JSON.stringify(payload) }),
-  updateInquiry: (id: string, payload: Pick<Inquiry, 'status' | 'notes' | 'next_follow_up_date'>) =>
+  updateInquiry: (id: string, payload: Partial<Inquiry>) =>
     request<Inquiry>(`/inquiries/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
   resetDemo: () => request<{ inserted: number }>('/demo/reset', { method: 'POST' }),
   exportUrl: `${API_BASE_URL}/exports/inquiries.csv`,
