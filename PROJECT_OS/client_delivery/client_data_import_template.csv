@@ -1,6 +1,0 @@
-name,phone,email,service_needed,status,next_follow_up_date,notes
-Jordan Ellis,555-0181,jordan.ellis@example.com,Spinal Adjustment,New Inquiry,2026-06-16,Called after finding the practice on Google; wants help with recurring lower back pain.
-Morgan Lee,555-0182,morgan.lee@example.com,Sports Injury Treatment,Consultation Scheduled,2026-06-17,Referral from an existing patient; consultation scheduled for next week.
-Taylor Brooks,555-0183,taylor.brooks@example.com,Wellness Consultation,Follow-Up Needed,2026-06-15,Asked for pricing and availability; needs a follow-up call before deciding.
-Riley Carter,555-0184,riley.carter@example.com,Neck Pain Evaluation,Active Patient,,Converted after consultation; no follow-up needed for inquiry workflow.
-Casey Patel,555-0185,casey.patel@example.com,Posture Assessment,Lost,,Chose another provider after insurance question.

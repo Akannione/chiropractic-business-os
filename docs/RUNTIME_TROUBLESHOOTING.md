@@ -10,7 +10,7 @@ The main app is the full-stack version:
 - Frontend: `frontend/`
 - Database: MongoDB
 
-The legacy Streamlit + SQLite version lives in `legacy/streamlit_sqlite/`.
+The repository is intentionally kept focused on this full-stack app. Old prototype and sales-collateral folders were removed from the active repo.
 
 ## Recommended Local Startup
 
@@ -140,11 +140,12 @@ Expected backend health response:
 
 ## GitHub And Deployment Clarity
 
-The repository should make it obvious which version is current:
+The repository should stay small and app-focused:
 
-- Main app: `backend/` and `frontend/`
-- Legacy app: `legacy/streamlit_sqlite/`
-- Sales/operations docs: `PROJECT_OS/`, `DEMO_KIT/`, `sales_assets/`, `marketing/`
+- Backend: `backend/`
+- Frontend: `frontend/`
+- Essential docs: `docs/`
+- Root commands: `package.json`
 
 Before pushing:
 

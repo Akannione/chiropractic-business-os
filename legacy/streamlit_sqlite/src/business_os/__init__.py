@@ -1,2 +1,0 @@
-"""Business OS MVP package."""
-
