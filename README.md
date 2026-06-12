@@ -31,8 +31,10 @@ business_os_mvp/
       middleware/
       models/
       routes/
+      serializers/
       services/
       utils/
+      validators/
   frontend/
     src/
       components/
@@ -42,6 +44,7 @@ business_os_mvp/
       styles/
       utils/
   docs/
+    API.md
     CSV_IMPORT_EXAMPLE.csv
     INTAKE_EMBED_SNIPPETS.md
     RUNTIME_TROUBLESHOOTING.md
@@ -148,6 +151,7 @@ Useful source links:
 
 More details:
 
+- `docs/API.md`
 - `docs/WORKFLOW_AUTOMATION.md`
 - `docs/INTAKE_EMBED_SNIPPETS.md`
 - `docs/CSV_IMPORT_EXAMPLE.csv`

@@ -1,18 +1,14 @@
 import { Router } from 'express';
+import { getConfig } from '../controllers/configController.js';
+import { postDemoReset, postSeed } from '../controllers/demoController.js';
+import { exportInquiriesCsv } from '../controllers/exportController.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
+import { getKpis, getWeeklySummary } from '../controllers/reportController.js';
+import { postImportCsv, postPublicInquiry, postWebhookInquiry } from '../controllers/automationController.js';
 import {
-  exportInquiriesCsv,
-  getConfig,
   getInquiries,
-  getKpis,
-  getWeeklySummary,
   patchInquiry,
-  postDemoReset,
-  postImportCsv,
   postInquiry,
-  postPublicInquiry,
-  postSeed,
-  postWebhookInquiry,
 } from '../controllers/inquiryController.js';
 
 export const inquiryRouter = Router();
