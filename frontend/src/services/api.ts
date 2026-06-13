@@ -1,10 +1,41 @@
-import { AppConfig, ImportPreview, ImportResult, Inquiry, Kpis, PublicInquiryInput, WeeklySummary } from '../types';
+import {
+  Activity,
+  AppConfig,
+  AuthStatus,
+  ImportPreview,
+  ImportResult,
+  Inquiry,
+  Kpis,
+  LoginResult,
+  MonthlySummary,
+  PublicInquiryInput,
+  ReminderResult,
+  WeeklySummary,
+} from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
+const authTokenKey = 'business-os-auth-token';
+
+export function getAuthToken() {
+  return window.localStorage.getItem(authTokenKey) || '';
+}
+
+export function setAuthToken(token: string) {
+  window.localStorage.setItem(authTokenKey, token);
+}
+
+export function clearAuthToken() {
+  window.localStorage.removeItem(authTokenKey);
+}
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = getAuthToken();
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options?.headers,
+    },
     ...options,
   });
   if (!response.ok) {
@@ -15,10 +46,15 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  authStatus: () => request<AuthStatus>('/auth/status'),
+  login: (password: string) =>
+    request<LoginResult>('/auth/login', { method: 'POST', body: JSON.stringify({ password }) }),
   config: () => request<AppConfig>('/config'),
   inquiries: () => request<Inquiry[]>('/inquiries'),
+  activities: () => request<Activity[]>('/activities'),
   kpis: () => request<Kpis>('/kpis'),
   weeklySummary: () => request<WeeklySummary>('/weekly-summary'),
+  monthlySummary: () => request<MonthlySummary>('/monthly-summary'),
   createInquiry: (payload: Partial<Inquiry>) =>
     request<Inquiry>('/inquiries', { method: 'POST', body: JSON.stringify(payload) }),
   createPublicInquiry: (payload: PublicInquiryInput) =>
@@ -37,6 +73,15 @@ export const api = {
       headers: { 'Content-Type': 'text/csv' },
       body: csvText,
     }),
+  sendDailySummary: () => request<ReminderResult>('/reminders/daily-summary', { method: 'POST' }),
   resetDemo: () => request<{ inserted: number }>('/demo/reset', { method: 'POST' }),
+  downloadExportCsv: async () => {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/exports/inquiries.csv`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!response.ok) throw new Error('CSV export failed.');
+    return response.blob();
+  },
   exportUrl: `${API_BASE_URL}/exports/inquiries.csv`,
 };

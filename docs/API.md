@@ -24,6 +24,38 @@ Response:
 
 Returns practice labels, status options, inquiry sources, requested services, KPI help text, and demo-mode state.
 
+## Authentication
+
+Authentication is optional. When `ADMIN_PASSWORD` is configured, staff routes require a bearer token. Public intake and webhook intake remain open.
+
+### `GET /auth/status`
+
+Returns whether staff login is enabled.
+
+```json
+{"authEnabled":true}
+```
+
+### `POST /auth/login`
+
+JSON body:
+
+```json
+{"password":"staff-password"}
+```
+
+Response:
+
+```json
+{"token":"admin.expiry.signature","authEnabled":true}
+```
+
+Use the token as:
+
+```text
+Authorization: Bearer admin.expiry.signature
+```
+
 ## Patient Inquiries
 
 ### `GET /inquiries`
@@ -177,6 +209,22 @@ Returns dashboard KPI values.
 ### `GET /weekly-summary`
 
 Returns the weekly practice summary.
+
+### `GET /monthly-summary`
+
+Returns a month-to-date owner report.
+
+## Activity
+
+### `GET /activities`
+
+Returns recent activity history for inquiry creation and updates.
+
+## Reminders
+
+### `POST /reminders/daily-summary`
+
+Sends an internal staff follow-up summary when SMTP is configured. If email is not configured, returns a non-crashing response explaining that notification is skipped.
 
 ## Exports
 

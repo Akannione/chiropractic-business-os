@@ -46,6 +46,21 @@ export function ExportsPage({ inquiries, onChanged, setError }: ExportsPageProps
     }
   }
 
+  async function downloadCsv() {
+    setError('');
+    try {
+      const blob = await api.downloadExportCsv();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `patient_inquiries_${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (nextError) {
+      setError((nextError as Error).message);
+    }
+  }
+
   return (
     <section className="stack">
       <div className="section-heading">
@@ -58,9 +73,9 @@ export function ExportsPage({ inquiries, onChanged, setError }: ExportsPageProps
           <h3>Patient Inquiries CSV</h3>
           <p>{inquiries.length ? `${inquiries.length} patient inquiries ready to export.` : 'No export data yet.'}</p>
         </div>
-        <a className="primary-button" href={api.exportUrl}>
+        <button className="primary-button" type="button" onClick={downloadCsv}>
           Download CSV
-        </a>
+        </button>
       </div>
 
       <div className="export-card import-card">
@@ -84,6 +99,21 @@ export function ExportsPage({ inquiries, onChanged, setError }: ExportsPageProps
         >
           {importing ? 'Importing...' : 'Import Previewed Rows'}
         </button>
+      </div>
+
+      <div className="panel">
+        <div className="panel-heading">
+          <h3>CSV Column Mapping</h3>
+          <p>Rename client spreadsheet columns to one of these accepted headers before uploading.</p>
+        </div>
+        <div className="mapping-grid">
+          <span>Patient Name: `name`, `patient_name`, `full_name`, `Patient Name`</span>
+          <span>Phone: `phone`, `Phone`</span>
+          <span>Email: `email`, `Email`</span>
+          <span>Requested Service: `service_needed`, `requested_service`, `service`, `Requested Service`</span>
+          <span>Source: `source`, `Source`, `inquiry_source`</span>
+          <span>Notes: `notes`, `message`, `Message`, `Notes`</span>
+        </div>
       </div>
 
       {preview && (

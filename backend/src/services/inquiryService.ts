@@ -1,5 +1,6 @@
 import { Inquiry } from '../models/Inquiry.js';
 import { parseDateOnly } from '../utils/date.js';
+import { logActivity } from './activityService.js';
 
 export type InquiryInput = {
   name: string;
@@ -19,7 +20,7 @@ export async function listInquiries() {
 
 export async function createInquiry(input: InquiryInput) {
   const now = new Date();
-  return Inquiry.create({
+  const inquiry = await Inquiry.create({
     ...input,
     name: input.name.trim(),
     phone: input.phone.trim(),
@@ -31,13 +32,21 @@ export async function createInquiry(input: InquiryInput) {
     created_at: now,
     updated_at: now,
   });
+  await logActivity({
+    inquiryId: inquiry.id,
+    patientName: inquiry.name,
+    action: 'Inquiry created',
+    detail: `Created from ${inquiry.source} with status ${inquiry.status}.`,
+  });
+  return inquiry;
 }
 
 export async function updateInquiry(
   id: string,
   input: Partial<InquiryInput>,
 ) {
-  return Inquiry.findByIdAndUpdate(
+  const previous = await Inquiry.findById(id).lean();
+  const updated = await Inquiry.findByIdAndUpdate(
     id,
     {
       ...(input.name !== undefined ? { name: input.name.trim() } : {}),
@@ -53,4 +62,22 @@ export async function updateInquiry(
     },
     { new: true, runValidators: true },
   );
+  if (updated) {
+    const changes: string[] = [];
+    if (input.status !== undefined && previous?.status !== input.status) changes.push(`status to ${input.status}`);
+    if (
+      input.next_follow_up_date !== undefined &&
+      String(previous?.next_follow_up_date || '') !== String(parseDateOnly(input.next_follow_up_date) || '')
+    ) {
+      changes.push(`follow-up to ${input.next_follow_up_date || 'none'}`);
+    }
+    if (input.notes !== undefined && previous?.notes !== input.notes) changes.push('notes updated');
+    await logActivity({
+      inquiryId: updated.id,
+      patientName: updated.name,
+      action: 'Inquiry updated',
+      detail: changes.length ? `Changed ${changes.join(', ')}.` : 'Inquiry details updated.',
+    });
+  }
+  return updated;
 }

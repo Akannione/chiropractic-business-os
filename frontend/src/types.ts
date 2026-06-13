@@ -1,4 +1,4 @@
-export type View = 'dashboard' | 'inquiries' | 'summary' | 'exports' | 'public-intake';
+export type View = 'dashboard' | 'inquiries' | 'summary' | 'monthly' | 'activity' | 'exports' | 'settings' | 'public-intake';
 
 export type InquiryStatus =
   | 'New Inquiry'
@@ -51,12 +51,44 @@ export type WeeklySummary = Kpis & {
   plainEnglishSummary: string;
 };
 
+export type MonthlySummary = Kpis & {
+  monthStart: string;
+  monthEnd: string;
+  plainEnglishSummary: string;
+};
+
 export type AppConfig = {
+  practiceName: string;
   statuses: InquiryStatus[];
   sources: InquirySource[];
   services: string[];
   demoMode: boolean;
   kpiHelp: Record<string, string>;
+};
+
+export type AuthStatus = {
+  authEnabled: boolean;
+};
+
+export type LoginResult = AuthStatus & {
+  token: string;
+};
+
+export type Activity = {
+  id: string;
+  inquiry_id?: string;
+  patient_name: string;
+  action: string;
+  detail: string;
+  created_at: string;
+};
+
+export type ReminderResult = {
+  sent: boolean;
+  reason?: string;
+  overdue: number;
+  dueToday: number;
+  newInquiries: number;
 };
 
 export type ImportPreviewRow = {

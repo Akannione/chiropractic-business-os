@@ -81,6 +81,18 @@ SMTP_FROM=Chiropractic Business OS <no-reply@example.com>
 
 If these are not configured, inquiries still save normally and email notification is skipped.
 
+Staff can also trigger a daily internal follow-up summary from the Settings tab or:
+
+```text
+POST /api/reminders/daily-summary
+```
+
+The summary includes overdue follow-ups, due-today follow-ups, and new inquiries.
+
+## Staff Login
+
+Set `ADMIN_PASSWORD` in production to protect staff routes. The public intake form and webhook intake remain available so website inquiries can still enter the system.
+
 ## Source And Service Follow-Up Rules
 
 The backend applies simple default follow-up rules:
@@ -155,6 +167,7 @@ docs/CSV_IMPORT_EXAMPLE.csv
 5. Staff uses the dashboard workflow buttons to mark a consultation scheduled, move the inquiry to Active Patient, push the follow-up to tomorrow, or mark the inquiry Lost.
 6. Staff opens Patient Inquiries when deeper notes or contact details need to be edited.
 7. Owner reviews weekly performance.
+8. Owner reviews the monthly report during monthly check-ins.
 
 ## Next Automation Opportunities
 

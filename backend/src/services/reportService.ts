@@ -21,3 +21,21 @@ export function buildWeeklySummary(inquiries: InquiryShape[]) {
   };
 }
 
+export function buildMonthlySummary(inquiries: InquiryShape[]) {
+  const today = startOfToday();
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  const monthlyInquiries = inquiries.filter((inquiry) => inquiry.created_at >= monthStart);
+  const kpis = calculateKpis(monthlyInquiries);
+  const summary =
+    monthlyInquiries.length === 0
+      ? 'No patient inquiries were created this month yet.'
+      : `This month has ${kpis.totalPatientInquiries} patient inquiries, ${kpis.activePatients} active patients, and ${kpis.followUpsNeeded} follow-ups needing attention. Estimated Treatment Value for this month is $${kpis.estimatedTreatmentValue.toLocaleString()}.`;
+
+  return {
+    monthStart: monthStart.toISOString().slice(0, 10),
+    monthEnd: monthEnd.toISOString().slice(0, 10),
+    ...kpis,
+    plainEnglishSummary: summary,
+  };
+}

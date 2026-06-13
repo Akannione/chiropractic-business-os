@@ -1,5 +1,17 @@
 import type { ReactNode } from 'react';
-import { Download, FileText, Globe2, LayoutDashboard, Plus, RefreshCw, Users } from 'lucide-react';
+import {
+  Activity,
+  BarChart3,
+  Download,
+  FileText,
+  Globe2,
+  LayoutDashboard,
+  LogOut,
+  Plus,
+  RefreshCw,
+  Settings,
+  Users,
+} from 'lucide-react';
 import type { AppConfig, View } from '../types';
 
 type AppShellProps = {
@@ -10,6 +22,7 @@ type AppShellProps = {
   loading: boolean;
   onViewChange: (view: View) => void;
   onDemoReset: () => Promise<void>;
+  onLogout: () => void;
   children: ReactNode;
 };
 
@@ -21,6 +34,7 @@ export function AppShell({
   loading,
   onViewChange,
   onDemoReset,
+  onLogout,
   children,
 }: AppShellProps) {
   return (
@@ -43,8 +57,17 @@ export function AppShell({
           <NavButton icon={<FileText />} active={view === 'summary'} onClick={() => onViewChange('summary')}>
             Weekly Summary
           </NavButton>
+          <NavButton icon={<BarChart3 />} active={view === 'monthly'} onClick={() => onViewChange('monthly')}>
+            Monthly Report
+          </NavButton>
+          <NavButton icon={<Activity />} active={view === 'activity'} onClick={() => onViewChange('activity')}>
+            Activity
+          </NavButton>
           <NavButton icon={<Download />} active={view === 'exports'} onClick={() => onViewChange('exports')}>
             Exports
+          </NavButton>
+          <NavButton icon={<Settings />} active={view === 'settings'} onClick={() => onViewChange('settings')}>
+            Settings
           </NavButton>
           <NavButton icon={<Globe2 />} active={view === 'public-intake'} onClick={() => onViewChange('public-intake')}>
             Public Intake
@@ -55,6 +78,9 @@ export function AppShell({
             <RefreshCw size={16} /> Reset demo data
           </button>
         )}
+        <button className="ghost-button" onClick={onLogout}>
+          <LogOut size={16} /> Sign out
+        </button>
       </aside>
 
       <main className="content">

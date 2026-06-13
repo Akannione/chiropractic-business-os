@@ -67,8 +67,8 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
           <span className="eyebrow">Chiropractic Business OS</span>
           <h1>Request a Chiropractic Follow-Up</h1>
           <p>
-            Share your contact information and requested service. The practice team will receive your inquiry
-            automatically and follow up as soon as possible.
+            Share your contact information and requested service. The practice team will receive your inquiry and
+            follow up with next steps during normal office workflow.
           </p>
         </div>
 
@@ -120,7 +120,8 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
         </form>
 
         <p className="public-footnote">
-          Source: {source}. This form does not schedule an appointment or replace clinical advice.
+          Source: {source}. This form sends an inquiry only. It does not schedule an appointment, replace clinical advice,
+          or collect insurance or payment information.
         </p>
       </section>
     </main>

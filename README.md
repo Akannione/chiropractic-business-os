@@ -16,10 +16,13 @@ A focused full-stack web app for chiropractic practices to capture patient inqui
 - Shows a dashboard follow-up workflow with one-click actions for urgent inquiries
 - Shows practice KPIs such as active patients, follow-ups needed, overdue follow-ups, estimated treatment value, and inquiry-to-patient rate
 - Provides a printable and downloadable weekly practice summary
+- Provides a month-to-date owner report
+- Tracks activity history for inquiry creation and updates
 - Exports patient inquiries as CSV
 - Supports automated intake from website links, Google/referral source links, webhook payloads, and CSV imports
 - Previews CSV imports and skips duplicate email or phone matches
 - Optionally sends internal email notifications for new automated inquiries when SMTP is configured
+- Supports optional staff login when `ADMIN_PASSWORD` is configured
 
 ## Project Structure
 
@@ -49,6 +52,7 @@ business_os_mvp/
     API.md
     CSV_IMPORT_EXAMPLE.csv
     INTAKE_EMBED_SNIPPETS.md
+    PRODUCTION_DEPLOYMENT.md
     RUNTIME_TROUBLESHOOTING.md
     WORKFLOW_AUTOMATION.md
   package.json
@@ -103,6 +107,9 @@ Backend variables live in `backend/.env.example`:
 PORT=4000
 MONGODB_URI=mongodb://127.0.0.1:27017/chiropractic_business_os
 CORS_ORIGIN=http://localhost:5173
+PRACTICE_NAME=Chiropractic Practice
+ADMIN_PASSWORD=
+AUTH_TOKEN_SECRET=change-this-long-random-secret
 BUSINESS_OS_DEMO_MODE=true
 INTERNAL_NOTIFICATION_EMAIL=owner@example.com
 SMTP_HOST=smtp.example.com
@@ -121,6 +128,7 @@ VITE_API_BASE_URL=http://localhost:4000/api
 
 SMTP variables are optional. If they are not configured, inquiry creation still works and notification is skipped.
 Public and webhook intake routes include a lightweight in-memory rate limit to reduce accidental spam. For a production deployment with multiple backend instances, replace this with platform-level or shared-store rate limiting.
+`ADMIN_PASSWORD` is optional for local demos. Set it in production so staff dashboard APIs require login. The public intake form remains open.
 
 ## Automation Paths
 
@@ -163,6 +171,7 @@ Useful source links:
 More details:
 
 - `docs/API.md`
+- `docs/PRODUCTION_DEPLOYMENT.md`
 - `docs/WORKFLOW_AUTOMATION.md`
 - `docs/INTAKE_EMBED_SNIPPETS.md`
 - `docs/CSV_IMPORT_EXAMPLE.csv`
@@ -174,6 +183,7 @@ Run:
 ```bash
 npm run typecheck
 npm run build
+npm run test
 ```
 
 Health check:
