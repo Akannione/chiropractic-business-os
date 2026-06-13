@@ -12,6 +12,16 @@ This guide keeps the Chiropractic Business OS deployment simple: MongoDB Atlas f
 ## 2. Render Backend
 
 Create a Render Web Service from the GitHub repository.
+The repository includes a `render.yaml` Blueprint for the backend API.
+
+Recommended path:
+
+1. Open Render.
+2. Choose **New Blueprint**.
+3. Connect `https://github.com/Akannione/chiropractic-business-os`.
+4. Select the `main` branch.
+5. Render will read `render.yaml`.
+6. Fill the secret environment variables marked `sync: false`.
 
 Recommended settings:
 
@@ -41,6 +51,7 @@ SMTP_FROM=Chiropractic Business OS <no-reply@example.com>
 ## 3. Vercel Frontend
 
 Create a Vercel project from the GitHub repository.
+The frontend includes `frontend/vercel.json` for Vite build settings and SPA fallback routing.
 
 Recommended settings:
 
