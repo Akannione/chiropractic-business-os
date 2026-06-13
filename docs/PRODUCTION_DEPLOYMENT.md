@@ -53,6 +53,12 @@ SMTP_FROM=Chiropractic Business OS <no-reply@example.com>
 Create a Vercel project from the GitHub repository.
 The frontend includes `frontend/vercel.json` for Vite build settings and SPA fallback routing.
 
+Current production frontend:
+
+```text
+https://frontend-gold-alpha-31.vercel.app
+```
+
 Recommended settings:
 
 - Root directory: `frontend`
@@ -64,6 +70,8 @@ Environment variable:
 ```bash
 VITE_API_BASE_URL=https://your-render-backend.onrender.com/api
 ```
+
+After the Render backend is deployed, set `VITE_API_BASE_URL` in Vercel to the Render backend URL plus `/api`, then redeploy the frontend.
 
 ## 4. Staff Login
 
