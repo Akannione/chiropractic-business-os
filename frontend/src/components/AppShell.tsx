@@ -41,10 +41,10 @@ export function AppShell({
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark">OS</div>
+          <div className="brand-mark">CB</div>
           <div>
-            <strong>Chiropractic</strong>
-            <span>Business OS</span>
+            <strong>CBOS</strong>
+            <span>Practice inquiry system</span>
           </div>
         </div>
         <nav>
@@ -86,7 +86,7 @@ export function AppShell({
       <main className="content">
         <header className="topbar">
           <div>
-            <h1>Chiropractic Business OS</h1>
+            <h1>CBOS</h1>
             <p>Track patient inquiries, follow-ups, active patients, and estimated treatment value.</p>
           </div>
           <button className="primary-button" onClick={() => onViewChange('inquiries')}>

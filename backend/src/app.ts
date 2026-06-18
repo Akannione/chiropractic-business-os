@@ -12,7 +12,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.text({ type: ['text/csv', 'text/plain'], limit: '1mb' }));
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, service: 'Chiropractic Business OS API' });
+  res.json({ ok: true, service: 'CBOS API' });
 });
 
 app.use('/api', inquiryRouter);

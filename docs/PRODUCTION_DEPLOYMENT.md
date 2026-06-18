@@ -1,6 +1,6 @@
 # Production Deployment Checklist
 
-This guide keeps the Chiropractic Business OS deployment simple: MongoDB Atlas for data, Render for the backend API, and Vercel for the React frontend.
+This guide keeps the CBOS deployment simple: MongoDB Atlas for data, Render for the backend API, and Vercel for the React frontend.
 
 ## 1. MongoDB Atlas
 
@@ -45,7 +45,7 @@ SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=
 SMTP_PASS=
-SMTP_FROM=Chiropractic Business OS <no-reply@example.com>
+SMTP_FROM=CBOS <no-reply@example.com>
 ```
 
 ## 3. Vercel Frontend

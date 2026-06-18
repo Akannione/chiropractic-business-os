@@ -64,7 +64,7 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
     <main className="public-page">
       <section className="public-card">
         <div className="section-heading">
-          <span className="eyebrow">Chiropractic Business OS</span>
+          <span className="eyebrow">CBOS</span>
           <h1>Request a Chiropractic Follow-Up</h1>
           <p>
             Share your contact information and requested service. The practice team will receive your inquiry and

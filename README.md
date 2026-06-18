@@ -1,4 +1,4 @@
-# Chiropractic Business OS
+# CBOS
 
 A focused full-stack web app for chiropractic practices to capture patient inquiries, track follow-ups, review practice KPIs, and export inquiry data.
 
@@ -117,7 +117,7 @@ SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=
 SMTP_PASS=
-SMTP_FROM=Chiropractic Business OS <no-reply@example.com>
+SMTP_FROM=CBOS <no-reply@example.com>
 ```
 
 Frontend variables live in `frontend/.env.example`:
@@ -170,6 +170,7 @@ Useful source links:
 
 More details:
 
+- `docs/DEMO_WALKTHROUGH.md`
 - `docs/API.md`
 - `docs/PRODUCTION_DEPLOYMENT.md`
 - `docs/WORKFLOW_AUTOMATION.md`
@@ -195,7 +196,7 @@ curl http://localhost:4000/api/health
 Expected response:
 
 ```json
-{"ok":true,"service":"Chiropractic Business OS API"}
+{"ok":true,"service":"CBOS API"}
 ```
 
 ## Scope

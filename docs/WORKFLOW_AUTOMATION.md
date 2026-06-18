@@ -1,6 +1,6 @@
 # Workflow Automation
 
-This document explains how patient inquiry capture is automated in the current full-stack Chiropractic Business OS and what can be automated next without turning the MVP into an EHR, scheduling system, or billing platform.
+This document explains how patient inquiry capture is automated in the current full-stack CBOS and what can be automated next without turning the MVP into an EHR, scheduling system, or billing platform.
 
 ## Current Automated Intake
 
@@ -76,7 +76,7 @@ SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=
 SMTP_PASS=
-SMTP_FROM=Chiropractic Business OS <no-reply@example.com>
+SMTP_FROM=CBOS <no-reply@example.com>
 ```
 
 If these are not configured, inquiries still save normally and email notification is skipped.
@@ -161,7 +161,7 @@ docs/CSV_IMPORT_EXAMPLE.csv
 ## Recommended Practice Workflow
 
 1. Patient submits the public intake form.
-2. Business OS creates the inquiry automatically.
+2. CBOS creates the inquiry automatically.
 3. Dashboard updates when staff opens or refreshes the app.
 4. Staff starts with Follow-Ups Needed.
 5. Staff uses the dashboard workflow buttons to mark a consultation scheduled, move the inquiry to Active Patient, push the follow-up to tomorrow, or mark the inquiry Lost.
@@ -245,7 +245,7 @@ Implemented as `POST /api/webhooks/inquiries`.
 Value:
 
 - The practice can keep its current form provider.
-- Business OS still becomes the central follow-up dashboard.
+- CBOS still becomes the central follow-up dashboard.
 
 Boundary:
 

@@ -1,6 +1,6 @@
 # Runtime And Sandbox Troubleshooting
 
-This guide documents the local issues we have already hit while building the Chiropractic Business OS and how to avoid repeating them.
+This guide documents the local issues we have already hit while building the CBOS and how to avoid repeating them.
 
 ## Primary App
 
@@ -135,7 +135,7 @@ curl -I http://localhost:5173
 Expected backend health response:
 
 ```json
-{"ok":true,"service":"Chiropractic Business OS API"}
+{"ok":true,"service":"CBOS API"}
 ```
 
 ## GitHub And Deployment Clarity

@@ -85,7 +85,7 @@ export async function sendDailyFollowUpSummary({
       `New inquiries (${newInquiries.length})`,
       formatRows(newInquiries),
       '',
-      'Open Chiropractic Business OS to update statuses and notes.',
+      'Open CBOS to update statuses and notes.',
     ].join('\n'),
   });
 

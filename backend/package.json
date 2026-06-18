@@ -1,7 +1,7 @@
 {
-  "name": "chiropractic-business-os-backend",
+  "name": "cbos-backend",
   "version": "1.0.0",
-  "description": "Node.js TypeScript API for the Chiropractic Business OS.",
+  "description": "Node.js TypeScript API for the CBOS.",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",

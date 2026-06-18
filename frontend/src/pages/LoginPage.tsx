@@ -31,7 +31,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       <section className="public-card login-card">
         <div className="section-heading">
           <span className="eyebrow">Staff Access</span>
-          <h1>Chiropractic Business OS</h1>
+          <h1>CBOS</h1>
           <p>Sign in to view patient inquiries, follow-ups, reporting, and exports.</p>
         </div>
         {error && <div className="notice error">{error}</div>}

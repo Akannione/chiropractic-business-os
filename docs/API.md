@@ -15,7 +15,7 @@ Returns service health.
 Response:
 
 ```json
-{"ok":true,"service":"Chiropractic Business OS API"}
+{"ok":true,"service":"CBOS API"}
 ```
 
 ## Configuration

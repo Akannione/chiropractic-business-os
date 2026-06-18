@@ -1,6 +1,6 @@
 # Intake Embed And Source Links
 
-Use these snippets to route patient inquiries directly into Chiropractic Business OS.
+Use these snippets to route patient inquiries directly into CBOS.
 
 Replace `https://your-business-os-domain.com` with the deployed frontend URL.
 
