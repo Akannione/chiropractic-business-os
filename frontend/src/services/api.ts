@@ -13,8 +13,7 @@ import {
   WeeklySummary,
 } from '../types';
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:4000/api' : '/api');
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:4000/api' : '');
 const authTokenKey = 'business-os-auth-token';
 
 export function getAuthToken() {
@@ -30,6 +29,9 @@ export function clearAuthToken() {
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  if (!API_BASE_URL) {
+    throw new Error('Production API URL is not configured. Set VITE_API_BASE_URL to the deployed backend URL.');
+  }
   const token = getAuthToken();
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
@@ -77,6 +79,9 @@ export const api = {
   sendDailySummary: () => request<ReminderResult>('/reminders/daily-summary', { method: 'POST' }),
   resetDemo: () => request<{ inserted: number }>('/demo/reset', { method: 'POST' }),
   downloadExportCsv: async () => {
+    if (!API_BASE_URL) {
+      throw new Error('Production API URL is not configured. Set VITE_API_BASE_URL to the deployed backend URL.');
+    }
     const token = getAuthToken();
     const response = await fetch(`${API_BASE_URL}/exports/inquiries.csv`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
