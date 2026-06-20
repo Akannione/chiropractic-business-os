@@ -146,6 +146,10 @@ The repository should stay small and app-focused:
 - Frontend: `frontend/`
 - Essential docs: `docs/`
 - Root commands: `package.json`
+- Demo API: Vercel project rooted at `backend/`
+- Demo frontend: Vercel project rooted at `frontend/`
+
+The old Render deployment path has been removed. For the current deployment flow, use `docs/PRODUCTION_DEPLOYMENT.md`.
 
 Before pushing:
 

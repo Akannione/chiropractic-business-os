@@ -1,44 +1,41 @@
-# Production Deployment Checklist
+# Demo Deployment Checklist
 
-This guide keeps the CBOS deployment simple: MongoDB Atlas for data, Render for the backend API, and Vercel for the React frontend.
+This guide keeps the CBOS demo deployment costless: MongoDB Atlas M0 for data and two Vercel projects from the same GitHub repository.
 
 ## 1. MongoDB Atlas
 
 1. Create a MongoDB Atlas project and cluster.
 2. Create a database user with a strong password.
-3. Allow access from Render or use Atlas recommended network settings for hosted apps.
-4. Copy the connection string into `MONGODB_URI`.
+3. Add your current IP address for local testing.
+4. Add the network access required by Vercel. For a short-lived demo, `0.0.0.0/0` is the simplest option, but it must be paired with a strong unique password.
+5. Copy the connection string and set the database name to `chiropractic_business_os`.
+6. Store the connection string only as the API project's `MONGODB_URI` environment variable.
 
-## 2. Render Backend
+If a credential is exposed, rotate the Atlas database-user password before continuing.
 
-Create a Render Web Service from the GitHub repository.
-The repository includes a `render.yaml` Blueprint for the backend API.
+## 2. Vercel Express API
 
-Recommended path:
+Create a Vercel project with these settings:
 
-1. Open Render.
-2. Choose **New Blueprint**.
-3. Connect `https://github.com/Akannione/chiropractic-business-os`.
-4. Select the `main` branch.
-5. Render will read `render.yaml`.
-6. Fill the secret environment variables marked `sync: false`.
-
-Recommended settings:
-
+- Project name: `cbos-api`
+- Repository: `https://github.com/Akannione/chiropractic-business-os`
 - Root directory: `backend`
-- Build command: `npm install && npm run build`
-- Start command: `npm start`
+- Framework: Express
 
-Environment variables:
+Required environment variables:
 
 ```bash
-PORT=4000
 MONGODB_URI=mongodb+srv://...
-CORS_ORIGIN=https://your-frontend-domain.vercel.app
-PRACTICE_NAME=Client Chiropractic Practice
-ADMIN_PASSWORD=strong-staff-password
+CORS_ORIGIN=https://frontend-gold-alpha-31.vercel.app
+PRACTICE_NAME=CBOS Demo Practice
 AUTH_TOKEN_SECRET=long-random-secret
-BUSINESS_OS_DEMO_MODE=false
+BUSINESS_OS_DEMO_MODE=true
+```
+
+Optional variables:
+
+```bash
+ADMIN_PASSWORD=
 INTERNAL_NOTIFICATION_EMAIL=staff@example.com
 SMTP_HOST=smtp.example.com
 SMTP_PORT=587
@@ -48,34 +45,42 @@ SMTP_PASS=
 SMTP_FROM=CBOS <no-reply@example.com>
 ```
 
-## 3. Vercel Frontend
+Current API:
 
-Create a Vercel project from the GitHub repository.
-The frontend includes `frontend/vercel.json` for Vite build settings and SPA fallback routing.
+```text
+https://cbos-api.vercel.app
+```
 
-Current production frontend:
+Health check:
+
+```bash
+curl https://cbos-api.vercel.app/api/health
+```
+
+## 3. Vercel React Frontend
+
+Use these settings:
+
+- Project name: `frontend`
+- Repository: `https://github.com/Akannione/chiropractic-business-os`
+- Root directory: `frontend`
+- Framework: Vite
+
+Production environment variable:
+
+```bash
+VITE_API_BASE_URL=https://cbos-api.vercel.app/api
+```
+
+Current frontend:
 
 ```text
 https://frontend-gold-alpha-31.vercel.app
 ```
 
-Recommended settings:
-
-- Root directory: `frontend`
-- Build command: `npm run build`
-- Output directory: `dist`
-
-Environment variable:
-
-```bash
-VITE_API_BASE_URL=https://your-render-backend.onrender.com/api
-```
-
-After the Render backend is deployed, set `VITE_API_BASE_URL` in Vercel to the Render backend URL plus `/api`, then redeploy the frontend.
-
 ## 4. Staff Login
 
-Set `ADMIN_PASSWORD` in production. When it is set, staff dashboard APIs require login. The public `/intake` form remains open for patient inquiries.
+Leave `ADMIN_PASSWORD` blank for a controlled demo, or set it before sharing staff access publicly. When it is set, staff dashboard APIs require login. The public `/intake` form remains open.
 
 Do not reuse the demo password across clients.
 
@@ -87,13 +92,22 @@ Use MongoDB Atlas backups or scheduled exports. At minimum, export patient inqui
 
 This system is for inquiry and follow-up tracking. It is not an EHR, billing system, insurance system, or scheduling platform. Avoid storing clinical notes, diagnosis details, insurance IDs, payment details, or sensitive treatment records.
 
-## 7. Go-Live Verification
+## 7. Demo Verification
 
 1. Open the frontend.
-2. Confirm staff login works.
+2. Confirm the API health endpoint returns 200.
 3. Submit a test `/intake?source=Website` inquiry.
 4. Confirm it appears in the dashboard.
 5. Update status from the dashboard workflow.
 6. Export CSV.
 7. Send the daily summary if SMTP is configured.
 8. Delete the test record before handoff.
+
+## 8. Paying-Client Boundary
+
+Vercel Hobby and Atlas M0 are appropriate for demonstrations and early validation. Before deploying for a paying practice:
+
+1. Move to commercial hosting appropriate for business use.
+2. Create client-specific database and authentication credentials.
+3. Review backup, privacy, monitoring, and support requirements.
+4. Treat infrastructure cost as part of the client delivery package.

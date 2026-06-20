@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express from 'express';
+import { connectDatabase } from './config/database.js';
 import { env } from './config/env.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { inquiryRouter } from './routes/inquiryRoutes.js';
@@ -15,6 +16,11 @@ app.get('/api/health', (_req, res) => {
   res.json({ ok: true, service: 'CBOS API' });
 });
 
+app.use('/api', (_req, _res, next) => {
+  connectDatabase().then(() => next()).catch(next);
+});
 app.use('/api', inquiryRouter);
 app.use(notFound);
 app.use(errorHandler);
+
+export default app;

@@ -15,4 +15,6 @@ exports/*.txt
 .DS_Store
 .agents/
 .codex/
+.vercel/
 AGENTS.md
+.vercel

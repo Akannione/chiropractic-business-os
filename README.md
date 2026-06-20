@@ -7,6 +7,7 @@ A focused full-stack web app for chiropractic practices to capture patient inqui
 - Backend: Node.js, Express, TypeScript
 - Database: MongoDB with Mongoose
 - Frontend: React, Vite, TypeScript
+- Demo hosting: separate Vercel projects for the Express API and React frontend
 - Charts/UI: lightweight React UI with native CSS
 
 ## What It Does
@@ -29,6 +30,7 @@ A focused full-stack web app for chiropractic practices to capture patient inqui
 ```text
 business_os_mvp/
   backend/
+    vercel.json
     src/
       config/
       controllers/
@@ -41,6 +43,7 @@ business_os_mvp/
       utils/
       validators/
   frontend/
+    vercel.json
     src/
       components/
       hooks/
@@ -130,6 +133,24 @@ SMTP variables are optional. If they are not configured, inquiry creation still 
 Public and webhook intake routes include a lightweight in-memory rate limit to reduce accidental spam. For a production deployment with multiple backend instances, replace this with platform-level or shared-store rate limiting.
 `ADMIN_PASSWORD` is optional for local demos. Set it in production so staff dashboard APIs require login. The public intake form remains open.
 
+## Demo Deployment
+
+The demo uses two Vercel projects from the same GitHub repository:
+
+- React frontend: `https://frontend-gold-alpha-31.vercel.app`
+- Express API: `https://cbos-api.vercel.app`
+- MongoDB: Atlas M0 free cluster
+
+The frontend production variable is:
+
+```bash
+VITE_API_BASE_URL=https://cbos-api.vercel.app/api
+```
+
+The API requires `MONGODB_URI` in the `cbos-api` Vercel project before database-backed routes work. Rotate exposed database credentials immediately and add the replacement URI directly in Vercel. Never commit or paste database credentials into documentation, Git, or chat.
+
+This free deployment is for demos and validation. A paying-client deployment should use an appropriate commercial hosting plan and client-specific credentials.
+
 ## Automation Paths
 
 Public intake:
@@ -191,6 +212,7 @@ Health check:
 
 ```bash
 curl http://localhost:4000/api/health
+curl https://cbos-api.vercel.app/api/health
 ```
 
 Expected response:

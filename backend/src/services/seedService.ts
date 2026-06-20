@@ -4,9 +4,18 @@ import { Inquiry } from '../models/Inquiry.js';
 export async function seedSampleDataIfEmpty() {
   const count = await Inquiry.countDocuments();
   if (count > 0) return 0;
+
   const rows = buildSampleInquiries();
-  await Inquiry.insertMany(rows);
-  return rows.length;
+  const result = await Inquiry.collection.bulkWrite(
+    rows.map((row) => ({
+      updateOne: {
+        filter: { email: row.email },
+        update: { $setOnInsert: row },
+        upsert: true,
+      },
+    })),
+  );
+  return result.upsertedCount;
 }
 
 export async function resetSampleData() {
@@ -15,4 +24,3 @@ export async function resetSampleData() {
   await Inquiry.insertMany(rows);
   return rows.length;
 }
-
