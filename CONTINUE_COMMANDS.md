@@ -66,15 +66,12 @@ curl -sS -X POST http://localhost:4000/api/imports/inquiries.csv/preview \
   --data-binary @docs/METASOFT_REACTIVATION_DEMO.csv
 ```
 
-## Git Handoff
+## GitHub Pull Request
 
 ```bash
 cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
-git status --short
-git diff --check
-git add .
-git commit -m "Add patient reactivation workflow"
-git push -u origin codex/reactivation-prototype
+gh pr view 1 --web
+gh pr checks 1
 ```
 
 ## Production Deployment
@@ -103,6 +100,6 @@ Read AGENTS.md, PROJECT_STATUS.md, and CONTINUE_COMMANDS.md in
 /Users/tobiloba202/Documents/New project/business_os_mvp.
 Continue from the current production deployment blocker.
 Do not repeat the completed reactivation prototype.
-Rotate/configure Atlas only through secure account flows, then deploy and run the documented production smoke tests.
+Review Pull Request #1. Rotate/configure Atlas only through secure account flows, then merge, deploy, and run the documented production smoke tests.
 Before ending, update the root continuity files, TOBI_OS state, portfolio pipeline, and resume system.
 ```

@@ -6,24 +6,24 @@ Full-stack CBOS for small chiropractic practices to capture patient inquiries, t
 
 ## Current State
 
-The clinic-feedback prototype is complete locally. CBOS now keeps its existing inquiry workflow and adds optional appointment context, patient type, last visit date, expected visit frequency, follow-up ownership, and follow-up outcome. The React app includes a Patient Reactivations call list ordered by overdue, due today, and upcoming return dates.
+The clinic-feedback prototype is complete locally and published to GitHub in Pull Request #1: `https://github.com/Akannione/chiropractic-business-os/pull/1`. CBOS now keeps its existing inquiry workflow and adds optional appointment context, patient type, last visit date, expected visit frequency, follow-up ownership, and follow-up outcome. The React app includes a Patient Reactivations call list ordered by overdue, due today, and upcoming return dates.
 
 The demo frontend remains live at `https://frontend-gold-alpha-31.vercel.app`, and the API health endpoint remains live at `https://cbos-api.vercel.app`. The new reactivation work has not been deployed to production yet. Production database workflows remain blocked until the exposed Atlas database-user password is rotated and the replacement `MONGODB_URI` is added to the Vercel API project.
 
 ## Last Completed Task
 
-2026-06-24: Implemented and validated the clinic-feedback reactivation prototype, including MetaSoft-style CSV mapping, realistic demo data, practice-friendly exports, a responsive React call-list workflow, and updated demo/API documentation.
+2026-06-24: Implemented, validated, committed, pushed, and opened Pull Request #1 for the clinic-feedback reactivation prototype.
 
 ## Current Task
 
-Publish the verified reactivation prototype to GitHub, rotate the Atlas credential, configure production database access, and deploy the updated frontend and API.
+Rotate the Atlas credential, configure production database access, merge Pull Request #1, and deploy the updated frontend and API.
 
 ## Next Actions
 
-1. Push the verified reactivation branch to GitHub.
-2. Rotate the exposed Atlas database-user password.
-3. Permit the required Vercel network access in Atlas.
-4. Add the replacement Atlas URI to the `cbos-api` Vercel project as sensitive `MONGODB_URI`.
+1. Rotate the exposed Atlas database-user password.
+2. Permit the required Vercel network access in Atlas.
+3. Add the replacement Atlas URI to the `cbos-api` Vercel project as sensitive `MONGODB_URI`.
+4. Review and merge Pull Request #1.
 5. Deploy the updated backend and frontend.
 6. Run the production reactivation, import, update, KPI, summary, and CSV export smoke tests.
 7. Capture updated screenshots for the portfolio and clinic follow-up.
@@ -34,6 +34,7 @@ Publish the verified reactivation prototype to GitHub, rotate the Atlas credenti
 * `cbos-api` still lacks a working production `MONGODB_URI`, so database-backed production routes remain unavailable.
 * Atlas Network Access must permit Vercel before production data workflows can run.
 * The reactivation prototype is verified locally but not yet deployed.
+* Pull Request #1 is open and not yet merged into `main`.
 * Vercel Hobby and Atlas M0 are demo infrastructure, not the final paying-client hosting plan.
 
 ## Reusable Lessons
