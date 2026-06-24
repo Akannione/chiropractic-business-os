@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
-import type { Activity, AppConfig, Inquiry, Kpis, MonthlySummary, WeeklySummary } from '../types';
+import type {
+  Activity,
+  AppConfig,
+  Inquiry,
+  Kpis,
+  MonthlySummary,
+  ReactivationQueue,
+  WeeklySummary,
+} from '../types';
 
 const emptyKpis: Kpis = {
   totalPatientInquiries: 0,
@@ -21,15 +29,30 @@ export function useBusinessOsData() {
   const [kpis, setKpis] = useState<Kpis>(emptyKpis);
   const [summary, setSummary] = useState<WeeklySummary | null>(null);
   const [monthlySummary, setMonthlySummary] = useState<MonthlySummary | null>(null);
+  const [reactivations, setReactivations] = useState<ReactivationQueue>({
+    rows: [],
+    overdue: 0,
+    dueToday: 0,
+    upcoming: 0,
+  });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
   async function loadData() {
     setError('');
-    const [nextConfig, nextInquiries, nextActivities, nextKpis, nextSummary, nextMonthlySummary] = await Promise.all([
+    const [
+      nextConfig,
+      nextInquiries,
+      nextReactivations,
+      nextActivities,
+      nextKpis,
+      nextSummary,
+      nextMonthlySummary,
+    ] = await Promise.all([
       api.config(),
       api.inquiries(),
+      api.reactivations(),
       api.activities(),
       api.kpis(),
       api.weeklySummary(),
@@ -37,6 +60,7 @@ export function useBusinessOsData() {
     ]);
     setConfig(nextConfig);
     setInquiries(nextInquiries);
+    setReactivations(nextReactivations);
     setActivities(nextActivities);
     setKpis(nextKpis);
     setSummary(nextSummary);
@@ -62,6 +86,7 @@ export function useBusinessOsData() {
     kpis,
     summary,
     monthlySummary,
+    reactivations,
     message,
     error,
     loading,

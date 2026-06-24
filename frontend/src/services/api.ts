@@ -9,6 +9,7 @@ import {
   LoginResult,
   MonthlySummary,
   PublicInquiryInput,
+  ReactivationQueue,
   ReminderResult,
   WeeklySummary,
 } from '../types';
@@ -52,6 +53,7 @@ export const api = {
     request<LoginResult>('/auth/login', { method: 'POST', body: JSON.stringify({ password }) }),
   config: () => request<AppConfig>('/config'),
   inquiries: () => request<Inquiry[]>('/inquiries'),
+  reactivations: () => request<ReactivationQueue>('/reactivations'),
   activities: () => request<Activity[]>('/activities'),
   kpis: () => request<Kpis>('/kpis'),
   weeklySummary: () => request<WeeklySummary>('/weekly-summary'),

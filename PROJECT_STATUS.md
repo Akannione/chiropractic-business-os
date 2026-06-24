@@ -2,72 +2,85 @@
 
 ## Project Purpose
 
-Full-stack CBOS for small chiropractic practices to capture patient inquiries, track follow-ups, review KPIs, import/export CSV data, and support a simple owner-facing operations workflow.
+Full-stack CBOS for small chiropractic practices to capture patient inquiries, track follow-ups and patient reactivations, review practice KPIs, import/export CSV data, and support a simple owner-facing operations workflow.
 
 ## Current State
 
-CBOS now uses Vercel for both demo deployments. The React frontend is live at `https://frontend-gold-alpha-31.vercel.app`, and the Express API is live as a Vercel Function at `https://cbos-api.vercel.app`. The frontend points to the API, API health returns 200, CORS is configured, and Render configuration has been removed. Database-backed routes remain blocked until the exposed Atlas database-user password is rotated and the replacement `MONGODB_URI` is added to `cbos-api`.
+The clinic-feedback prototype is complete locally. CBOS now keeps its existing inquiry workflow and adds optional appointment context, patient type, last visit date, expected visit frequency, follow-up ownership, and follow-up outcome. The React app includes a Patient Reactivations call list ordered by overdue, due today, and upcoming return dates.
+
+The demo frontend remains live at `https://frontend-gold-alpha-31.vercel.app`, and the API health endpoint remains live at `https://cbos-api.vercel.app`. The new reactivation work has not been deployed to production yet. Production database workflows remain blocked until the exposed Atlas database-user password is rotated and the replacement `MONGODB_URI` is added to the Vercel API project.
 
 ## Last Completed Task
 
-2026-06-19: Deployed the Node/TypeScript API to Vercel Functions, configured the React frontend to call it, removed Render deployment configuration, and confirmed API health returns 200.
+2026-06-24: Implemented and validated the clinic-feedback reactivation prototype, including MetaSoft-style CSV mapping, realistic demo data, practice-friendly exports, a responsive React call-list workflow, and updated demo/API documentation.
 
 ## Current Task
 
-Rotate the exposed Atlas password, permit Vercel network access, add the replacement `MONGODB_URI` to `cbos-api`, redeploy the API, and run the production workflow test.
+Publish the verified reactivation prototype to GitHub, rotate the Atlas credential, configure production database access, and deploy the updated frontend and API.
 
-## Remaining Tasks
+## Next Actions
 
-1. Rotate the exposed Atlas database-user password.
-2. Add the Atlas Network Access entry required by Vercel.
-3. Add the replacement Atlas URI to Vercel as sensitive `MONGODB_URI`.
-4. Redeploy `cbos-api`.
-5. Run inquiry, update, KPI, summary, and CSV export smoke tests.
-6. Capture live proof for the portfolio.
+1. Push the verified reactivation branch to GitHub.
+2. Rotate the exposed Atlas database-user password.
+3. Permit the required Vercel network access in Atlas.
+4. Add the replacement Atlas URI to the `cbos-api` Vercel project as sensitive `MONGODB_URI`.
+5. Deploy the updated backend and frontend.
+6. Run the production reactivation, import, update, KPI, summary, and CSV export smoke tests.
+7. Capture updated screenshots for the portfolio and clinic follow-up.
+
+## Known Issues And Blockers
+
+* The exposed Atlas database-user password must be rotated and never reused.
+* `cbos-api` still lacks a working production `MONGODB_URI`, so database-backed production routes remain unavailable.
+* Atlas Network Access must permit Vercel before production data workflows can run.
+* The reactivation prototype is verified locally but not yet deployed.
+* Vercel Hobby and Atlas M0 are demo infrastructure, not the final paying-client hosting plan.
+
+## Reusable Lessons
+
+* Position CBOS as a workflow layer beside ChiroMatrix and MetaSoft, not as an EHR, billing, insurance, or scheduling replacement.
+* A reactivation queue can be derived from `last_visit_date + expected_visit_frequency_days` without duplicating the appointment calendar.
+* Previewing field mappings and duplicates with fake CSV data directly addresses a clinic's migration anxiety.
+* Validate responsive grid containment with rendered browser measurements; TypeScript and build checks do not detect horizontal overflow.
+* Verify database-backed endpoints in addition to `/api/health`.
 
 ## Modified Files
 
+* Backend inquiry model, validation, services, controllers, routes, serializers, sample data, tests, and CSV export logic
+* Frontend types, data hook, API service, navigation, inquiry forms, export preview, reactivation page, and responsive styles
 * `README.md`
-* `package.json`
-* `backend/package.json`
-* `backend/package-lock.json`
-* `backend/src/app.ts`
-* `backend/src/server.ts`
-* `backend/src/services/notificationService.ts`
-* `frontend/package.json`
-* `frontend/package-lock.json`
-* `frontend/index.html`
-* `frontend/src/components/AppShell.tsx`
-* `frontend/src/pages/LoginPage.tsx`
-* `frontend/src/pages/PublicInquiryPage.tsx`
 * `docs/API.md`
-* `docs/INTAKE_EMBED_SNIPPETS.md`
-* `docs/PRODUCTION_DEPLOYMENT.md`
-* `docs/RUNTIME_TROUBLESHOOTING.md`
-* `docs/WORKFLOW_AUTOMATION.md`
-* `render.yaml`
-* `PROJECT_STATUS.md`
-* `NEXT_STEPS.md`
-* `KNOWN_ISSUES.md`
-* `LESSONS_LEARNED.md`
-* `CONTINUE_COMMANDS.md`
+* `docs/DEMO_WALKTHROUGH.md`
+* `docs/METASOFT_REACTIVATION_DEMO.csv`
+* `docs/superpowers/specs/2026-06-24-clinic-reactivation-prototype-design.md`
+* `docs/superpowers/plans/2026-06-24-clinic-reactivation-prototype.md`
 
 ## Current Branch
 
-`main`
+`codex/reactivation-prototype`
 
-## Commands To Continue
+## Verification Status
+
+Passed:
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
 npm run typecheck
-npm run build
 npm run test
-rg -n "CBOS|cbos" -g '!node_modules' -g '!dist' -g '!.git' .
-curl -s http://localhost:4000/api/health
-rg -n "http://localhost:4000/api" frontend/dist frontend/src
-curl -L https://frontend-gold-alpha-31.vercel.app | rg -o '/assets/[^\" ]+\\.js'
-curl -i https://cbos-api.vercel.app/api/health
-curl -i https://cbos-api.vercel.app/api/config
-sed -n '1,220p' docs/PRODUCTION_DEPLOYMENT.md
+npm run build
+git diff --check
 ```
+
+Live local checks passed:
+
+* MongoDB started at `mongodb://127.0.0.1:27017/chiropractic_business_os`.
+* API health and configuration returned successfully.
+* Demo reset seeded eight fake chiropractic records.
+* Reactivation API returned `2 overdue`, `1 due today`, and `1 upcoming`.
+* Five fake MetaSoft-style CSV rows previewed and imported.
+* A repeated preview marked all five rows as duplicates.
+* Follow-up owner/outcome updates persisted.
+* CSV export included practice-friendly reactivation headers.
+* Re-seeding an occupied database inserted zero duplicate sample rows.
+* Browser checks found no relevant console errors.
+* Desktop and mobile dashboard/reactivation views rendered.
+* Mobile horizontal overflow was found, fixed, and revalidated.

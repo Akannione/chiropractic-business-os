@@ -1,0 +1,6 @@
+Patient Name,Phone,Email,Requested Service,Patient Type,Appointment Status,Requested Appointment,Offer Type,Last Visit Date,Visit Frequency Days,Assigned Follow-Up Owner,Follow-Up Outcome,Notes
+Taylor Brooks,404-555-0110,taylor.brooks@example.com,Massage Therapy,Existing Patient,Not Scheduled,Friday 10 AM,Groupon,2026-05-20,30,Front Desk,Left Voicemail,Fake demo record for reactivation follow-up
+Morgan Reed,678-555-0112,morgan.reed@example.com,Spinal Adjustment,Reactivation,Appointment Scheduled,Monday morning,None,2026-06-03,14,Doc,Spoke - Scheduled,Fake demo record returning after a missed visit
+Casey Howard,470-555-0114,casey.howard@example.com,Wellness Consultation,Existing Patient,Not Scheduled,,None,2026-06-10,30,Front Desk,Not Contacted,Fake demo record for a monthly wellness patient
+Jamie Parker,770-555-0116,jamie.parker@example.com,Sports Injury Treatment,New Patient,Not Scheduled,After 4 PM,Other,,,Front Desk,Not Contacted,Fake website inquiry without prior visit history
+Riley Bennett,912-555-0118,riley.bennett@example.com,Neck Pain Evaluation,Dead Lead,Not Scheduled,,None,2026-04-15,30,,No Response,Fake dead lead excluded from the reactivation queue

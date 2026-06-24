@@ -6,105 +6,103 @@
 cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
 ```
 
-## Open In IDE
-
-### VS Code
+## Inspect State
 
 ```bash
-code .
-```
-
-### Cursor
-
-```bash
-cursor .
-```
-
-## Git Status
-
-```bash
-git status
-git branch
+git status --short
+git branch --show-current
 git log --oneline -5
-```
-
-## Environment Setup
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install --upgrade pip
+sed -n '1,260p' PROJECT_STATUS.md
 ```
 
 ## Install Dependencies
 
 ```bash
-npm install
-npm install --prefix backend
-npm install --prefix frontend
 npm run install:all
 ```
 
-## Run Project
+## Start Local Demo
+
+Terminal 1:
 
 ```bash
-npm run dev:backend
-npm run dev:frontend
-npm run dev --prefix backend
-npm run dev --prefix frontend
+cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+mkdir -p .mongo-data
+mongod --dbpath .mongo-data --bind_ip 127.0.0.1 --port 27017
 ```
 
-## Test Project
+Terminal 2:
 
 ```bash
-npm test
-npm test --prefix backend
+cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+BUSINESS_OS_DEMO_MODE=true npm run dev:backend
+```
+
+Terminal 3:
+
+```bash
+cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+npm --prefix frontend run dev -- --host 127.0.0.1
+```
+
+Open:
+
+```text
+http://localhost:5173/
+```
+
+## Validate
+
+```bash
+cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
 npm run typecheck
-npm run typecheck --prefix backend
-npm run typecheck --prefix frontend
+npm run test
 npm run build
+git diff --check
+curl -sS http://localhost:4000/api/health
+curl -sS http://localhost:4000/api/reactivations
+curl -sS -X POST http://localhost:4000/api/imports/inquiries.csv/preview \
+  -H "Content-Type: text/csv" \
+  --data-binary @docs/METASOFT_REACTIVATION_DEMO.csv
 ```
 
-## Validate Outputs
+## Git Handoff
 
 ```bash
-ls -la
-find . -maxdepth 3 -type f | sort
-rg -n "CBOS|cbos" -g '!node_modules' -g '!dist' -g '!.git' .
-curl -s http://localhost:4000/api/health
-rg -n "http://localhost:4000/api" frontend/dist frontend/src
-LIVE_JS_PATH=$(curl -sL https://frontend-gold-alpha-31.vercel.app | rg -o '/assets/[^" ]+\.js' | head -1)
-curl -sL "https://frontend-gold-alpha-31.vercel.app${LIVE_JS_PATH}" | rg -n "http://localhost:4000/api" || true
-curl -i https://cbos-api.vercel.app/api/health
-curl -i https://cbos-api.vercel.app/api/config
-vercel env ls production --cwd backend
-vercel env ls production --cwd frontend
+cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+git status --short
+git diff --check
+git add .
+git commit -m "Add patient reactivation workflow"
+git push -u origin codex/reactivation-prototype
 ```
 
-## Deployment
+## Production Deployment
+
+After rotating the exposed Atlas password:
 
 ```bash
-# After rotating the Atlas password, enter the replacement URI when prompted.
 cd "/Users/tobiloba202/Documents/New project/business_os_mvp/backend"
 vercel env add MONGODB_URI production --sensitive
 vercel deploy --prod --force
-curl https://cbos-api.vercel.app/api/health
-curl https://cbos-api.vercel.app/api/config
+curl -sS https://cbos-api.vercel.app/api/health
+curl -sS https://cbos-api.vercel.app/api/reactivations
+```
 
-# Frontend deployment.
+Deploy the frontend:
+
+```bash
 cd "/Users/tobiloba202/Documents/New project/business_os_mvp/frontend"
 vercel deploy --prod --force
 ```
 
 ## Resume With Codex
 
-Paste this into a new Codex session:
-
 ```text
-Read AGENTS.md, PROJECT_STATUS.md, NEXT_STEPS.md, KNOWN_ISSUES.md, LESSONS_LEARNED.md, and CONTINUE_COMMANDS.md.
-Determine the current project state.
-Run the appropriate continuation commands.
-Continue from the highest-priority unfinished task.
-Do not repeat completed work.
-Before ending, update all continuity files again.
+Read AGENTS.md, PROJECT_STATUS.md, and CONTINUE_COMMANDS.md in
+/Users/tobiloba202/Documents/New project/business_os_mvp.
+Continue from the current production deployment blocker.
+Do not repeat the completed reactivation prototype.
+Rotate/configure Atlas only through secure account flows, then deploy and run the documented production smoke tests.
+Before ending, update the root continuity files, TOBI_OS state, portfolio pipeline, and resume system.
 ```

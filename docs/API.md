@@ -66,7 +66,7 @@ Returns all patient inquiries, sorted newest first.
 
 Creates a staff-entered patient inquiry.
 
-Required JSON fields:
+Example JSON body. The original inquiry fields remain required; the clinic workflow fields are optional:
 
 ```json
 {
@@ -78,13 +78,21 @@ Required JSON fields:
   "status": "New Inquiry",
   "estimated_value": 200,
   "notes": "Asked about first visit.",
-  "next_follow_up_date": "2026-06-12"
+  "next_follow_up_date": "2026-06-12",
+  "appointment_status": "Not Scheduled",
+  "patient_type": "New Patient",
+  "appointment_request": "Friday around 10 AM",
+  "offer_type": "None",
+  "last_visit_date": null,
+  "expected_visit_frequency_days": null,
+  "assigned_follow_up_owner": "Front Desk",
+  "follow_up_outcome": "Not Contacted"
 }
 ```
 
 ### `PATCH /inquiries/:id`
 
-Updates inquiry details, status, notes, and follow-up date.
+Updates inquiry details, status, appointment context, reactivation timing, notes, and follow-up ownership.
 
 JSON body:
 
@@ -101,6 +109,18 @@ JSON body:
   "next_follow_up_date": "2026-06-14"
 }
 ```
+
+All clinic workflow fields are optional. Existing inquiry records remain valid without them.
+
+### `GET /reactivations`
+
+Returns the patient reactivation call list. A patient appears when both `last_visit_date` and `expected_visit_frequency_days` are present. Lost inquiries and dead leads are excluded.
+
+The response groups the calculated return timing into:
+
+- `Overdue`
+- `Due Today`
+- `Upcoming`
 
 ## Automated Intake
 
@@ -141,6 +161,14 @@ Accepted field aliases:
 - `service_needed`, `requested_service`, `service`
 - `source`
 - `notes`, `message`, `Message`
+- `patient_type`, `Patient Type`
+- `appointment_status`, `Appointment Status`
+- `appointment_request`, `requested_appointment`, `Requested Appointment`
+- `offer_type`, `Offer Type`
+- `last_visit_date`, `Last Visit Date`
+- `expected_visit_frequency_days`, `visit_frequency_days`, `Visit Frequency Days`
+- `assigned_follow_up_owner`, `follow_up_owner`, `Assigned Follow-Up Owner`
+- `follow_up_outcome`, `Follow-Up Outcome`
 
 ### `POST /imports/inquiries.csv/preview`
 

@@ -38,6 +38,14 @@ export type AutomatedInquiryInput = {
   source?: string;
   notes?: string;
   estimated_value?: number;
+  appointment_status?: string;
+  patient_type?: string;
+  appointment_request?: string;
+  offer_type?: string;
+  last_visit_date?: string | null;
+  expected_visit_frequency_days?: number | null;
+  assigned_follow_up_owner?: string;
+  follow_up_outcome?: string;
 };
 
 export function normalizeSource(value: unknown) {
@@ -69,6 +77,14 @@ export function buildAutomatedInquiryInput(input: AutomatedInquiryInput, intakeL
     estimated_value: estimateTreatmentValue(serviceNeeded, input.estimated_value),
     notes: String(input.notes || `Submitted from ${intakeLabel}.`).trim(),
     next_follow_up_date: calculateFollowUpDate(source, serviceNeeded),
+    appointment_status: input.appointment_status || 'Not Scheduled',
+    patient_type: input.patient_type || 'New Patient',
+    appointment_request: String(input.appointment_request || '').trim(),
+    offer_type: input.offer_type || 'None',
+    last_visit_date: input.last_visit_date || null,
+    expected_visit_frequency_days: input.expected_visit_frequency_days || null,
+    assigned_follow_up_owner: String(input.assigned_follow_up_owner || '').trim(),
+    follow_up_outcome: input.follow_up_outcome || 'Not Contacted',
   };
 }
 

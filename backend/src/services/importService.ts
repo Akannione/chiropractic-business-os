@@ -5,6 +5,12 @@ import {
   normalizeSource,
 } from './automationService.js';
 import { Inquiry } from '../models/Inquiry.js';
+import {
+  APPOINTMENT_STATUSES,
+  FOLLOW_UP_OUTCOMES,
+  OFFER_TYPES,
+  PATIENT_TYPES,
+} from '../config/constants.js';
 
 type CsvRow = Record<string, string>;
 
@@ -67,7 +73,25 @@ function firstValue(row: CsvRow, keys: string[]) {
   return '';
 }
 
+function enumValue(value: string, options: readonly string[], fallback: string) {
+  const match = options.find((option) => option.toLowerCase() === value.trim().toLowerCase());
+  return match || fallback;
+}
+
+function positiveInteger(value: string) {
+  const number = Number(value);
+  return Number.isInteger(number) && number > 0 ? number : undefined;
+}
+
 export function mapExternalRow(row: CsvRow): AutomatedInquiryInput {
+  const patientType = firstValue(row, ['patient_type', 'Patient Type']);
+  const appointmentStatus = firstValue(row, [
+    'appointment_status',
+    'Appointment Status',
+    'Was Appointment Scheduled',
+  ]);
+  const offerType = firstValue(row, ['offer_type', 'Offer Type', 'Promotion']);
+  const followUpOutcome = firstValue(row, ['follow_up_outcome', 'Follow-Up Outcome']);
   return {
     name: firstValue(row, ['name', 'patient_name', 'full_name', 'Patient Name']),
     phone: firstValue(row, ['phone', 'Phone']),
@@ -76,6 +100,34 @@ export function mapExternalRow(row: CsvRow): AutomatedInquiryInput {
     source: normalizeSource(firstValue(row, ['source', 'Source', 'inquiry_source'])),
     notes: firstValue(row, ['notes', 'message', 'Message', 'Notes']),
     estimated_value: Number(firstValue(row, ['estimated_value', 'Estimated Treatment Value'])) || undefined,
+    patient_type: enumValue(patientType, PATIENT_TYPES, 'New Patient'),
+    appointment_status: enumValue(appointmentStatus, APPOINTMENT_STATUSES, 'Not Scheduled'),
+    appointment_request: firstValue(row, [
+      'appointment_request',
+      'requested_appointment',
+      'Requested Appointment',
+    ]),
+    offer_type: enumValue(offerType, OFFER_TYPES, 'None'),
+    last_visit_date:
+      firstValue(row, ['last_visit_date', 'Last Visit Date']) || null,
+    expected_visit_frequency_days:
+      positiveInteger(
+        firstValue(row, [
+          'expected_visit_frequency_days',
+          'visit_frequency_days',
+          'Visit Frequency Days',
+        ]),
+      ) || null,
+    assigned_follow_up_owner: firstValue(row, [
+      'assigned_follow_up_owner',
+      'follow_up_owner',
+      'Assigned Follow-Up Owner',
+    ]),
+    follow_up_outcome: enumValue(
+      followUpOutcome,
+      FOLLOW_UP_OUTCOMES,
+      'Not Contacted',
+    ),
   };
 }
 
@@ -122,6 +174,7 @@ export async function previewInquiryCsv(csvText: string) {
     if (phoneKey) seenContacts.add(phoneKey);
 
     return {
+      ...row,
       rowNumber: index + 2,
       name: row.name,
       phone: row.phone,

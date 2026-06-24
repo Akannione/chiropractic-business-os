@@ -132,7 +132,30 @@ Then say:
 
 > The owner does not have to rely only on memory or ask staff for a manual update.
 
-### 5. Public Intake
+### 5. Patient Reactivations
+
+Click **Reactivations**.
+
+Show:
+
+- Overdue patients first
+- Due-today patients
+- Last visit date
+- Expected visit frequency
+- Follow-up owner
+- Follow-up outcome
+
+Say:
+
+> This is the gap the clinic described. CBOS calculates when a weekly or monthly patient was expected back and creates a call list without replacing MetaSoft or the appointment calendar.
+
+Then select a patient and update the owner or outcome.
+
+Say:
+
+> The front desk can work the list and record whether they left a voicemail, spoke with the patient, or scheduled the next visit.
+
+### 6. Public Intake
 
 Click **Public Intake**.
 
@@ -152,7 +175,7 @@ Say:
 
 > The source can be tracked automatically, so the practice can start seeing where inquiries are coming from.
 
-### 6. Weekly Summary
+### 7. Weekly Summary
 
 Click **Weekly Summary**.
 
@@ -164,7 +187,7 @@ Then say:
 
 > It is meant to support a quick weekly review, not create a complicated report.
 
-### 7. Exports
+### 8. Exports
 
 Click **Exports**.
 
@@ -175,6 +198,16 @@ Say:
 If they already use spreadsheets, say:
 
 > This can also help clean up an existing inquiry list and bring it into one place.
+
+Mention the fake import file:
+
+```text
+docs/METASOFT_REACTIVATION_DEMO.csv
+```
+
+Say:
+
+> Before importing real information, we preview the clinic's export, confirm the field mapping, identify duplicates, and test with fake data. That directly reduces migration risk.
 
 ## What Not To Claim
 
@@ -237,4 +270,3 @@ Say:
 Say:
 
 > The main value is simple: every inquiry in one place, every follow-up visible, and a weekly view of whether the practice is converting interest into active patients.
-
