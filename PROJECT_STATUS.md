@@ -8,7 +8,7 @@ Full-stack CBOS for small chiropractic practices to capture patient inquiries, t
 
 The clinic-feedback prototype is complete locally and published to GitHub in Pull Request #1: `https://github.com/Akannione/chiropractic-business-os/pull/1`. CBOS now keeps its existing inquiry workflow and adds optional appointment context, patient type, last visit date, expected visit frequency, follow-up ownership, and follow-up outcome. The React app includes a Patient Reactivations call list ordered by overdue, due today, and upcoming return dates.
 
-The demo frontend remains live at `https://frontend-gold-alpha-31.vercel.app`, and the API health endpoint remains live at `https://cbos-api.vercel.app`. The new reactivation work has not been deployed to production yet. Production database workflows remain blocked until the exposed Atlas database-user password is rotated and the replacement `MONGODB_URI` is added to the Vercel API project.
+The demo frontend remains live at `https://frontend-gold-alpha-31.vercel.app`, and the API health endpoint remains live at `https://cbos-api.vercel.app`. Pull Request #1 has a passing Vercel preview build; the preview URL is protected by Vercel Authentication. The new reactivation work has not been deployed to production yet. Production database workflows remain blocked until the exposed Atlas database-user password is rotated and the replacement `MONGODB_URI` is added to the Vercel API project.
 
 ## Last Completed Task
 
@@ -35,6 +35,7 @@ Rotate the Atlas credential, configure production database access, merge Pull Re
 * Atlas Network Access must permit Vercel before production data workflows can run.
 * The reactivation prototype is verified locally but not yet deployed.
 * Pull Request #1 is open and not yet merged into `main`.
+* The Vercel PR preview requires Vercel login, so public clinic demos should continue using the production URL until the PR is merged and deployed.
 * Vercel Hobby and Atlas M0 are demo infrastructure, not the final paying-client hosting plan.
 
 ## Reusable Lessons
@@ -55,6 +56,8 @@ Rotate the Atlas credential, configure production database access, merge Pull Re
 * `docs/METASOFT_REACTIVATION_DEMO.csv`
 * `docs/superpowers/specs/2026-06-24-clinic-reactivation-prototype-design.md`
 * `docs/superpowers/plans/2026-06-24-clinic-reactivation-prototype.md`
+* `package.json`
+* `package-lock.json`
 
 ## Current Branch
 
@@ -85,3 +88,4 @@ Live local checks passed:
 * Browser checks found no relevant console errors.
 * Desktop and mobile dashboard/reactivation views rendered.
 * Mobile horizontal overflow was found, fixed, and revalidated.
+* The GitHub Vercel check initially exposed a missing root lockfile and missing `build:vercel` script; both were fixed and the preview check now passes.
