@@ -13,6 +13,8 @@ This guide keeps the CBOS demo deployment costless: MongoDB Atlas M0 for data an
 
 If a credential is exposed, rotate the Atlas database-user password before continuing.
 
+Current demo note: `cbos-api` production health can return 200 even when database-backed routes fail. If `/api/reactivations` or inquiry routes return 500, first confirm `MONGODB_URI` exists in the `cbos-api` production environment.
+
 ## 2. Vercel Express API
 
 Create a Vercel project with these settings:
@@ -31,6 +33,15 @@ PRACTICE_NAME=CBOS Demo Practice
 AUTH_TOKEN_SECRET=long-random-secret
 BUSINESS_OS_DEMO_MODE=true
 ```
+
+Verify the required variables are present:
+
+```bash
+cd "/Users/tobiloba202/Documents/New project/business_os_mvp/backend"
+vercel env ls production
+```
+
+The list must include `MONGODB_URI`. Vercel hides values, which is expected.
 
 Optional variables:
 
@@ -56,6 +67,14 @@ Health check:
 ```bash
 curl https://cbos-api.vercel.app/api/health
 ```
+
+Database route check:
+
+```bash
+curl https://cbos-api.vercel.app/api/reactivations
+```
+
+If health succeeds but this route fails, the API is deployed but cannot connect to MongoDB.
 
 ## 3. Vercel React Frontend
 

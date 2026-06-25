@@ -8,11 +8,15 @@ Full-stack CBOS for small chiropractic practices to capture patient inquiries, t
 
 The clinic-feedback prototype is complete locally and published to GitHub in Pull Request #1: `https://github.com/Akannione/chiropractic-business-os/pull/1`. CBOS now keeps its existing inquiry workflow and adds optional appointment context, patient type, last visit date, expected visit frequency, follow-up ownership, and follow-up outcome. The React app includes a Patient Reactivations call list ordered by overdue, due today, and upcoming return dates.
 
-The demo frontend remains live at `https://frontend-gold-alpha-31.vercel.app`, and the API health endpoint remains live at `https://cbos-api.vercel.app`. Pull Request #1 has a passing Vercel preview build; the preview URL is protected by Vercel Authentication. The new reactivation work has not been deployed to production yet. Production database workflows remain blocked until the exposed Atlas database-user password is rotated and the replacement `MONGODB_URI` is added to the Vercel API project.
+The demo frontend remains live at `https://frontend-gold-alpha-31.vercel.app`, and the API health endpoint remains live at `https://cbos-api.vercel.app`. Pull Request #1 has passing Vercel checks; the preview URL is protected by Vercel Authentication. The new reactivation work has not been deployed to production yet. Production database workflows remain blocked until the exposed Atlas database-user password is rotated and the replacement `MONGODB_URI` is added to the `cbos-api` Vercel project.
+
+2026-06-25 deployment prep confirmed that `cbos-api` production currently has `AUTH_TOKEN_SECRET`, `BUSINESS_OS_DEMO_MODE`, `PRACTICE_NAME`, and `CORS_ORIGIN`, but it does not have `MONGODB_URI`. The production health endpoint returns 200, while database-backed routes such as `/api/reactivations` return 500.
+
+Uncommitted Dr. McIntyre Canva collateral was preserved in a local stash named `preserve-dr-mcintyre-canva-assets-before-cbos-deploy` so the CBOS deployment branch can stay clean.
 
 ## Last Completed Task
 
-2026-06-24: Implemented, validated, committed, pushed, and opened Pull Request #1 for the clinic-feedback reactivation prototype.
+2026-06-25: Automated deployment-prep checks, cleaned corrupted frontend dependency folders with `npm ci --prefix frontend`, re-ran validation, confirmed PR #1 checks pass, confirmed production health works, and confirmed database-backed production routes fail because `MONGODB_URI` is missing in Vercel.
 
 ## Current Task
 
@@ -22,16 +26,17 @@ Rotate the Atlas credential, configure production database access, merge Pull Re
 
 1. Rotate the exposed Atlas database-user password.
 2. Permit the required Vercel network access in Atlas.
-3. Add the replacement Atlas URI to the `cbos-api` Vercel project as sensitive `MONGODB_URI`.
-4. Review and merge Pull Request #1.
-5. Deploy the updated backend and frontend.
-6. Run the production reactivation, import, update, KPI, summary, and CSV export smoke tests.
-7. Capture updated screenshots for the portfolio and clinic follow-up.
+3. Add the replacement Atlas URI to the `cbos-api` Vercel project as sensitive production `MONGODB_URI`.
+4. Redeploy `cbos-api` and confirm `/api/reactivations` no longer returns 500.
+5. Review and merge Pull Request #1.
+6. Deploy the updated backend and frontend.
+7. Run the production reactivation, import, update, KPI, summary, and CSV export smoke tests.
+8. Capture updated screenshots for the portfolio and clinic follow-up.
 
 ## Known Issues And Blockers
 
 * The exposed Atlas database-user password must be rotated and never reused.
-* `cbos-api` still lacks a working production `MONGODB_URI`, so database-backed production routes remain unavailable.
+* `cbos-api` production lacks `MONGODB_URI`, so database-backed production routes currently return 500.
 * Atlas Network Access must permit Vercel before production data workflows can run.
 * The reactivation prototype is verified locally but not yet deployed.
 * Pull Request #1 is open and not yet merged into `main`.
@@ -68,11 +73,22 @@ Rotate the Atlas credential, configure production database access, merge Pull Re
 Passed:
 
 ```bash
+npm ci --prefix frontend
 npm run typecheck
 npm run test
 npm run build
 git diff --check
+gh pr checks 1
+curl -sS -i https://cbos-api.vercel.app/api/health
+curl -sS -i https://cbos-api.vercel.app/api/reactivations
 ```
+
+Production verification on 2026-06-25:
+
+* `https://cbos-api.vercel.app/api/health` returned `HTTP/2 200`.
+* `https://cbos-api.vercel.app/api/reactivations` returned `HTTP/2 500`, matching the missing `MONGODB_URI` blocker.
+* `vercel env ls production` in `backend/` showed no `MONGODB_URI`.
+* `gh pr checks 1` showed Vercel and Vercel Preview Comments passing.
 
 Live local checks passed:
 
