@@ -150,7 +150,7 @@ The frontend production variable is:
 VITE_API_BASE_URL=https://cbos-api.vercel.app/api
 ```
 
-The API requires `MONGODB_URI` in the `cbos-api` Vercel project before database-backed routes work. Rotate exposed database credentials immediately and add the replacement URI directly in Vercel. Never commit or paste database credentials into documentation, Git, or chat.
+The API stores `MONGODB_URI` as a sensitive production variable in the `cbos-api` Vercel project. The Atlas credential was rotated and the database-backed production workflow was verified on June 29, 2026. Never commit or paste database credentials into documentation, Git, or chat.
 
 This free deployment is for demos and validation. A paying-client deployment should use an appropriate commercial hosting plan and client-specific credentials.
 
@@ -196,6 +196,7 @@ Useful source links:
 More details:
 
 - `docs/DEMO_WALKTHROUGH.md`
+- `docs/CASE_STUDY.md`
 - `docs/API.md`
 - `docs/PRODUCTION_DEPLOYMENT.md`
 - `docs/WORKFLOW_AUTOMATION.md`

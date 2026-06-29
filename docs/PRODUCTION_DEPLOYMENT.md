@@ -13,7 +13,7 @@ This guide keeps the CBOS demo deployment costless: MongoDB Atlas M0 for data an
 
 If a credential is exposed, rotate the Atlas database-user password before continuing.
 
-Current demo note: `cbos-api` production health can return 200 even when database-backed routes fail. If `/api/reactivations` or inquiry routes return 500, first confirm `MONGODB_URI` exists in the `cbos-api` production environment.
+Production proof completed on June 29, 2026: the Atlas credential was rotated, `MONGODB_URI` was stored as a sensitive Vercel production variable, and health plus database-backed workflow routes returned HTTP 200. Continue checking `/api/reactivations` because health alone does not prove database connectivity.
 
 ## 2. Vercel Express API
 

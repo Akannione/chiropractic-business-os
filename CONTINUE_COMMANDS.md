@@ -69,31 +69,33 @@ curl -sS -X POST http://localhost:4000/api/imports/inquiries.csv/preview \
 
 ## Dr. McIntyre Canva Template Package
 
-The current package is website-aligned to the supplied Wix screenshots: bright blue backgrounds, white serif headings, charcoal image borders, off-white testimonial pages, and photo-first layouts.
+The current package is website-aligned to the supplied Wix screenshots and resized for Instagram, Facebook, and LinkedIn: bright blue backgrounds, white serif headings, charcoal image borders, off-white testimonial pages, and photo-first layouts.
 
 Inspect the local Canva-ready deliverables:
 
 ```bash
 cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
-ls -lh outputs/dr_mcintyre_canva/*.pptx
-sed -n '1,220p' outputs/dr_mcintyre_canva/README.md
-open outputs/dr_mcintyre_canva
+ls -lh ../outputs/dr_mcintyre_canva/*.pptx
+sed -n '1,220p' ../outputs/dr_mcintyre_canva/README.md
+open ../outputs/dr_mcintyre_canva
 ```
 
 Preview rendered QA images:
 
 ```bash
 cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
-find outputs/dr_mcintyre_canva/previews -name 'slide-*.png' | wc -l
-open outputs/dr_mcintyre_canva/previews/dr_mcintyre_square_social_template_library/slide-015.png
-open outputs/dr_mcintyre_canva/previews/dr_mcintyre_story_template_library/slide-009.png
-open outputs/dr_mcintyre_canva/previews/dr_mcintyre_carousel_education_library/slide-017.png
+find ../outputs/dr_mcintyre_canva/previews -name 'slide-*.png' | wc -l
+open ../outputs/dr_mcintyre_canva/previews/dr_mcintyre_instagram_feed_square_1080x1080/slide-010.png
+open ../outputs/dr_mcintyre_canva/previews/dr_mcintyre_instagram_feed_portrait_1080x1350/slide-020.png
+open ../outputs/dr_mcintyre_canva/previews/dr_mcintyre_instagram_feed_tall_1080x1440/slide-020.png
+open ../outputs/dr_mcintyre_canva/previews/dr_mcintyre_linkedin_feed_landscape_1200x627/slide-036.png
+open ../outputs/dr_mcintyre_canva/previews/dr_mcintyre_instagram_facebook_story_reel_1080x1920/slide-003.png
 ```
 
 Canva import handoff:
 
 ```text
-Open Canva, create or open the folder "Dr McIntyre Brand Kit", upload the four PPTX files from outputs/dr_mcintyre_canva, then confirm text, shapes, buttons, and photo placeholders remain editable. Replace placeholders with actual clinic website photos where available.
+Open Canva folder https://www.canva.com/folder/FAHNjVVrJ3c, upload the platform-specific PPTX files from ../outputs/dr_mcintyre_canva, then confirm text, shapes, buttons, and photo placeholders remain editable. Replace placeholders with actual clinic website photos where available.
 ```
 
 ## GitHub Pull Request
@@ -122,9 +124,9 @@ cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
 git stash apply stash@{0}
 ```
 
-## Production Deployment
+## Production Verification
 
-Current production blocker:
+Current production endpoints:
 
 ```bash
 cd "/Users/tobiloba202/Documents/New project/business_os_mvp/backend"
@@ -133,28 +135,17 @@ curl -sS -i https://cbos-api.vercel.app/api/health | sed -n '1,40p'
 curl -sS -i https://cbos-api.vercel.app/api/reactivations | sed -n '1,80p'
 ```
 
-Expected before fixing secrets:
+Expected:
 
 ```text
 /api/health returns 200.
-/api/reactivations returns 500 because MONGODB_URI is missing.
+/api/reactivations returns 200 with overdue, dueToday, upcoming, and rows fields.
 ```
 
-Manual account steps that cannot be safely automated without your private Atlas access:
-
-1. Open MongoDB Atlas.
-2. Go to Database Access.
-3. Edit the exposed CBOS database user or create a new least-privilege user.
-4. Generate a new strong password.
-5. Copy the new Atlas connection string and set the database name to `chiropractic_business_os`.
-6. Go to Network Access.
-7. Add the access rule needed for Vercel. For a short demo, `0.0.0.0/0` is the simplest option, but use a strong unique password and replace this with stricter hosting/networking for a paying client.
-
-After rotating the exposed Atlas password, add the new URI to Vercel:
+Redeploy the API only after validation passes:
 
 ```bash
 cd "/Users/tobiloba202/Documents/New project/business_os_mvp/backend"
-vercel env add MONGODB_URI production --sensitive
 vercel env ls production
 vercel deploy --prod --force
 curl -sS https://cbos-api.vercel.app/api/health
@@ -177,14 +168,16 @@ curl -sS https://cbos-api.vercel.app/api/reactivations
 gh pr checks 1
 ```
 
+Do not pull `MONGODB_URI` into a tracked file. If the Atlas credential is exposed again, rotate it before any redeploy and overwrite the Vercel variable as sensitive.
+
 ## Resume With Codex
 
 ```text
 Read AGENTS.md, PROJECT_STATUS.md, and CONTINUE_COMMANDS.md in
 /Users/tobiloba202/Documents/New project/business_os_mvp.
-Continue from the current production deployment blocker.
+Continue from the production-proven CBOS state.
 Do not repeat the completed reactivation prototype.
 Uncommitted Dr. McIntyre Canva collateral is preserved in a Git stash named preserve-dr-mcintyre-canva-assets-before-cbos-deploy.
-Review Pull Request #1. Rotate/configure Atlas only through secure account flows, add production MONGODB_URI to cbos-api, redeploy, then merge/deploy and run the documented production smoke tests.
+Confirm Pull Request #1 is merged. Then use the live demo and docs/CASE_STUDY.md in one controlled clinic validation conversation with fake or sanitized data.
 Before ending, update the root continuity files, TOBI_OS state, portfolio pipeline, and resume system.
 ```
