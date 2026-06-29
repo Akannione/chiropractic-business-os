@@ -8,7 +8,7 @@ Full-stack CBOS for small chiropractic practices to capture patient inquiries, t
 
 Production proven. The React frontend is live at `https://frontend-gold-alpha-31.vercel.app`, the API is live at `https://cbos-api.vercel.app`, and MongoDB Atlas-backed routes are working. The clinic-feedback reactivation workflow is deployed with overdue, due-today, and upcoming queues plus follow-up owner and outcome tracking.
 
-Pull Request #1 contains the clinic-reactivation source changes and the production deployment is verified. Dr. McIntyre Canva collateral remains preserved separately from the deployment branch.
+Pull Request #1 was merged into `main` at commit `b46add8`, so the public source now matches the production deployment. Dr. McIntyre Canva collateral remains preserved separately from the deployment branch.
 
 ## Last Completed Task
 
@@ -20,10 +20,9 @@ Use the production-proven workflow as bounded consulting and portfolio proof wit
 
 ## Next Actions
 
-1. Merge Pull Request #1 after its final checks pass.
-2. Use the live demo and case study in one controlled clinic validation conversation.
-3. Use only fake or sanitized clinic data during demos.
-4. Replace demo infrastructure with client-specific security, hosting, backup, and monitoring before paid production use.
+1. Use the live demo and case study in one controlled clinic validation conversation.
+2. Use only fake or sanitized clinic data during demos.
+3. Replace demo infrastructure with client-specific security, hosting, backup, and monitoring before paid production use.
 
 ## Known Issues And Blockers
 
@@ -47,7 +46,7 @@ Use the production-proven workflow as bounded consulting and portfolio proof wit
 
 ## Current Branch
 
-`codex/reactivation-prototype`
+`main`
 
 ## Verification Status
 

@@ -95,7 +95,7 @@ open ../outputs/dr_mcintyre_canva/previews/dr_mcintyre_instagram_facebook_story_
 Canva import handoff:
 
 ```text
-Open Canva folder https://www.canva.com/folder/FAHNjVVrJ3c, upload the platform-specific PPTX files from ../outputs/dr_mcintyre_canva, then confirm text, shapes, buttons, and photo placeholders remain editable. Replace placeholders with actual clinic website photos where available.
+Open the imported Canva project at https://www.canva.com/folder/FAHN7Tn3DQc. Do not upload the PPTX files again. After the Canva usage limit resets, upload original-resolution clinic, doctor, and staff photos, replace the `Replace photo` elements, and verify representative pages in the Instagram, Facebook, LinkedIn, Stories, Reels, and Templates folders.
 ```
 
 ## GitHub Pull Request
@@ -178,6 +178,6 @@ Read AGENTS.md, PROJECT_STATUS.md, and CONTINUE_COMMANDS.md in
 Continue from the production-proven CBOS state.
 Do not repeat the completed reactivation prototype.
 Uncommitted Dr. McIntyre Canva collateral is preserved in a Git stash named preserve-dr-mcintyre-canva-assets-before-cbos-deploy.
-Confirm Pull Request #1 is merged. Then use the live demo and docs/CASE_STUDY.md in one controlled clinic validation conversation with fake or sanitized data.
+Pull Request #1 is merged. Use the live demo and docs/CASE_STUDY.md in one controlled clinic validation conversation with fake or sanitized data.
 Before ending, update the root continuity files, TOBI_OS state, portfolio pipeline, and resume system.
 ```
