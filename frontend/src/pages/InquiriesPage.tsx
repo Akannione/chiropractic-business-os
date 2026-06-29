@@ -3,7 +3,16 @@ import type { FormEvent } from 'react';
 import { Panel } from '../components/Panel';
 import { StatusChip } from '../components/StatusChip';
 import { api } from '../services/api';
-import type { AppConfig, Inquiry, InquirySource, InquiryStatus } from '../types';
+import type {
+  AppConfig,
+  AppointmentStatus,
+  FollowUpOutcome,
+  Inquiry,
+  InquirySource,
+  InquiryStatus,
+  OfferType,
+  PatientType,
+} from '../types';
 import { displayDate, money, todayIso } from '../utils/format';
 
 type InquiryFormState = {
@@ -16,6 +25,14 @@ type InquiryFormState = {
   estimated_value: number;
   notes: string;
   next_follow_up_date: string;
+  appointment_status: AppointmentStatus;
+  patient_type: PatientType;
+  appointment_request: string;
+  offer_type: OfferType;
+  last_visit_date: string;
+  expected_visit_frequency_days: number | null;
+  assigned_follow_up_owner: string;
+  follow_up_outcome: FollowUpOutcome;
 };
 
 type FollowUpFilter = 'All' | 'Needs Follow-Up' | 'Overdue' | 'Due Today';
@@ -37,6 +54,14 @@ const emptyForm = (config: AppConfig | null): InquiryFormState => ({
   estimated_value: 200,
   notes: '',
   next_follow_up_date: todayIso(),
+  appointment_status: 'Not Scheduled',
+  patient_type: 'New Patient',
+  appointment_request: '',
+  offer_type: 'None',
+  last_visit_date: '',
+  expected_visit_frequency_days: null,
+  assigned_follow_up_owner: '',
+  follow_up_outcome: 'Not Contacted',
 });
 
 const formFromInquiry = (inquiry: Inquiry): InquiryFormState => ({
@@ -49,6 +74,14 @@ const formFromInquiry = (inquiry: Inquiry): InquiryFormState => ({
   estimated_value: inquiry.estimated_value,
   notes: inquiry.notes,
   next_follow_up_date: inquiry.next_follow_up_date || '',
+  appointment_status: inquiry.appointment_status || 'Not Scheduled',
+  patient_type: inquiry.patient_type || 'New Patient',
+  appointment_request: inquiry.appointment_request || '',
+  offer_type: inquiry.offer_type || 'None',
+  last_visit_date: inquiry.last_visit_date || '',
+  expected_visit_frequency_days: inquiry.expected_visit_frequency_days || null,
+  assigned_follow_up_owner: inquiry.assigned_follow_up_owner || '',
+  follow_up_outcome: inquiry.follow_up_outcome || 'Not Contacted',
 });
 
 function matchesFollowUpFilter(inquiry: Inquiry, filter: FollowUpFilter) {
@@ -197,6 +230,115 @@ export function InquiriesPage({ config, inquiries, onChanged, setError }: Inquir
               value={form.next_follow_up_date}
               onChange={(event) => setForm({ ...form, next_follow_up_date: event.target.value })}
             />
+          </label>
+          <div className="form-section-label full">
+            <strong>Clinic Workflow</strong>
+            <span>Optional details used for appointment tracking and patient reactivation.</span>
+          </div>
+          <label>
+            Patient Type
+            <select
+              value={form.patient_type}
+              onChange={(event) =>
+                setForm({ ...form, patient_type: event.target.value as PatientType })
+              }
+            >
+              {(config?.patientTypes || ['New Patient']).map((patientType) => (
+                <option key={patientType}>{patientType}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Appointment Status
+            <select
+              value={form.appointment_status}
+              onChange={(event) =>
+                setForm({
+                  ...form,
+                  appointment_status: event.target.value as AppointmentStatus,
+                })
+              }
+            >
+              {(config?.appointmentStatuses || ['Not Scheduled']).map((appointmentStatus) => (
+                <option key={appointmentStatus}>{appointmentStatus}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Requested Appointment
+            <input
+              value={form.appointment_request}
+              onChange={(event) =>
+                setForm({ ...form, appointment_request: event.target.value })
+              }
+              placeholder="Example: Friday around 10 AM"
+            />
+          </label>
+          <label>
+            Offer Type
+            <select
+              value={form.offer_type}
+              onChange={(event) =>
+                setForm({ ...form, offer_type: event.target.value as OfferType })
+              }
+            >
+              {(config?.offerTypes || ['None']).map((offerType) => (
+                <option key={offerType}>{offerType}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Last Visit Date
+            <input
+              type="date"
+              value={form.last_visit_date}
+              onChange={(event) => setForm({ ...form, last_visit_date: event.target.value })}
+            />
+          </label>
+          <label>
+            Expected Visit Frequency
+            <div className="input-with-suffix">
+              <input
+                min="1"
+                type="number"
+                value={form.expected_visit_frequency_days || ''}
+                onChange={(event) =>
+                  setForm({
+                    ...form,
+                    expected_visit_frequency_days: event.target.value
+                      ? Number(event.target.value)
+                      : null,
+                  })
+                }
+              />
+              <span>days</span>
+            </div>
+          </label>
+          <label>
+            Follow-Up Owner
+            <input
+              value={form.assigned_follow_up_owner}
+              onChange={(event) =>
+                setForm({ ...form, assigned_follow_up_owner: event.target.value })
+              }
+              placeholder="Front Desk, Doctor, or staff name"
+            />
+          </label>
+          <label>
+            Follow-Up Outcome
+            <select
+              value={form.follow_up_outcome}
+              onChange={(event) =>
+                setForm({
+                  ...form,
+                  follow_up_outcome: event.target.value as FollowUpOutcome,
+                })
+              }
+            >
+              {(config?.followUpOutcomes || ['Not Contacted']).map((outcome) => (
+                <option key={outcome}>{outcome}</option>
+              ))}
+            </select>
           </label>
           <label className="full">
             Notes
@@ -347,6 +489,127 @@ export function InquiriesPage({ config, inquiries, onChanged, setError }: Inquir
                   value={detailForm.next_follow_up_date}
                   onChange={(event) => setDetailForm({ ...detailForm, next_follow_up_date: event.target.value })}
                 />
+              </label>
+              <div className="form-section-label full">
+                <strong>Clinic Workflow</strong>
+                <span>Appointment details and return timing used by the reactivation call list.</span>
+              </div>
+              <label>
+                Patient Type
+                <select
+                  value={detailForm.patient_type}
+                  onChange={(event) =>
+                    setDetailForm({
+                      ...detailForm,
+                      patient_type: event.target.value as PatientType,
+                    })
+                  }
+                >
+                  {(config?.patientTypes || ['New Patient']).map((patientType) => (
+                    <option key={patientType}>{patientType}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Appointment Status
+                <select
+                  value={detailForm.appointment_status}
+                  onChange={(event) =>
+                    setDetailForm({
+                      ...detailForm,
+                      appointment_status: event.target.value as AppointmentStatus,
+                    })
+                  }
+                >
+                  {(config?.appointmentStatuses || ['Not Scheduled']).map((appointmentStatus) => (
+                    <option key={appointmentStatus}>{appointmentStatus}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Requested Appointment
+                <input
+                  value={detailForm.appointment_request}
+                  onChange={(event) =>
+                    setDetailForm({
+                      ...detailForm,
+                      appointment_request: event.target.value,
+                    })
+                  }
+                />
+              </label>
+              <label>
+                Offer Type
+                <select
+                  value={detailForm.offer_type}
+                  onChange={(event) =>
+                    setDetailForm({
+                      ...detailForm,
+                      offer_type: event.target.value as OfferType,
+                    })
+                  }
+                >
+                  {(config?.offerTypes || ['None']).map((offerType) => (
+                    <option key={offerType}>{offerType}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Last Visit Date
+                <input
+                  type="date"
+                  value={detailForm.last_visit_date}
+                  onChange={(event) =>
+                    setDetailForm({ ...detailForm, last_visit_date: event.target.value })
+                  }
+                />
+              </label>
+              <label>
+                Expected Visit Frequency
+                <div className="input-with-suffix">
+                  <input
+                    min="1"
+                    type="number"
+                    value={detailForm.expected_visit_frequency_days || ''}
+                    onChange={(event) =>
+                      setDetailForm({
+                        ...detailForm,
+                        expected_visit_frequency_days: event.target.value
+                          ? Number(event.target.value)
+                          : null,
+                      })
+                    }
+                  />
+                  <span>days</span>
+                </div>
+              </label>
+              <label>
+                Follow-Up Owner
+                <input
+                  value={detailForm.assigned_follow_up_owner}
+                  onChange={(event) =>
+                    setDetailForm({
+                      ...detailForm,
+                      assigned_follow_up_owner: event.target.value,
+                    })
+                  }
+                />
+              </label>
+              <label>
+                Follow-Up Outcome
+                <select
+                  value={detailForm.follow_up_outcome}
+                  onChange={(event) =>
+                    setDetailForm({
+                      ...detailForm,
+                      follow_up_outcome: event.target.value as FollowUpOutcome,
+                    })
+                  }
+                >
+                  {(config?.followUpOutcomes || ['Not Contacted']).map((outcome) => (
+                    <option key={outcome}>{outcome}</option>
+                  ))}
+                </select>
               </label>
               <label className="full">
                 Notes

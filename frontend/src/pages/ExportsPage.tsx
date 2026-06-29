@@ -113,6 +113,14 @@ export function ExportsPage({ inquiries, onChanged, setError }: ExportsPageProps
           <span>Requested Service: `service_needed`, `requested_service`, `service`, `Requested Service`</span>
           <span>Source: `source`, `Source`, `inquiry_source`</span>
           <span>Notes: `notes`, `message`, `Message`, `Notes`</span>
+          <span>Patient Type: `patient_type`, `Patient Type`</span>
+          <span>Appointment Status: `appointment_status`, `Appointment Status`, `Was Appointment Scheduled`</span>
+          <span>Requested Appointment: `appointment_request`, `requested_appointment`, `Requested Appointment`</span>
+          <span>Offer Type: `offer_type`, `Offer Type`, `Promotion`</span>
+          <span>Last Visit Date: `last_visit_date`, `Last Visit Date`</span>
+          <span>Visit Frequency: `expected_visit_frequency_days`, `visit_frequency_days`, `Visit Frequency Days`</span>
+          <span>Follow-Up Owner: `assigned_follow_up_owner`, `follow_up_owner`, `Assigned Follow-Up Owner`</span>
+          <span>Follow-Up Outcome: `follow_up_outcome`, `Follow-Up Outcome`</span>
         </div>
       </div>
 
@@ -134,6 +142,8 @@ export function ExportsPage({ inquiries, onChanged, setError }: ExportsPageProps
                     <th>Row</th>
                     <th>Patient</th>
                     <th>Requested Service</th>
+                    <th>Patient Type</th>
+                    <th>Last Visit</th>
                     <th>Source</th>
                     <th>Status</th>
                   </tr>
@@ -148,6 +158,8 @@ export function ExportsPage({ inquiries, onChanged, setError }: ExportsPageProps
                         <small>{row.email || row.phone}</small>
                       </td>
                       <td>{row.service_needed}</td>
+                      <td>{row.patient_type}</td>
+                      <td>{row.last_visit_date || 'Not provided'}</td>
                       <td>{row.source}</td>
                       <td>
                         {row.duplicate

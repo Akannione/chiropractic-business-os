@@ -9,6 +9,7 @@ import {
   LogOut,
   Plus,
   RefreshCw,
+  RotateCcw,
   Settings,
   Users,
 } from 'lucide-react';
@@ -53,6 +54,13 @@ export function AppShell({
           </NavButton>
           <NavButton icon={<Users />} active={view === 'inquiries'} onClick={() => onViewChange('inquiries')}>
             Patient Inquiries
+          </NavButton>
+          <NavButton
+            icon={<RotateCcw />}
+            active={view === 'reactivations'}
+            onClick={() => onViewChange('reactivations')}
+          >
+            Reactivations
           </NavButton>
           <NavButton icon={<FileText />} active={view === 'summary'} onClick={() => onViewChange('summary')}>
             Weekly Summary

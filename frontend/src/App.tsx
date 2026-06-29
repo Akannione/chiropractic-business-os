@@ -8,6 +8,7 @@ import { LoginPage } from './pages/LoginPage';
 import { ActivityPage } from './pages/ActivityPage';
 import { MonthlySummaryPage } from './pages/MonthlySummaryPage';
 import { PublicInquiryPage } from './pages/PublicInquiryPage';
+import { ReactivationsPage } from './pages/ReactivationsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { WeeklySummaryPage } from './pages/WeeklySummaryPage';
 import { api, clearAuthToken, getAuthToken } from './services/api';
@@ -54,6 +55,7 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
     inquiries,
     kpis,
     monthlySummary,
+    reactivations,
     summary,
     message,
     error,
@@ -89,6 +91,14 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
       )}
       {view === 'inquiries' && (
         <InquiriesPage config={config} inquiries={inquiries} onChanged={refreshWithMessage} setError={setError} />
+      )}
+      {view === 'reactivations' && (
+        <ReactivationsPage
+          config={config}
+          queue={reactivations}
+          onChanged={refreshWithMessage}
+          setError={setError}
+        />
       )}
       {view === 'summary' && <WeeklySummaryPage summary={summary} />}
       {view === 'monthly' && <MonthlySummaryPage summary={monthlySummary} />}

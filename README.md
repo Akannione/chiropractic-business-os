@@ -1,6 +1,6 @@
 # CBOS
 
-A focused full-stack web app for chiropractic practices to capture patient inquiries, track follow-ups, review practice KPIs, and export inquiry data.
+A focused full-stack web app for chiropractic practices to capture patient inquiries, track follow-ups and patient reactivations, review practice KPIs, and export inquiry data.
 
 ## Current Stack
 
@@ -14,6 +14,8 @@ A focused full-stack web app for chiropractic practices to capture patient inqui
 
 - Captures patient inquiries from staff entry and public intake forms
 - Tracks inquiry status and follow-up dates
+- Builds a patient reactivation call list from last visit date and expected visit frequency
+- Records appointment status, patient type, offer context, follow-up owner, and follow-up outcome
 - Shows a dashboard follow-up workflow with one-click actions for urgent inquiries
 - Shows practice KPIs such as active patients, follow-ups needed, overdue follow-ups, estimated treatment value, and inquiry-to-patient rate
 - Provides a printable and downloadable weekly practice summary
@@ -58,6 +60,7 @@ business_os_mvp/
     PRODUCTION_DEPLOYMENT.md
     RUNTIME_TROUBLESHOOTING.md
     WORKFLOW_AUTOMATION.md
+    METASOFT_REACTIVATION_DEMO.csv
   package.json
   README.md
 ```
@@ -147,7 +150,7 @@ The frontend production variable is:
 VITE_API_BASE_URL=https://cbos-api.vercel.app/api
 ```
 
-The API requires `MONGODB_URI` in the `cbos-api` Vercel project before database-backed routes work. Rotate exposed database credentials immediately and add the replacement URI directly in Vercel. Never commit or paste database credentials into documentation, Git, or chat.
+The API stores `MONGODB_URI` as a sensitive production variable in the `cbos-api` Vercel project. The Atlas credential was rotated and the database-backed production workflow was verified on June 29, 2026. Never commit or paste database credentials into documentation, Git, or chat.
 
 This free deployment is for demos and validation. A paying-client deployment should use an appropriate commercial hosting plan and client-specific credentials.
 
@@ -178,6 +181,7 @@ POST /api/imports/inquiries.csv
 ```
 
 The preview route flags duplicate email or phone matches and rows with missing required fields before the import runs.
+It also accepts optional clinic workflow columns such as patient type, appointment status, last visit date, visit frequency, follow-up owner, and follow-up outcome. Use `docs/METASOFT_REACTIVATION_DEMO.csv` as a fake-data import example before working with a real practice export.
 
 Useful source links:
 
@@ -192,11 +196,13 @@ Useful source links:
 More details:
 
 - `docs/DEMO_WALKTHROUGH.md`
+- `docs/CASE_STUDY.md`
 - `docs/API.md`
 - `docs/PRODUCTION_DEPLOYMENT.md`
 - `docs/WORKFLOW_AUTOMATION.md`
 - `docs/INTAKE_EMBED_SNIPPETS.md`
 - `docs/CSV_IMPORT_EXAMPLE.csv`
+- `docs/METASOFT_REACTIVATION_DEMO.csv`
 
 ## Verification
 
@@ -223,4 +229,8 @@ Expected response:
 
 ## Scope
 
-This app intentionally does not include authentication, payments, EHR features, insurance workflows, appointment scheduling, or AI patient replies. It is kept focused on inquiry capture, follow-up visibility, lightweight reporting, and demo-ready automation.
+This app intentionally does not include payments, EHR features, insurance workflows, appointment scheduling, or AI patient replies. Optional staff access protection is available, but the product remains focused on inquiry capture, follow-up and reactivation visibility, lightweight reporting, and demo-ready automation.
+
+## Clinic Workflow Boundary
+
+CBOS complements systems such as ChiroMatrix and MetaSoft. It does not replace the practice website, EHR, billing, insurance, or appointment calendar. Existing CSV exports can be previewed and imported, while the reactivation queue gives staff a focused list of patients whose expected return date is overdue, due today, or upcoming.

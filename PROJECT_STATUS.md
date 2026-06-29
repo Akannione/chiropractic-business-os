@@ -2,72 +2,69 @@
 
 ## Project Purpose
 
-Full-stack CBOS for small chiropractic practices to capture patient inquiries, track follow-ups, review KPIs, import/export CSV data, and support a simple owner-facing operations workflow.
+Full-stack CBOS for small chiropractic practices to capture patient inquiries, track follow-ups and patient reactivations, review practice KPIs, import/export CSV data, and support a simple owner-facing operations workflow.
 
 ## Current State
 
-CBOS now uses Vercel for both demo deployments. The React frontend is live at `https://frontend-gold-alpha-31.vercel.app`, and the Express API is live as a Vercel Function at `https://cbos-api.vercel.app`. The frontend points to the API, API health returns 200, CORS is configured, and Render configuration has been removed. Database-backed routes remain blocked until the exposed Atlas database-user password is rotated and the replacement `MONGODB_URI` is added to `cbos-api`.
+Production proven. The React frontend is live at `https://frontend-gold-alpha-31.vercel.app`, the API is live at `https://cbos-api.vercel.app`, and MongoDB Atlas-backed routes are working. The clinic-feedback reactivation workflow is deployed with overdue, due-today, and upcoming queues plus follow-up owner and outcome tracking.
+
+Pull Request #1 contains the clinic-reactivation source changes and the production deployment is verified. Dr. McIntyre Canva collateral remains preserved separately from the deployment branch.
 
 ## Last Completed Task
 
-2026-06-19: Deployed the Node/TypeScript API to Vercel Functions, configured the React frontend to call it, removed Render deployment configuration, and confirmed API health returns 200.
+2026-06-29: Rotated the Atlas database-user password, added the replacement URI to Vercel as sensitive `MONGODB_URI`, added the required demo network rule, redeployed the API and frontend, and passed production API and WebKit browser smoke tests.
 
 ## Current Task
 
-Rotate the exposed Atlas password, permit Vercel network access, add the replacement `MONGODB_URI` to `cbos-api`, redeploy the API, and run the production workflow test.
+Use the production-proven workflow as bounded consulting and portfolio proof without expanding CBOS into a full practice-management platform.
 
-## Remaining Tasks
+## Next Actions
 
-1. Rotate the exposed Atlas database-user password.
-2. Add the Atlas Network Access entry required by Vercel.
-3. Add the replacement Atlas URI to Vercel as sensitive `MONGODB_URI`.
-4. Redeploy `cbos-api`.
-5. Run inquiry, update, KPI, summary, and CSV export smoke tests.
-6. Capture live proof for the portfolio.
+1. Merge Pull Request #1 after its final checks pass.
+2. Use the live demo and case study in one controlled clinic validation conversation.
+3. Use only fake or sanitized clinic data during demos.
+4. Replace demo infrastructure with client-specific security, hosting, backup, and monitoring before paid production use.
+
+## Known Issues And Blockers
+
+* Vercel Hobby and Atlas M0 are demo infrastructure, not the final paying-client hosting plan.
+* Atlas permits public network access for Vercel's dynamic demo egress; the strong unique database credential limits access, but paid deployment should use stricter infrastructure.
+* The local frontend dependency tree can become corrupted by generated duplicate `@types` folders; `npm ci --prefix frontend` is the verified repair.
+
+## Reusable Lessons
+
+* Verify database-backed endpoints in addition to `/api/health`.
+* Keep CBOS positioned as a follow-up and reactivation layer beside existing practice systems.
+* A production screenshot, route-level smoke test, and concise case study are stronger portfolio proof than a designed mockup.
 
 ## Modified Files
 
+* Production environment configuration in Atlas and Vercel
+* `docs/CASE_STUDY.md`
 * `README.md`
-* `package.json`
-* `backend/package.json`
-* `backend/package-lock.json`
-* `backend/src/app.ts`
-* `backend/src/server.ts`
-* `backend/src/services/notificationService.ts`
-* `frontend/package.json`
-* `frontend/package-lock.json`
-* `frontend/index.html`
-* `frontend/src/components/AppShell.tsx`
-* `frontend/src/pages/LoginPage.tsx`
-* `frontend/src/pages/PublicInquiryPage.tsx`
-* `docs/API.md`
-* `docs/INTAKE_EMBED_SNIPPETS.md`
 * `docs/PRODUCTION_DEPLOYMENT.md`
-* `docs/RUNTIME_TROUBLESHOOTING.md`
-* `docs/WORKFLOW_AUTOMATION.md`
-* `render.yaml`
-* `PROJECT_STATUS.md`
-* `NEXT_STEPS.md`
-* `KNOWN_ISSUES.md`
-* `LESSONS_LEARNED.md`
-* `CONTINUE_COMMANDS.md`
+* Continuity documents
 
 ## Current Branch
 
-`main`
+`codex/reactivation-prototype`
 
-## Commands To Continue
+## Verification Status
+
+Passed on June 29, 2026:
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
 npm run typecheck
-npm run build
 npm run test
-rg -n "CBOS|cbos" -g '!node_modules' -g '!dist' -g '!.git' .
-curl -s http://localhost:4000/api/health
-rg -n "http://localhost:4000/api" frontend/dist frontend/src
-curl -L https://frontend-gold-alpha-31.vercel.app | rg -o '/assets/[^\" ]+\\.js'
-curl -i https://cbos-api.vercel.app/api/health
-curl -i https://cbos-api.vercel.app/api/config
-sed -n '1,220p' docs/PRODUCTION_DEPLOYMENT.md
+npm run build
+curl https://cbos-api.vercel.app/api/health
+curl https://cbos-api.vercel.app/api/reactivations
+curl https://cbos-api.vercel.app/api/kpis
 ```
+
+Production evidence:
+
+* API deployment status: Ready
+* Health, config, reactivations, KPIs, weekly summary, and monthly summary: HTTP 200
+* Desktop WebKit: content loaded, API requests returned 200, no console errors
+* Mobile WebKit at 390x844: no console errors or page-level horizontal overflow

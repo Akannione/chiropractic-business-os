@@ -8,6 +8,7 @@ export async function exportInquiriesCsv(_req: Request, res: Response) {
   const rows = inquiries.map((inquiry) => ({
     ...inquiry,
     next_follow_up_date: formatDate(inquiry.next_follow_up_date),
+    last_visit_date: formatDate(inquiry.last_visit_date),
   }));
   res.header('Content-Type', 'text/csv');
   res.attachment(`patient_inquiries_${new Date().toISOString().slice(0, 10)}.csv`);
