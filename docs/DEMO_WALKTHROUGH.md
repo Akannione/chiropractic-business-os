@@ -36,6 +36,22 @@ Then state the value:
 
 ## Demo Setup
 
+Production demo:
+
+```text
+https://frontend-gold-alpha-31.vercel.app
+```
+
+Production case study:
+
+```text
+https://github.com/Akannione/chiropractic-business-os/blob/main/docs/CASE_STUDY.md
+```
+
+Use only fake or sanitized data. Do not enter patient information during an initial validation call.
+
+Local fallback:
+
 Local app URL:
 
 ```text
@@ -52,6 +68,80 @@ If the browser does not load, hard refresh with:
 
 ```text
 Cmd + Shift + R
+```
+
+## 20-Minute Validation Plan
+
+### Minutes 0-3: Current Workflow
+
+Ask:
+
+1. Where do new inquiries and missed follow-ups live today?
+2. How does staff know who needs a call today?
+3. How are inactive patients selected for reactivation?
+
+Do not demo until the current workflow and pain point are clear.
+
+### Minutes 3-10: Live Reactivation Workflow
+
+Show only:
+
+- overdue, due-today, and upcoming counts
+- timing and owner filters
+- the prioritized call list
+- follow-up owner and outcome
+
+Ask the staff member to identify the first patient they would call from the fake queue and explain why.
+
+### Minutes 10-15: Fake CSV Fit
+
+Use `docs/METASOFT_REACTIVATION_DEMO.csv` to explain the preview, field mapping, and duplicate checks. Ask which columns their existing export includes and which fields staff already maintain.
+
+### Minutes 15-20: Decision Questions
+
+Ask:
+
+1. Would this make today's follow-up work easier to see?
+2. Which person would own the queue?
+3. What information is missing from the call list?
+4. What would stop the office from testing this with sanitized data?
+5. Is a short fake-data pilot worth scheduling?
+
+## Validation Measures
+
+Record evidence rather than general reactions:
+
+| Measure | Current Workflow | CBOS Walkthrough | Result |
+|---|---|---|---|
+| Time to identify the first overdue follow-up |  |  |  |
+| Staff member can explain queue ownership |  |  |  |
+| Required CSV fields are available |  |  |  |
+| Missing workflow field or objection |  |  |  |
+| Fake-data pilot decision |  |  | Go / Revise / Stop |
+
+Proceed to a pilot only when the practice identifies a real follow-up gap, assigns an owner, and can provide a fake or sanitized export. Revise when one missing field blocks the workflow. Stop when the existing system already solves the problem clearly or staff will not use another daily queue.
+
+## Ready-To-Send Invite
+
+Subject:
+
+```text
+20-minute follow-up and reactivation workflow walkthrough
+```
+
+Message:
+
+```text
+Hi Dr. McIntyre,
+
+I used the clinic feedback to finish a focused follow-up and patient reactivation workflow. It does not replace ChiroTouch, MetaSoft, scheduling, billing, or the EHR. It gives the front desk one call list for overdue, due-today, and upcoming patients, with a follow-up owner and outcome.
+
+Could we do a 20-minute walkthrough using only fake data? I want to confirm whether the queue matches the way the office actually works and identify anything that would block a small pilot.
+
+Live demo: https://frontend-gold-alpha-31.vercel.app
+
+Best,
+Tobi
 ```
 
 ## Demo Flow

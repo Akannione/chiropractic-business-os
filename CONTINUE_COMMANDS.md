@@ -106,6 +106,18 @@ gh pr view 1 --web
 gh pr checks 1
 ```
 
+## Clinic Validation
+
+Review the production walkthrough, decision measures, and ready-to-send invite:
+
+```bash
+cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+sed -n '1,320p' docs/DEMO_WALKTHROUGH.md
+open -a Safari https://frontend-gold-alpha-31.vercel.app
+```
+
+Do not send the invite or enter real patient data without Tobi's approval. During the first walkthrough, use only the production demo's fake records or `docs/METASOFT_REACTIVATION_DEMO.csv`.
+
 ## Preserved Local Collateral
 
 Dr. McIntyre Canva collateral was preserved before deployment work so it does not clutter the CBOS deployment branch.
@@ -178,6 +190,6 @@ Read AGENTS.md, PROJECT_STATUS.md, and CONTINUE_COMMANDS.md in
 Continue from the production-proven CBOS state.
 Do not repeat the completed reactivation prototype.
 Uncommitted Dr. McIntyre Canva collateral is preserved in a Git stash named preserve-dr-mcintyre-canva-assets-before-cbos-deploy.
-Pull Request #1 is merged. Use the live demo and docs/CASE_STUDY.md in one controlled clinic validation conversation with fake or sanitized data.
+Pull Request #1 is merged and production proof is complete. Review the ready-to-send invite and measured 20-minute plan in docs/DEMO_WALKTHROUGH.md. Send only after Tobi approves the external message, then record the clinic's workflow evidence and Go / Revise / Stop decision.
 Before ending, update the root continuity files, TOBI_OS state, portfolio pipeline, and resume system.
 ```

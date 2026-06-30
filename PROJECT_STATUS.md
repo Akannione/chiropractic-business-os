@@ -16,12 +16,12 @@ Pull Request #1 was merged into `main` at commit `b46add8`, so the public source
 
 ## Current Task
 
-Use the production-proven workflow as bounded consulting and portfolio proof without expanding CBOS into a full practice-management platform.
+Run one measured clinic validation walkthrough with fake or sanitized data without expanding CBOS into a full practice-management platform.
 
 ## Next Actions
 
-1. Use the live demo and case study in one controlled clinic validation conversation.
-2. Use only fake or sanitized clinic data during demos.
+1. Send the ready-to-use invite in `docs/DEMO_WALKTHROUGH.md` after Tobi approves the external message.
+2. Run the 20-minute validation plan and record the decision measures.
 3. Replace demo infrastructure with client-specific security, hosting, backup, and monitoring before paid production use.
 
 ## Known Issues And Blockers

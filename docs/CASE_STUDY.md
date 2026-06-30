@@ -44,4 +44,4 @@ The workflow gives staff one prioritized call list instead of requiring them to 
 
 ## Next Validation Step
 
-Run a controlled clinic walkthrough with fake or sanitized CSV data and measure whether staff can identify and action missed follow-ups faster than their current workflow.
+Run the measured 20-minute walkthrough in `docs/DEMO_WALKTHROUGH.md` with fake or sanitized CSV data. Record time-to-first-overdue-follow-up, queue ownership, available export fields, objections, and the pilot decision.
