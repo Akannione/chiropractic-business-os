@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
-    "test": "tsx src/tests/service.test.ts"
+    "test": "tsx src/tests/service.test.ts",
+    "smoke:reactivation": "tsx src/scripts/reactivationSmoke.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -173,6 +173,7 @@ Accepted field aliases:
 ### `POST /imports/inquiries.csv/preview`
 
 Previews an existing inquiry CSV before import. The response flags duplicate emails or phone numbers and rows with missing required fields.
+Quoted fields may contain commas, escaped double quotes, and line breaks. Blank clinic workflow fields remain optional. Nonblank `Last Visit Date` values must use `YYYY-MM-DD` and represent a real date, while nonblank `Visit Frequency Days` values must be positive whole numbers.
 
 Header:
 

@@ -12,37 +12,46 @@ Pull Request #1 was merged into `main` at commit `b46add8`, so the public source
 
 ## Last Completed Task
 
-2026-06-29: Rotated the Atlas database-user password, added the replacement URI to Vercel as sensitive `MONGODB_URI`, added the required demo network rule, redeployed the API and frontend, and passed production API and WebKit browser smoke tests.
+2026-06-29: Sent the approved 20-minute clinic-validation invite to the clinic contact.
 
 ## Current Task
 
-Run one measured clinic validation walkthrough with fake or sanitized data without expanding CBOS into a full practice-management platform.
+Await Dr. McIntyre's reply without resending the original invite. If there is no response by July 2, send one concise follow-up; when accepted, run the measured 20-minute clinic-validation walkthrough with fake data and record the Go / Revise / Stop decision.
 
 ## Next Actions
 
-1. Send the ready-to-use invite in `docs/DEMO_WALKTHROUGH.md` after Tobi approves the external message.
-2. Run the 20-minute validation plan and record the decision measures.
-3. Replace demo infrastructure with client-specific security, hosting, backup, and monitoring before paid production use.
+1. Wait for Dr. McIntyre's reply in the existing Gmail thread; do not resend the invite.
+2. If there is no response by July 2, send one concise follow-up in the existing thread.
+3. When he provides availability, schedule and run the 20-minute fake-data walkthrough in `docs/DEMO_WALKTHROUGH.md`.
+4. Record the decision measures and Go / Revise / Stop outcome before changing product scope.
 
 ## Known Issues And Blockers
 
 * Vercel Hobby and Atlas M0 are demo infrastructure, not the final paying-client hosting plan.
 * Atlas permits public network access for Vercel's dynamic demo egress; the strong unique database credential limits access, but paid deployment should use stricter infrastructure.
 * The local frontend dependency tree can become corrupted by generated duplicate `@types` folders; `npm ci --prefix frontend` is the verified repair.
+* The live clinic walkthrough now depends on Dr. McIntyre replying with availability; the approved invite was sent June 29, 2026, and the single follow-up checkpoint is July 2.
 
 ## Reusable Lessons
 
 * Verify database-backed endpoints in addition to `/api/health`.
 * Keep CBOS positioned as a follow-up and reactivation layer beside existing practice systems.
 * A production screenshot, route-level smoke test, and concise case study are stronger portfolio proof than a designed mockup.
+* Validate raw optional CSV values before mapping so malformed clinic data cannot silently become blank fields.
+* Destructive smoke workflows should verify demo mode, require explicit remote opt-in, and restore a known baseline in cleanup.
 
 ## Modified Files
 
-* Production environment configuration in Atlas and Vercel
-* `docs/CASE_STUDY.md`
+* `backend/src/services/reactivationService.ts`
+* `backend/src/services/importService.ts`
+* `backend/src/tests/service.test.ts`
+* `backend/src/scripts/reactivationSmoke.ts`
+* `backend/package.json`
+* `package.json`
 * `README.md`
-* `docs/PRODUCTION_DEPLOYMENT.md`
-* Continuity documents
+* `docs/API.md`
+* `PROJECT_STATUS.md`
+* `CONTINUE_COMMANDS.md`
 
 ## Current Branch
 
@@ -50,16 +59,20 @@ Run one measured clinic validation walkthrough with fake or sanitized data witho
 
 ## Verification Status
 
-Passed on June 29, 2026:
+Passed on June 29, 2026 after the reactivation contract, defensive CSV, and automated smoke-workflow updates:
 
 ```bash
 npm run typecheck
 npm run test
 npm run build
+npm run smoke:reactivation -- --help
+npm run smoke:reactivation
 curl https://cbos-api.vercel.app/api/health
 curl https://cbos-api.vercel.app/api/reactivations
 curl https://cbos-api.vercel.app/api/kpis
 ```
+
+`npm run test` now covers the nine-case CSV-ingestion matrix, the complete smoke-workflow orchestration through an isolated fake API, and populated/empty `/api/reactivations` response contracts without MongoDB. The real command also passed against the local demo stack: 5 rows previewed and imported, 3 eligible reactivation rows verified, one follow-up updated and exported, and cleanup restored 8 sample records. The remote production demo was not reset.
 
 Production evidence:
 

@@ -182,6 +182,7 @@ POST /api/imports/inquiries.csv
 
 The preview route flags duplicate email or phone matches and rows with missing required fields before the import runs.
 It also accepts optional clinic workflow columns such as patient type, appointment status, last visit date, visit frequency, follow-up owner, and follow-up outcome. Use `docs/METASOFT_REACTIVATION_DEMO.csv` as a fake-data import example before working with a real practice export.
+Quoted CSV fields can contain commas, escaped double quotes, and line breaks. Nonblank last-visit dates must be real `YYYY-MM-DD` dates, and visit-frequency values must be positive whole numbers; invalid values are reported during preview instead of being imported silently.
 
 Useful source links:
 
@@ -226,6 +227,27 @@ Expected response:
 ```json
 {"ok":true,"service":"CBOS API"}
 ```
+
+### Automated Reactivation Smoke Workflow
+
+With the local backend running in demo mode, execute the complete fake-data workflow:
+
+```bash
+npm run smoke:reactivation
+```
+
+The command uses `docs/METASOFT_REACTIVATION_DEMO.csv`, verifies preview and import counts, confirms eligible rows enter the reactivation queue, updates one follow-up, verifies the CSV export, and restores sample data in cleanup. It refuses APIs without demo mode and refuses non-local resets unless explicitly allowed.
+
+When staff authentication is enabled, provide a bearer token through `CBOS_AUTH_TOKEN`. A remote demo run must also set `CBOS_SMOKE_ALLOW_REMOTE_RESET=true`:
+
+```bash
+CBOS_API_BASE_URL=https://cbos-api.vercel.app/api \
+CBOS_AUTH_TOKEN='replace-with-temporary-token' \
+CBOS_SMOKE_ALLOW_REMOTE_RESET=true \
+npm run smoke:reactivation
+```
+
+Do not run the reset workflow against client or non-demo data.
 
 ## Scope
 

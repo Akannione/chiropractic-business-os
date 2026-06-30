@@ -38,6 +38,13 @@ export type ReactivationRow = {
   next_follow_up_date: string;
 };
 
+export type ReactivationQueue = {
+  rows: ReactivationRow[];
+  overdue: number;
+  dueToday: number;
+  upcoming: number;
+};
+
 const dayInMilliseconds = 24 * 60 * 60 * 1000;
 
 function normalizeDay(value: Date | string) {
@@ -51,7 +58,7 @@ function normalizeDay(value: Date | string) {
 export function buildReactivationQueue(
   inquiries: ReactivationInquiry[],
   today = startOfToday(),
-) {
+): ReactivationQueue {
   const currentDay = normalizeDay(today) || startOfToday();
 
   const rows = inquiries.flatMap<ReactivationRow>((inquiry) => {

@@ -11,6 +11,7 @@ import {
   OFFER_TYPES,
   PATIENT_TYPES,
 } from '../config/constants.js';
+import { formatDate, parseDateOnly } from '../utils/date.js';
 
 type CsvRow = Record<string, string>;
 
@@ -24,41 +25,60 @@ type ImportPreviewRow = AutomatedInquiryInput & {
 
 const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const phonePattern = /^\+?[0-9][0-9\s().-]{6,19}$/;
+const lastVisitDateKeys = ['last_visit_date', 'Last Visit Date'];
+const visitFrequencyKeys = [
+  'expected_visit_frequency_days',
+  'visit_frequency_days',
+  'Visit Frequency Days',
+];
 
-function parseCsvLine(line: string) {
-  const values: string[] = [];
+function parseCsvRows(csvText: string) {
+  const rows: string[][] = [];
+  let row: string[] = [];
   let current = '';
   let quoted = false;
 
-  for (let index = 0; index < line.length; index += 1) {
-    const char = line[index];
-    const next = line[index + 1];
+  const pushField = () => {
+    row.push(current.trim());
+    current = '';
+  };
+  const pushRow = () => {
+    pushField();
+    if (row.some((value) => value.length > 0)) rows.push(row);
+    row = [];
+  };
+
+  for (let index = 0; index < csvText.length; index += 1) {
+    const char = csvText[index];
+    const next = csvText[index + 1];
     if (char === '"' && quoted && next === '"') {
       current += '"';
       index += 1;
     } else if (char === '"') {
       quoted = !quoted;
     } else if (char === ',' && !quoted) {
-      values.push(current.trim());
-      current = '';
+      pushField();
+    } else if ((char === '\n' || char === '\r') && !quoted) {
+      if (char === '\r' && next === '\n') index += 1;
+      pushRow();
+    } else if ((char === '\n' || char === '\r') && quoted) {
+      if (char === '\r' && next === '\n') index += 1;
+      current += '\n';
     } else {
       current += char;
     }
   }
-  values.push(current.trim());
-  return values;
+
+  if (current || row.length > 0) pushRow();
+  return rows;
 }
 
 export function parseInquiryCsv(csvText: string): CsvRow[] {
-  const lines = csvText
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  if (lines.length < 2) return [];
+  const csvRows = parseCsvRows(csvText);
+  if (csvRows.length < 2) return [];
 
-  const headers = parseCsvLine(lines[0]).map((header) => header.trim());
-  return lines.slice(1).map((line) => {
-    const values = parseCsvLine(line);
+  const headers = csvRows[0].map((header) => header.trim());
+  return csvRows.slice(1).map((values) => {
     return headers.reduce<CsvRow>((row, header, index) => {
       row[header] = values[index] || '';
       return row;
@@ -109,15 +129,9 @@ export function mapExternalRow(row: CsvRow): AutomatedInquiryInput {
     ]),
     offer_type: enumValue(offerType, OFFER_TYPES, 'None'),
     last_visit_date:
-      firstValue(row, ['last_visit_date', 'Last Visit Date']) || null,
+      firstValue(row, lastVisitDateKeys) || null,
     expected_visit_frequency_days:
-      positiveInteger(
-        firstValue(row, [
-          'expected_visit_frequency_days',
-          'visit_frequency_days',
-          'Visit Frequency Days',
-        ]),
-      ) || null,
+      positiveInteger(firstValue(row, visitFrequencyKeys)) || null,
     assigned_follow_up_owner: firstValue(row, [
       'assigned_follow_up_owner',
       'follow_up_owner',
@@ -139,17 +153,32 @@ function normalizePhone(value: string) {
   return value.replace(/\D/g, '');
 }
 
-function validatePreviewRow(row: AutomatedInquiryInput) {
+function validDateOnly(value: string) {
+  const normalized = value.trim();
+  const parsed = parseDateOnly(normalized);
+  return /^\d{4}-\d{2}-\d{2}$/.test(normalized) && formatDate(parsed) === normalized;
+}
+
+function validatePreviewRow(row: AutomatedInquiryInput, sourceRow: CsvRow) {
   const errors: string[] = [];
   if (!row.name.trim()) errors.push('Patient name is required.');
   if (!phonePattern.test(row.phone.trim())) errors.push('Enter a valid phone number.');
   if (!emailPattern.test(row.email.trim())) errors.push('Enter a valid email address.');
   if (!row.service_needed.trim()) errors.push('Requested Service is required.');
+  const lastVisitDate = firstValue(sourceRow, lastVisitDateKeys);
+  if (lastVisitDate && !validDateOnly(lastVisitDate)) {
+    errors.push('Last Visit Date must use YYYY-MM-DD and be a real date.');
+  }
+  const visitFrequency = firstValue(sourceRow, visitFrequencyKeys);
+  if (visitFrequency && !positiveInteger(visitFrequency)) {
+    errors.push('Visit Frequency Days must be a positive whole number.');
+  }
   return errors;
 }
 
 export async function previewInquiryCsv(csvText: string) {
-  const rows = parseInquiryCsv(csvText).map(mapExternalRow);
+  const sourceRows = parseInquiryCsv(csvText);
+  const rows = sourceRows.map(mapExternalRow);
   const existing = await Inquiry.find({}, { email: 1, phone: 1 }).lean();
   const existingContacts = new Set<string>();
   for (const inquiry of existing) {
@@ -183,7 +212,7 @@ export async function previewInquiryCsv(csvText: string) {
       source: normalizeSource(row.source),
       estimated_value: estimateTreatmentValue(row.service_needed, row.estimated_value),
       duplicate,
-      errors: validatePreviewRow(row),
+      errors: validatePreviewRow(row, sourceRows[index]),
     };
   });
 

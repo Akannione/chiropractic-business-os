@@ -67,6 +67,25 @@ curl -sS -X POST http://localhost:4000/api/imports/inquiries.csv/preview \
   --data-binary @docs/METASOFT_REACTIVATION_DEMO.csv
 ```
 
+`npm run test` includes the nine-case defensive CSV-ingestion matrix and the database-independent HTTP contract check for populated and empty `/api/reactivations` responses.
+
+## Automated Reactivation Smoke Workflow
+
+After the local backend is running with `BUSINESS_OS_DEMO_MODE=true`:
+
+```bash
+cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+npm run smoke:reactivation
+```
+
+Inspect CLI options without changing data:
+
+```bash
+npm run smoke:reactivation -- --help
+```
+
+The workflow resets demo data before and after execution. It uses only `docs/METASOFT_REACTIVATION_DEMO.csv`. Do not point it at client or non-demo data. Remote demo execution requires `CBOS_SMOKE_ALLOW_REMOTE_RESET=true` and `CBOS_AUTH_TOKEN` when staff authentication is enabled.
+
 ## Dr. McIntyre Canva Template Package
 
 The current package is website-aligned to the supplied Wix screenshots and resized for Instagram, Facebook, and LinkedIn: bright blue backgrounds, white serif headings, charcoal image borders, off-white testimonial pages, and photo-first layouts.
@@ -95,7 +114,7 @@ open ../outputs/dr_mcintyre_canva/previews/dr_mcintyre_instagram_facebook_story_
 Canva import handoff:
 
 ```text
-Open the imported Canva project at https://www.canva.com/folder/FAHN7Tn3DQc. Do not upload the PPTX files again. After the Canva usage limit resets, upload original-resolution clinic, doctor, and staff photos, replace the `Replace photo` elements, and verify representative pages in the Instagram, Facebook, LinkedIn, Stories, Reels, and Templates folders.
+Open the completed Canva project at https://www.canva.com/folder/FAHN7Tn3DQc. Do not upload the PPTX files again or repeat the photo extraction. Four reusable clinic-photo source designs and 45 authentic placements are complete; the next action is to offer a monthly social refresh or front-desk training package.
 ```
 
 ## GitHub Pull Request
@@ -116,7 +135,7 @@ sed -n '1,320p' docs/DEMO_WALKTHROUGH.md
 open -a Safari https://frontend-gold-alpha-31.vercel.app
 ```
 
-Do not send the invite or enter real patient data without Tobi's approval. During the first walkthrough, use only the production demo's fake records or `docs/METASOFT_REACTIVATION_DEMO.csv`.
+The approved invite was sent June 29, 2026 to the clinic contact. Do not resend it. Wait for a reply; if there is no response by July 2, send one concise follow-up in the existing Gmail thread. When accepted, use only the production demo's fake records or `docs/METASOFT_REACTIVATION_DEMO.csv` during the walkthrough. The private thread identifier is stored in TOBI_OS, not this public repository.
 
 ## Preserved Local Collateral
 
@@ -190,6 +209,6 @@ Read AGENTS.md, PROJECT_STATUS.md, and CONTINUE_COMMANDS.md in
 Continue from the production-proven CBOS state.
 Do not repeat the completed reactivation prototype.
 Uncommitted Dr. McIntyre Canva collateral is preserved in a Git stash named preserve-dr-mcintyre-canva-assets-before-cbos-deploy.
-Pull Request #1 is merged and production proof is complete. Review the ready-to-send invite and measured 20-minute plan in docs/DEMO_WALKTHROUGH.md. Send only after Tobi approves the external message, then record the clinic's workflow evidence and Go / Revise / Stop decision.
+Pull Request #1 is merged and production proof is complete. The measured clinic-validation invite was sent June 29. Do not resend it. Wait for a reply; if there is no response by July 2, send one concise follow-up in the existing Gmail thread. When accepted, run the measured 20-minute fake-data walkthrough in docs/DEMO_WALKTHROUGH.md and record the clinic's workflow evidence and Go / Revise / Stop decision. Use private TOBI_OS tracking for contact identifiers.
 Before ending, update the root continuity files, TOBI_OS state, portfolio pipeline, and resume system.
 ```
