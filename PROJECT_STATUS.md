@@ -12,25 +12,24 @@ Pull Request #1 was merged into `main` at commit `b46add8`, so the public source
 
 ## Last Completed Task
 
-2026-06-29: Sent the approved 20-minute clinic-validation invite to the clinic contact.
+2026-07-13: Reconciled the existing clinic Gmail thread, confirmed it still contains only the June 29 invite with no reply or follow-up, and created a concise threaded follow-up draft without sending it.
 
 ## Current Task
 
-Await Dr. McIntyre's reply without resending the original invite. If there is no response by July 2, send one concise follow-up; when accepted, run the measured 20-minute clinic-validation walkthrough with fake data and record the Go / Revise / Stop decision.
+Review and manually send the existing threaded clinic follow-up draft. When accepted, run the measured 20-minute clinic-validation walkthrough with fake data and record the Go / Revise / Stop decision.
 
 ## Next Actions
 
-1. Wait for Dr. McIntyre's reply in the existing Gmail thread; do not resend the invite.
-2. If there is no response by July 2, send one concise follow-up in the existing thread.
-3. When he provides availability, schedule and run the 20-minute fake-data walkthrough in `docs/DEMO_WALKTHROUGH.md`.
-4. Record the decision measures and Go / Revise / Stop outcome before changing product scope.
+1. Review and manually send the existing threaded Gmail draft; do not recreate the draft or resend the original invite.
+2. When he provides availability, schedule and run the 20-minute fake-data walkthrough in `docs/DEMO_WALKTHROUGH.md`.
+3. Record the decision measures and Go / Revise / Stop outcome before changing product scope.
 
 ## Known Issues And Blockers
 
 * Vercel Hobby and Atlas M0 are demo infrastructure, not the final paying-client hosting plan.
 * Atlas permits public network access for Vercel's dynamic demo egress; the strong unique database credential limits access, but paid deployment should use stricter infrastructure.
 * The local frontend dependency tree can become corrupted by generated duplicate `@types` folders; `npm ci --prefix frontend` is the verified repair.
-* The live clinic walkthrough now depends on Dr. McIntyre replying with availability; the approved invite was sent June 29, 2026, and the single follow-up checkpoint is July 2.
+* The live clinic walkthrough depends on Dr. McIntyre replying with availability. The June 29 invite has no reply, and a threaded follow-up draft now exists in Gmail but remains unsent by design.
 
 ## Reusable Lessons
 
@@ -39,6 +38,7 @@ Await Dr. McIntyre's reply without resending the original invite. If there is no
 * A production screenshot, route-level smoke test, and concise case study are stronger portfolio proof than a designed mockup.
 * Validate raw optional CSV values before mapping so malformed clinic data cannot silently become blank fields.
 * Destructive smoke workflows should verify demo mode, require explicit remote opt-in, and restore a known baseline in cleanup.
+* Governed metric definitions should record grain, denominators, exclusions, ownership, and tests without requiring a new analytics platform.
 
 ## Modified Files
 
@@ -52,6 +52,8 @@ Await Dr. McIntyre's reply without resending the original invite. If there is no
 * `docs/API.md`
 * `PROJECT_STATUS.md`
 * `CONTINUE_COMMANDS.md`
+* `docs/ANALYTICS_CONTRACT.md`
+* `docs/CASE_STUDY.md`
 
 ## Current Branch
 
@@ -59,7 +61,7 @@ Await Dr. McIntyre's reply without resending the original invite. If there is no
 
 ## Verification Status
 
-Passed on June 29, 2026 after the reactivation contract, defensive CSV, and automated smoke-workflow updates:
+Passed again on July 1, 2026 after the governed analytics documentation update:
 
 ```bash
 npm run typecheck
@@ -72,6 +74,8 @@ curl https://cbos-api.vercel.app/api/reactivations
 curl https://cbos-api.vercel.app/api/kpis
 ```
 
+The documented `npm ci --prefix frontend` repair removed corrupted duplicate type folders before the final successful run.
+
 `npm run test` now covers the nine-case CSV-ingestion matrix, the complete smoke-workflow orchestration through an isolated fake API, and populated/empty `/api/reactivations` response contracts without MongoDB. The real command also passed against the local demo stack: 5 rows previewed and imported, 3 eligible reactivation rows verified, one follow-up updated and exported, and cleanup restored 8 sample records. The remote production demo was not reset.
 
 Production evidence:
@@ -80,3 +84,9 @@ Production evidence:
 * Health, config, reactivations, KPIs, weekly summary, and monthly summary: HTTP 200
 * Desktop WebKit: content loaded, API requests returned 200, no console errors
 * Mobile WebKit at 390x844: no console errors or page-level horizontal overflow
+
+Outreach evidence on July 13, 2026: Gmail returned one sent message in the clinic thread, no reply, and no prior follow-up. The newly created reply remained labeled `DRAFT`; no email was sent during the autonomous cycle.
+
+Local verification passed again on July 13, 2026. The documented `npm ci --prefix frontend` repair removed duplicate generated type folders, then `npm run typecheck`, `npm run test`, and `npm run build` all completed successfully.
+
+Re-verified on August 10, 2026 before committing the governed analytics documentation. The duplicate `@types/react 2` and `@types/react-dom 2` folders had reappeared and were again cleared by `npm ci --prefix frontend`; afterwards `npm run typecheck`, `npm run test`, and `npm run build` all passed, and `git diff --check` reported no whitespace errors. Production remained live: `/api/health`, `/api/reactivations`, `/api/kpis`, and the frontend each returned HTTP 200.

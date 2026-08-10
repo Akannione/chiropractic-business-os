@@ -1,5 +1,9 @@
 # CBOS Production Case Study
 
+## Governed Analytics Proof
+
+The KPI and patient-reactivation logic has a documented analytics contract covering grain, calculation rules, exclusions, denominators, queue classification, ownership, and automated validation. This adds evidence of KPI governance and analytics engineering to the full-stack workflow proof. See `docs/ANALYTICS_CONTRACT.md`.
+
 ## Business Problem
 
 Small chiropractic practices can lose revenue when inquiries and returning patients are tracked across phone notes, spreadsheets, and practice software without one focused follow-up queue. Clinic discovery also showed that replacing an EHR or scheduling system would create unnecessary migration risk.

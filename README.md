@@ -55,6 +55,7 @@ business_os_mvp/
       utils/
   docs/
     API.md
+    ANALYTICS_CONTRACT.md
     CSV_IMPORT_EXAMPLE.csv
     INTAKE_EMBED_SNIPPETS.md
     PRODUCTION_DEPLOYMENT.md
@@ -198,6 +199,7 @@ More details:
 
 - `docs/DEMO_WALKTHROUGH.md`
 - `docs/CASE_STUDY.md`
+- `docs/ANALYTICS_CONTRACT.md`
 - `docs/API.md`
 - `docs/PRODUCTION_DEPLOYMENT.md`
 - `docs/WORKFLOW_AUTOMATION.md`
