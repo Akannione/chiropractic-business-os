@@ -95,7 +95,21 @@ Ask the staff member to identify the first patient they would call from the fake
 
 ### Minutes 10-15: Fake CSV Fit
 
-Use `docs/METASOFT_REACTIVATION_DEMO.csv` to explain the preview, field mapping, and duplicate checks. Ask which columns their existing export includes and which fields staff already maintain.
+Use `docs/NEW_PATIENT_IMPORT_DEMO.csv` to explain the preview, field mapping, duplicate checks, and validation. It is built to preview as 3 importable, 1 duplicate, and 1 error, so a real import can be completed on the call:
+
+* three net-new patients land in the Overdue, Due Today, and Upcoming queues
+* one row matches a patient already in the system and is skipped
+* one row uses a US-formatted date and is rejected with a specific message
+
+Regenerate it on the day of the call so the dates stay realistic:
+
+```bash
+npm run demo:csv
+```
+
+`docs/METASOFT_REACTIVATION_DEMO.csv` is the older sample. Every row in it already exists in the seeded demo data, so it previews as 5 duplicates and imports nothing. Use it only to talk through duplicate protection, never to show a successful import.
+
+Ask which columns their existing export includes and which fields staff already maintain.
 
 ### Minutes 15-20: Decision Questions
 
@@ -292,7 +306,7 @@ If they already use spreadsheets, say:
 Mention the fake import file:
 
 ```text
-docs/METASOFT_REACTIVATION_DEMO.csv
+docs/NEW_PATIENT_IMPORT_DEMO.csv
 ```
 
 Say:

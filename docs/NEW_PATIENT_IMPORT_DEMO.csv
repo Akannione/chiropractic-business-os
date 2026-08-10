@@ -1,0 +1,6 @@
+Patient Name,Phone,Email,Requested Service,Source,Patient Type,Appointment Status,Requested Appointment,Offer Type,Last Visit Date,Visit Frequency Days,Assigned Follow-Up Owner,Follow-Up Outcome,Notes
+Dana Whitfield,470-555-0231,dana.whitfield@example.com,Wellness Consultation,Referral,Existing Patient,Not Scheduled,Thursday afternoon,None,2026-06-27,30,Front Desk,Not Contacted,Fake demo record. Monthly wellness patient who missed a recall.
+Marcus Ellery,678-555-0248,marcus.ellery@example.com,Spinal Adjustment,Phone Call,Reactivation,Not Scheduled,Monday morning,None,2026-07-11,30,Doc,Not Contacted,Fake demo record. Expected back today on a monthly schedule.
+Sofia Nkemdirim,404-555-0263,sofia.nkemdirim@example.com,Massage Therapy,Website,Existing Patient,Not Scheduled,Any weekday after 3 PM,Groupon,2026-07-18,30,Front Desk,Not Contacted,"Fake demo record. Due back next week, not yet contacted."
+Aisha Coleman,470-555-0120,aisha.coleman@example.com,Wellness Consultation,Referral,Existing Patient,Not Scheduled,Friday morning,None,2026-07-11,30,Doc,Not Contacted,Fake demo record. Already in the system; expected to be skipped.
+Tobias Renner,706-555-0274,tobias.renner@example.com,Back Pain Consultation,Google,Existing Patient,Not Scheduled,Wednesday,None,07/14/2026,30,Front Desk,Not Contacted,Fake demo record. Date is not YYYY-MM-DD and must be flagged.

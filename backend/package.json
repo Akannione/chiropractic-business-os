@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "test": "tsx src/tests/service.test.ts",
-    "smoke:reactivation": "tsx src/scripts/reactivationSmoke.ts"
+    "smoke:reactivation": "tsx src/scripts/reactivationSmoke.ts",
+    "demo:csv": "tsx src/scripts/generateDemoImportCsv.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",
