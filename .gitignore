@@ -18,3 +18,9 @@ exports/*.txt
 .vercel/
 AGENTS.md
 .vercel
+
+# Local agent tooling artifacts; not part of the application.
+.claude-flow/
+.swarm/
+*.db
+*.db-*
