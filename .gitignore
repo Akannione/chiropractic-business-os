@@ -17,6 +17,7 @@ exports/*.txt
 .codex/
 .vercel/
 AGENTS.md
+CLAUDE.md
 .vercel
 
 # Local agent tooling artifacts; not part of the application.
