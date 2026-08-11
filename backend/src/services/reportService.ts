@@ -1,6 +1,7 @@
 import { calculateKpis } from './kpiService.js';
 import { InquiryShape } from '../models/Inquiry.js';
 import { startOfToday, startOfWeek } from '../utils/date.js';
+import { countOf, pluralize } from '../utils/text.js';
 
 export function buildWeeklySummary(inquiries: InquiryShape[]) {
   const today = startOfToday();
@@ -11,7 +12,7 @@ export function buildWeeklySummary(inquiries: InquiryShape[]) {
   const summary =
     inquiries.length === 0
       ? 'No patient inquiries are currently stored. Add a few inquiries to generate a useful practice snapshot.'
-      : `The practice has ${kpis.totalPatientInquiries} patient inquiries, ${kpis.newThisWeek} new this week, and ${kpis.activePatients} active patients. ${kpis.followUpsNeeded} inquiries need follow-up, with ${kpis.overdueFollowUps} overdue. Estimated Treatment Value is $${kpis.estimatedTreatmentValue.toLocaleString()} from inquiries not marked Lost.`;
+      : `The practice has ${countOf(kpis.totalPatientInquiries, 'patient inquiry', 'patient inquiries')}, ${kpis.newThisWeek} new this week, and ${countOf(kpis.activePatients, 'active patient')}. ${countOf(kpis.followUpsNeeded, 'inquiry', 'inquiries')} ${pluralize(kpis.followUpsNeeded, 'needs', 'need')} follow-up, with ${kpis.overdueFollowUps} overdue. Estimated Treatment Value is $${kpis.estimatedTreatmentValue.toLocaleString()} from inquiries not marked Lost.`;
 
   return {
     weekStart: weekStart.toISOString().slice(0, 10),
@@ -30,7 +31,7 @@ export function buildMonthlySummary(inquiries: InquiryShape[]) {
   const summary =
     monthlyInquiries.length === 0
       ? 'No patient inquiries were created this month yet.'
-      : `This month has ${kpis.totalPatientInquiries} patient inquiries, ${kpis.activePatients} active patients, and ${kpis.followUpsNeeded} follow-ups needing attention. Estimated Treatment Value for this month is $${kpis.estimatedTreatmentValue.toLocaleString()}.`;
+      : `This month has ${countOf(kpis.totalPatientInquiries, 'patient inquiry', 'patient inquiries')}, ${countOf(kpis.activePatients, 'active patient')}, and ${countOf(kpis.followUpsNeeded, 'follow-up')} needing attention. Estimated Treatment Value for this month is $${kpis.estimatedTreatmentValue.toLocaleString()}.`;
 
   return {
     monthStart: monthStart.toISOString().slice(0, 10),

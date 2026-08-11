@@ -89,6 +89,29 @@ const weeklySummary = buildWeeklySummary(inquiries);
 assert.equal(weeklySummary.totalPatientInquiries, 2);
 assert.ok(weeklySummary.plainEnglishSummary.includes('patient inquiries'));
 
+// Counts of one must read as singular; owners paste these summaries into email.
+assert.ok(weeklySummary.plainEnglishSummary.includes('1 active patient.'));
+assert.ok(weeklySummary.plainEnglishSummary.includes('1 inquiry needs follow-up'));
+
+const singleInquirySummary = buildWeeklySummary([
+  {
+    status: 'Active Patient',
+    estimated_value: 100,
+    source: 'Google',
+    created_at: today,
+    next_follow_up_date: null,
+  },
+] as never);
+assert.ok(singleInquirySummary.plainEnglishSummary.includes('1 patient inquiry,'));
+
+const pluralSummary = buildWeeklySummary([
+  { status: 'Follow-Up Needed', estimated_value: 10, source: 'Google', created_at: today, next_follow_up_date: yesterday },
+  { status: 'Follow-Up Needed', estimated_value: 10, source: 'Google', created_at: today, next_follow_up_date: yesterday },
+] as never);
+assert.ok(pluralSummary.plainEnglishSummary.includes('2 patient inquiries,'));
+assert.ok(pluralSummary.plainEnglishSummary.includes('0 active patients.'));
+assert.ok(pluralSummary.plainEnglishSummary.includes('2 inquiries need follow-up'));
+
 const reactivationToday = new Date('2026-06-24T12:00:00.000Z');
 const reactivationQueue = buildReactivationQueue(
   [

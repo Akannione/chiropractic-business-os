@@ -195,6 +195,47 @@ h3 { margin-bottom: 4px; }
   overflow-x: auto;
 }
 
+/* The dashboard's side panel is far narrower than a full-width table, so the
+   compact variant carries three columns at fixed proportions. Without this the
+   table renders wider than the panel and is visibly clipped. */
+.table-compact {
+  table-layout: fixed;
+  font-size: 13px;
+}
+
+.table-compact th,
+.table-compact td {
+  padding: 10px 6px;
+  /* Backstop: long single words such as "Consultation" must never push the
+     table past the panel. Rarely triggers at these column widths. */
+  overflow-wrap: break-word;
+}
+
+.table-compact th:nth-child(1),
+.table-compact td:nth-child(1) {
+  width: 26%;
+}
+
+.table-compact th:nth-child(2),
+.table-compact td:nth-child(2) {
+  width: 34%;
+}
+
+/* Status needs the widest share: the chip carries the longest single word
+   in the table, "Consultation". */
+.table-compact th:nth-child(3),
+.table-compact td:nth-child(3) {
+  width: 40%;
+}
+
+/* inline-flex sizes the chip to max-content, which cannot fit a narrow column.
+   inline-block lets the label wrap at spaces instead. */
+.table-compact .status-chip {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -498,17 +539,26 @@ textarea {
 .workflow-list {
   display: grid;
   gap: 10px;
+  min-width: 0;
 }
 
+/* The action column must be allowed to shrink below its content width so the
+   buttons wrap, otherwise the row pushes past the panel and is clipped. The
+   patient column keeps a floor so the name stays readable. */
 .workflow-item {
   border: 1px solid #d9e1ea;
   border-radius: 8px;
   background: #fff;
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) auto minmax(260px, auto);
+  grid-template-columns: minmax(160px, 1fr) auto minmax(0, auto);
   gap: 12px;
   align-items: center;
   padding: 13px;
+  min-width: 0;
+}
+
+.workflow-item .workflow-actions {
+  min-width: 0;
 }
 
 .workflow-item strong,

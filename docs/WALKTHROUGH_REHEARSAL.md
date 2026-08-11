@@ -17,7 +17,9 @@ The blocker and the CSV gap below were both fixed after the rehearsal. They are 
 * Production demo data was reset. The queue now reads Overdue 2 / Due Today 1 / Upcoming 1, with 15- and 10-day overdue values instead of 30-55. A pre-reset backup of the 8 production rows was exported first.
 * `docs/NEW_PATIENT_IMPORT_DEMO.csv` was added and now generates from `npm run demo:csv`, so its dates never rot. It previews as 3 importable, 1 duplicate, 1 error, and a real import was verified end to end against the local stack.
 
-Still open: the outcome-does-not-clear-the-queue conversation, the "1 active patients" string, the clipped dashboard table, and the untimed spoken pass.
+* The summary pluralization and the clipped dashboard panel were both fixed. Weekly and monthly summaries now read "1 active patient" and "1 inquiry needs follow-up", covered by tests. The dashboard's Recent Patient Inquiries panel carries three columns at fixed widths and no longer renders wider than its container; the follow-up workflow rows now wrap their buttons instead of overflowing.
+
+Still open: the outcome-does-not-clear-the-queue conversation and the untimed spoken pass.
 
 ## Blocker
 
@@ -67,12 +69,12 @@ Separately, the demo CSV's `Last Visit Date` values are hardcoded (2026-04-15 th
 
 ## Polish
 
-| Item | Detail |
-|---|---|
-| Copy bug | Weekly Summary reads "1 active patients" |
-| Owner field | Follow-Up Owner is free text while the filter above it is a dropdown built from existing values; a typo silently fragments filtering |
-| Row affordance | Call List rows are clickable (`cursor: pointer`) but nothing signals it; the script should say "click the patient's row" |
-| Table clipping | At 1280px the dashboard's Recent Patient Inquiries table renders 595px of content in a 286px box. No page-level horizontal overflow, but the panel is visibly chopped on a screen share |
+| Item | Detail | Status |
+|---|---|---|
+| Copy bug | Weekly Summary reads "1 active patients" | Fixed |
+| Table clipping | At 1280px the dashboard's Recent Patient Inquiries table renders 595px of content in a 286px box. No page-level horizontal overflow, but the panel is visibly chopped on a screen share | Fixed |
+| Owner field | Follow-Up Owner is free text while the filter above it is a dropdown built from existing values; a typo silently fragments filtering | Open |
+| Row affordance | Call List rows are clickable (`cursor: pointer`) but nothing signals it; the script should say "click the patient's row" | Open |
 
 ## Confirmed working
 
@@ -98,5 +100,5 @@ Spoken delivery was not timed. This rehearsal walked the software, not a live re
 2. ~~Build a net-new CSV so a successful import can be shown~~ — done, `docs/NEW_PATIENT_IMPORT_DEMO.csv`.
 3. Run `npm run demo:csv` on the morning of the call to refresh the CSV dates.
 4. Prepare the answer for "how do I know who was already called?"
-5. Fix the "1 active patients" string.
+5. ~~Fix the "1 active patients" string~~ — done, with test coverage.
 6. Do one timed spoken pass.

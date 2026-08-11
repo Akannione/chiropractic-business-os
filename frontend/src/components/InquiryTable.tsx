@@ -12,15 +12,15 @@ export function InquiryTable({ inquiries, compact = false }: InquiryTableProps) 
 
   return (
     <div className="table-wrap">
-      <table>
+      <table className={compact ? 'table-compact' : undefined}>
         <thead>
           <tr>
             <th>Patient</th>
             <th>Requested Service</th>
             <th>Status</th>
             {!compact && <th>Source</th>}
-            <th>Value</th>
-            <th>Next Follow-Up</th>
+            {!compact && <th>Value</th>}
+            {!compact && <th>Next Follow-Up</th>}
           </tr>
         </thead>
         <tbody>
@@ -28,15 +28,15 @@ export function InquiryTable({ inquiries, compact = false }: InquiryTableProps) 
             <tr key={inquiry.id}>
               <td>
                 <strong>{inquiry.name}</strong>
-                <span>{inquiry.email}</span>
+                {!compact && <span>{inquiry.email}</span>}
               </td>
               <td>{inquiry.service_needed}</td>
               <td>
                 <StatusChip status={inquiry.status} />
               </td>
               {!compact && <td>{inquiry.source}</td>}
-              <td>{money(inquiry.estimated_value)}</td>
-              <td>{displayDate(inquiry.next_follow_up_date)}</td>
+              {!compact && <td>{money(inquiry.estimated_value)}</td>}
+              {!compact && <td>{displayDate(inquiry.next_follow_up_date)}</td>}
             </tr>
           ))}
         </tbody>
