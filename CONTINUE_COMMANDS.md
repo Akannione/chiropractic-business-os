@@ -3,7 +3,7 @@
 ## Project Path
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
 ```
 
 ## Inspect State
@@ -26,7 +26,7 @@ npm run install:all
 Terminal 1:
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
 mkdir -p .mongo-data
 mongod --dbpath .mongo-data --bind_ip 127.0.0.1 --port 27017
 ```
@@ -34,14 +34,14 @@ mongod --dbpath .mongo-data --bind_ip 127.0.0.1 --port 27017
 Terminal 2:
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
 BUSINESS_OS_DEMO_MODE=true npm run dev:backend
 ```
 
 Terminal 3:
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
 npm --prefix frontend run dev -- --host 127.0.0.1
 ```
 
@@ -54,7 +54,7 @@ http://localhost:5173/
 ## Validate
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
 npm ci --prefix frontend
 npm run typecheck
 npm run test
@@ -75,7 +75,7 @@ curl -sS -X POST http://localhost:4000/api/imports/inquiries.csv/preview \
 After the local backend is running with `BUSINESS_OS_DEMO_MODE=true`:
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
 npm run smoke:reactivation
 ```
 
@@ -94,7 +94,7 @@ The current package is website-aligned to the supplied Wix screenshots and resiz
 Inspect the local Canva-ready deliverables:
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
 ls -lh ../outputs/dr_mcintyre_canva/*.pptx
 sed -n '1,220p' ../outputs/dr_mcintyre_canva/README.md
 open ../outputs/dr_mcintyre_canva
@@ -103,7 +103,7 @@ open ../outputs/dr_mcintyre_canva
 Preview rendered QA images:
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
 find ../outputs/dr_mcintyre_canva/previews -name 'slide-*.png' | wc -l
 open ../outputs/dr_mcintyre_canva/previews/dr_mcintyre_instagram_feed_square_1080x1080/slide-010.png
 open ../outputs/dr_mcintyre_canva/previews/dr_mcintyre_instagram_feed_portrait_1080x1350/slide-020.png
@@ -121,7 +121,7 @@ Open the completed Canva project at https://www.canva.com/folder/FAHN7Tn3DQc. Do
 ## GitHub Pull Request
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
 gh pr view 1 --web
 gh pr checks 1
 ```
@@ -131,7 +131,7 @@ gh pr checks 1
 Review the production walkthrough, decision measures, and ready-to-send invite:
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
 sed -n '1,320p' docs/DEMO_WALKTHROUGH.md
 open -a Safari https://frontend-gold-alpha-31.vercel.app
 ```
@@ -145,14 +145,14 @@ Dr. McIntyre Canva collateral was preserved before deployment work so it does no
 Inspect the stash:
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
 git stash list -n 3
 ```
 
 Restore later only when you are ready to work on collateral again:
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
 git stash apply stash@{0}
 ```
 
@@ -161,7 +161,7 @@ git stash apply stash@{0}
 Current production endpoints:
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp/backend"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp/backend"
 vercel env ls production
 curl -sS -i https://cbos-api.vercel.app/api/health | sed -n '1,40p'
 curl -sS -i https://cbos-api.vercel.app/api/reactivations | sed -n '1,80p'
@@ -177,7 +177,7 @@ Expected:
 Redeploy the API only after validation passes:
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp/backend"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp/backend"
 vercel env ls production
 vercel deploy --prod --force
 curl -sS https://cbos-api.vercel.app/api/health
@@ -187,14 +187,14 @@ curl -sS https://cbos-api.vercel.app/api/reactivations
 Deploy the frontend:
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp/frontend"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp/frontend"
 vercel deploy --prod --force
 ```
 
 After production deploy, run:
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
 curl -sS https://cbos-api.vercel.app/api/health
 curl -sS https://cbos-api.vercel.app/api/reactivations
 gh pr checks 1
@@ -206,7 +206,7 @@ Do not pull `MONGODB_URI` into a tracked file. If the Atlas credential is expose
 
 ```text
 Read AGENTS.md, PROJECT_STATUS.md, and CONTINUE_COMMANDS.md in
-/Users/tobiloba202/Documents/New project/business_os_mvp.
+/Users/tobiloba202/Developer/New project/business_os_mvp.
 Continue from the production-proven CBOS state.
 Do not repeat the completed reactivation prototype.
 Uncommitted Dr. McIntyre Canva collateral is preserved in a Git stash named preserve-dr-mcintyre-canva-assets-before-cbos-deploy.

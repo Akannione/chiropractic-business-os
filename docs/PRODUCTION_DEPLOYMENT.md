@@ -37,7 +37,7 @@ BUSINESS_OS_DEMO_MODE=true
 Verify the required variables are present:
 
 ```bash
-cd "/Users/tobiloba202/Documents/New project/business_os_mvp/backend"
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp/backend"
 vercel env ls production
 ```
 

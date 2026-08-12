@@ -28,7 +28,7 @@ Review and manually send the existing threaded clinic follow-up draft. When acce
 
 * Vercel Hobby and Atlas M0 are demo infrastructure, not the final paying-client hosting plan.
 * Atlas permits public network access for Vercel's dynamic demo egress; the strong unique database credential limits access, but paid deployment should use stricter infrastructure.
-* The local frontend dependency tree can become corrupted by generated duplicate `@types` folders; `npm ci --prefix frontend` is the verified repair.
+* Resolved on August 11, 2026: the recurring duplicate `@types` folders were caused by iCloud Desktop and Documents sync, which was syncing the repository including `node_modules`, `.git`, and `.mongo-data`. Its file provider raced with the atomic file replacement that npm, git, and Vite all rely on, and materialised the losing copy as `react 2`, `react 3`, and so on. The same mechanism produced stale `.git/index` copies. The workspace now lives at `/Users/tobiloba202/Developer/New project`, outside any synced location, and `brctl status` no longer tracks it. `npm ci --prefix frontend` remains the repair if duplicates are ever seen again.
 * The live clinic walkthrough depends on Dr. McIntyre replying with availability. The June 29 invite has no reply, and a threaded follow-up draft now exists in Gmail but remains unsent by design.
 
 ## Reusable Lessons
