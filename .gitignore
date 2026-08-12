@@ -25,3 +25,6 @@ CLAUDE.md
 .swarm/
 *.db
 *.db-*
+
+# Foglamp scan artifacts (contains edit token)
+.foglamp/
