@@ -93,6 +93,8 @@ Show only:
 
 Ask the staff member to identify the first patient they would call from the fake queue and explain why.
 
+Expect the question "how do I know who my staff already called?" during this segment. Recording an outcome does not remove a patient from this list, and he may notice. The prepared answer and the mechanics behind it are in `docs/OBJECTION_ALREADY_CALLED.md`; read it before the call.
+
 ### Minutes 10-15: Fake CSV Fit
 
 Use `docs/NEW_PATIENT_IMPORT_DEMO.csv` to explain the preview, field mapping, duplicate checks, and validation. It is built to preview as 3 importable, 1 duplicate, and 1 error, so a real import can be completed on the call:

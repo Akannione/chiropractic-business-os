@@ -99,6 +99,6 @@ Spoken delivery was not timed. This rehearsal walked the software, not a live re
 1. ~~Reset demo data on production~~ — done 2026-08-10. **Re-check on the day of the call**; the queue drifts as records age.
 2. ~~Build a net-new CSV so a successful import can be shown~~ — done, `docs/NEW_PATIENT_IMPORT_DEMO.csv`.
 3. Run `npm run demo:csv` on the morning of the call to refresh the CSV dates.
-4. Prepare the answer for "how do I know who was already called?"
+4. ~~Prepare the answer for "how do I know who was already called?"~~ — done, `docs/OBJECTION_ALREADY_CALLED.md`.
 5. ~~Fix the "1 active patients" string~~ — done, with test coverage.
 6. Do one timed spoken pass.
