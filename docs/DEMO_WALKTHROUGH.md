@@ -72,6 +72,8 @@ Cmd + Shift + R
 
 ## 20-Minute Validation Plan
 
+Delivered top to bottom, this document runs about 30 minutes, because the eight-section Demo Flow below is a full product tour rather than part of this plan. Use `docs/CALL_RUN_SHEET.md` on the call: it carries the clock, names the five tour sections to cut, and lists what to drop first if you fall behind.
+
 ### Minutes 0-3: Current Workflow
 
 Ask:

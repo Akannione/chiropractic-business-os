@@ -90,9 +90,13 @@ Separately, the demo CSV's `Last Visit Date` values are hardcoded (2026-04-15 th
 - No browser console errors across the walked screens
 - `authEnabled: false` on both local and production, so there is no login gate mid-demo
 
-## Not covered
+## Timing
 
-Spoken delivery was not timed. This rehearsal walked the software, not a live read-through, so the 20-minute budget is still unverified — the minutes 3-10 and 10-15 segments are the ones most likely to overrun. Do one timed out-loud pass before the call.
+Analysed on 2026-08-11. The 20-minute budget does not hold as written: delivered top to bottom the walkthrough runs about 30 minutes, because it contains two overlapping scripts — the 20-Minute Validation Plan and a separate eight-section product tour. Cutting five tour sections brings it to 15.5 minutes with 4.5 minutes of slack. `docs/CALL_RUN_SHEET.md` carries the clock, the cut list, and the overrun order.
+
+Production latency is not a risk: 1.3 s on a cold first request, then about 0.15 s across every endpoint.
+
+Still not done: an actual out-loud read. The clock marks are modelled from word counts and per-screen floors, not stopwatched. Read the Opening and the Reactivations segment aloud once against a timer.
 
 ## Pre-call checklist
 
@@ -101,4 +105,4 @@ Spoken delivery was not timed. This rehearsal walked the software, not a live re
 3. Run `npm run demo:csv` on the morning of the call to refresh the CSV dates.
 4. ~~Prepare the answer for "how do I know who was already called?"~~ — done, `docs/OBJECTION_ALREADY_CALLED.md`.
 5. ~~Fix the "1 active patients" string~~ — done, with test coverage.
-6. Do one timed spoken pass.
+6. Read the Opening and Reactivations segments aloud once against a timer. Everything else about the clock is in `docs/CALL_RUN_SHEET.md`.
