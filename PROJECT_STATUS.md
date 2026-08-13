@@ -16,13 +16,18 @@ Pull Request #1 was merged into `main` at commit `b46add8`, so the public source
 
 ## Current Task
 
-Review and manually send the existing threaded clinic follow-up draft. When accepted, run the measured 20-minute clinic-validation walkthrough with fake data and record the Go / Revise / Stop decision.
+Strengthen the application itself: security, database performance, and correctness. Client outreach is paused.
+
+## Outreach Hold
+
+Paused on 2026-08-11 by Tobi's decision. Do not send the existing Gmail follow-up draft, do not create new outreach drafts, and do not contact the clinic contact. The draft stays in Gmail, unsent. The walkthrough, run sheet, and objection notes are kept as prepared work for whenever outreach resumes; nothing in them should be treated as a pending action.
 
 ## Next Actions
 
-1. Review and manually send the existing threaded Gmail draft; do not recreate the draft or resend the original invite.
-2. When he provides availability, schedule and run the 20-minute fake-data walkthrough in `docs/DEMO_WALKTHROUGH.md`.
-3. Record the decision measures and Go / Revise / Stop outcome before changing product scope.
+1. Add database indexes. The `inquiries` and `activities` collections carry only the default `_id_` index, so every query is a collection scan.
+2. Stop loading the whole collection into Node on every read. `/api/kpis`, `/api/weekly-summary`, `/api/monthly-summary`, `/api/reactivations`, `/api/inquiries`, and the CSV export each call an unfiltered `find()` and compute in JavaScript.
+3. Decide whether the API needs real authentication. `ADMIN_PASSWORD` is unset in production, so `authEnabled` is false and every endpoint is open.
+4. Fix the rate limiter memory leak and set `trust proxy` so per-client limiting works behind Vercel.
 
 ## Known Issues And Blockers
 
