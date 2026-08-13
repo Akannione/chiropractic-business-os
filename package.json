@@ -12,6 +12,7 @@
     "typecheck": "npm run typecheck --prefix backend && npm run typecheck --prefix frontend",
     "test": "npm run test --prefix backend",
     "smoke:reactivation": "npm --prefix backend run smoke:reactivation --",
-    "demo:csv": "npm --prefix backend run demo:csv"
+    "demo:csv": "npm --prefix backend run demo:csv",
+    "bench": "npm --prefix backend run bench"
   }
 }

@@ -21,5 +21,9 @@ const activitySchema = new mongoose.Schema(
   },
 );
 
+// The activity feed reads newest first, and per-inquiry history filters by id.
+activitySchema.index({ created_at: -1 });
+activitySchema.index({ inquiry_id: 1, created_at: -1 });
+
 export type ActivityShape = InferSchemaType<typeof activitySchema>;
 export const Activity = mongoose.model('Activity', activitySchema);

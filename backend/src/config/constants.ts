@@ -45,6 +45,7 @@ export const SERVICES = [
 export const ACTIVE_STATUS = 'Active Patient';
 export const LOST_STATUS = 'Lost';
 export const FOLLOW_UP_NEEDED_STATUS = 'Follow-Up Needed';
+export const DEAD_LEAD_PATIENT_TYPE = 'Dead Lead';
 
 export const KPI_HELP = {
   estimatedTreatmentValue:

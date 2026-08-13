@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx src/tests/service.test.ts",
     "smoke:reactivation": "tsx src/scripts/reactivationSmoke.ts",
-    "demo:csv": "tsx src/scripts/generateDemoImportCsv.ts"
+    "demo:csv": "tsx src/scripts/generateDemoImportCsv.ts",
+    "bench": "tsx src/scripts/benchmark.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",

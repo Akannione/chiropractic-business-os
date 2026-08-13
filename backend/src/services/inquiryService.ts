@@ -1,3 +1,4 @@
+import { DEAD_LEAD_PATIENT_TYPE, LOST_STATUS } from '../config/constants.js';
 import { Inquiry } from '../models/Inquiry.js';
 import { parseDateOnly } from '../utils/date.js';
 import { logActivity } from './activityService.js';
@@ -26,6 +27,69 @@ function positiveIntegerOrNull(value: unknown) {
   if (value === null || value === undefined || value === '') return null;
   const number = Number(value);
   return Number.isInteger(number) && number > 0 ? number : null;
+}
+
+/**
+ * Fields the KPI and report calculations actually read. Fetching whole
+ * documents pulls notes and clinic workflow fields that no summary uses.
+ */
+const REPORT_FIELDS = {
+  status: 1,
+  estimated_value: 1,
+  source: 1,
+  created_at: 1,
+  next_follow_up_date: 1,
+} as const;
+
+/** Fields buildReactivationQueue reads when constructing a call-list row. */
+const REACTIVATION_FIELDS = {
+  name: 1,
+  phone: 1,
+  email: 1,
+  service_needed: 1,
+  status: 1,
+  patient_type: 1,
+  last_visit_date: 1,
+  expected_visit_frequency_days: 1,
+  assigned_follow_up_owner: 1,
+  follow_up_outcome: 1,
+  notes: 1,
+  next_follow_up_date: 1,
+} as const;
+
+/**
+ * Only the inquiries that can possibly appear in the reactivation queue.
+ *
+ * buildReactivationQueue applies the same rules in JavaScript and stays the
+ * source of truth for classification; this narrows what has to be read at all.
+ * Mongo's $ne also matches documents missing the field, which matches the
+ * JavaScript behaviour for records written before these fields existed.
+ */
+export async function listReactivationCandidates() {
+  return Inquiry.find(
+    {
+      status: { $ne: LOST_STATUS },
+      patient_type: { $ne: DEAD_LEAD_PATIENT_TYPE },
+      last_visit_date: { $ne: null },
+      expected_visit_frequency_days: { $gte: 1 },
+    },
+    REACTIVATION_FIELDS,
+  )
+    .lean({ virtuals: true });
+}
+
+/** Projected read for the weekly summary, which reports on all inquiries. */
+export async function listInquiriesForReports() {
+  return Inquiry.find({}, REPORT_FIELDS).lean();
+}
+
+/**
+ * The monthly summary only describes inquiries created this month.
+ * buildMonthlySummary applies the same cutoff itself, so this narrows what is
+ * read without changing the result.
+ */
+export async function listInquiriesCreatedSince(since: Date) {
+  return Inquiry.find({ created_at: { $gte: since } }, REPORT_FIELDS).lean();
 }
 
 export async function listInquiries() {

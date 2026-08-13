@@ -1,3 +1,4 @@
+import { DEAD_LEAD_PATIENT_TYPE, LOST_STATUS } from '../config/constants.js';
 import { addDays, formatDate, parseDateOnly, startOfToday } from '../utils/date.js';
 
 export type ReactivationStatus = 'Overdue' | 'Due Today' | 'Upcoming';
@@ -62,7 +63,7 @@ export function buildReactivationQueue(
   const currentDay = normalizeDay(today) || startOfToday();
 
   const rows = inquiries.flatMap<ReactivationRow>((inquiry) => {
-    if (inquiry.status === 'Lost' || inquiry.patient_type === 'Dead Lead') return [];
+    if (inquiry.status === LOST_STATUS || inquiry.patient_type === DEAD_LEAD_PATIENT_TYPE) return [];
 
     const lastVisit = inquiry.last_visit_date ? normalizeDay(inquiry.last_visit_date) : null;
     const frequencyDays = Number(inquiry.expected_visit_frequency_days);

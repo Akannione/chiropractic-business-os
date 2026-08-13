@@ -490,11 +490,13 @@ async function testReactivationApiContract() {
     },
   ];
 
-  Inquiry.find = (() => ({
-    sort: () => ({
-      lean: async () => contractRows,
-    }),
-  })) as unknown as typeof Inquiry.find;
+  // Chainable so the stub works whether the caller sorts in the database or
+  // goes straight to lean(). The reactivation queue sorts in JavaScript.
+  const contractQuery: Record<string, unknown> = {
+    lean: async () => contractRows,
+  };
+  contractQuery.sort = () => contractQuery;
+  Inquiry.find = (() => contractQuery) as unknown as typeof Inquiry.find;
 
   const contractApp = express();
   contractApp.use('/api', inquiryRouter);
