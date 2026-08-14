@@ -27,7 +27,8 @@ Paused on 2026-08-11 by Tobi's decision. Do not send the existing Gmail follow-u
 1. Add database indexes. The `inquiries` and `activities` collections carry only the default `_id_` index, so every query is a collection scan.
 2. Stop loading the whole collection into Node on every read. `/api/kpis`, `/api/weekly-summary`, `/api/monthly-summary`, `/api/reactivations`, `/api/inquiries`, and the CSV export each call an unfiltered `find()` and compute in JavaScript.
 3. Close the production API before any real patient data is entered. The application-side hardening is done; the remaining three steps need Vercel and Atlas access and are listed in `docs/SECURITY.md`.
-4. Consider a unique index on email and phone, which needs a de-duplication audit first.
+4. Audited on 2026-08-14: no unique index on email or phone. Households share contact details, so the constraint would refuse legitimate family members. The audit found that duplicate detection was matching on contact alone and silently discarding family members during import; it now requires the name to match as well. See `docs/DUPLICATE_POLICY.md`.
+5. Consider a merge tool for duplicates. Only the CSV import checks for them, so the public intake form can still create a second record for the same patient, and staff have no way to combine them.
 
 ## Known Issues And Blockers
 

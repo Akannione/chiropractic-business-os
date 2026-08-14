@@ -11,7 +11,8 @@
     "test": "tsx src/tests/service.test.ts",
     "smoke:reactivation": "tsx src/scripts/reactivationSmoke.ts",
     "demo:csv": "tsx src/scripts/generateDemoImportCsv.ts",
-    "bench": "tsx src/scripts/benchmark.ts"
+    "bench": "tsx src/scripts/benchmark.ts",
+    "audit:duplicates": "tsx src/scripts/duplicateAudit.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",

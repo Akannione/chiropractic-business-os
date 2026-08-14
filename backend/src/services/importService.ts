@@ -177,31 +177,55 @@ function validatePreviewRow(row: AutomatedInquiryInput, sourceRow: CsvRow) {
   return errors;
 }
 
+function normalizeName(value: string) {
+  return value.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+/**
+ * Identity keys for duplicate detection: the patient's name paired with a
+ * contact detail.
+ *
+ * Matching on email or phone alone treats a household as one patient. A parent
+ * booking for two children uses one phone and one address, so importing the
+ * Alvarez family silently dropped two of three real patients as duplicates.
+ *
+ * Requiring the name to match as well means the rule catches the same person
+ * arriving twice while letting a family share contact details. It fails open:
+ * a patient recorded under two spellings imports twice, which staff can see and
+ * merge. The previous behaviour failed closed and lost patients invisibly,
+ * which is the worse error for a recall list.
+ */
+function identityKeys(name: string, email: string, phone: string) {
+  const person = normalizeName(name);
+  if (!person) return [];
+  const keys: string[] = [];
+  const normalizedEmail = normalizeEmail(email);
+  const normalizedPhone = normalizePhone(phone);
+  if (normalizedEmail) keys.push(`${person}|email:${normalizedEmail}`);
+  if (normalizedPhone) keys.push(`${person}|phone:${normalizedPhone}`);
+  return keys;
+}
+
 export async function previewInquiryCsv(csvText: string) {
   const sourceRows = parseInquiryCsv(csvText);
   const rows = sourceRows.map(mapExternalRow);
-  const existing = await Inquiry.find({}, { email: 1, phone: 1 }).lean();
+  const existing = await Inquiry.find({}, { name: 1, email: 1, phone: 1 }).lean();
   const existingContacts = new Set<string>();
   for (const inquiry of existing) {
-    const email = normalizeEmail(String(inquiry.email || ''));
-    const phone = normalizePhone(String(inquiry.phone || ''));
-    if (email) existingContacts.add(`email:${email}`);
-    if (phone) existingContacts.add(`phone:${phone}`);
+    for (const key of identityKeys(
+      String(inquiry.name || ''),
+      String(inquiry.email || ''),
+      String(inquiry.phone || ''),
+    )) {
+      existingContacts.add(key);
+    }
   }
   const seenContacts = new Set<string>();
 
   const previewRows: ImportPreviewRow[] = rows.map((row, index) => {
-    const email = normalizeEmail(row.email);
-    const phone = normalizePhone(row.phone);
-    const emailKey = email ? `email:${email}` : '';
-    const phoneKey = phone ? `phone:${phone}` : '';
-    const duplicate =
-      Boolean(emailKey && existingContacts.has(emailKey)) ||
-      Boolean(phoneKey && existingContacts.has(phoneKey)) ||
-      Boolean(emailKey && seenContacts.has(emailKey)) ||
-      Boolean(phoneKey && seenContacts.has(phoneKey));
-    if (emailKey) seenContacts.add(emailKey);
-    if (phoneKey) seenContacts.add(phoneKey);
+    const keys = identityKeys(row.name, row.email, row.phone);
+    const duplicate = keys.some((key) => existingContacts.has(key) || seenContacts.has(key));
+    for (const key of keys) seenContacts.add(key);
 
     return {
       ...row,

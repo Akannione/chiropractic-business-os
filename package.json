@@ -13,6 +13,7 @@
     "test": "npm run test --prefix backend",
     "smoke:reactivation": "npm --prefix backend run smoke:reactivation --",
     "demo:csv": "npm --prefix backend run demo:csv",
-    "bench": "npm --prefix backend run bench"
+    "bench": "npm --prefix backend run bench",
+    "audit:duplicates": "npm --prefix backend run audit:duplicates --"
   }
 }

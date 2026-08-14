@@ -286,11 +286,13 @@ async function testCsvIngestionMatrix() {
       'Requested Service is required.',
     ]);
 
+    // The same patient listed twice in one file, with the phone formatted
+    // differently and the address in a different case.
     const withinFileDuplicatePreview = await previewInquiryCsv(
       [
         'name,phone,email,service_needed',
-        'First Patient,404 555 0125,duplicate@example.com,Spinal Adjustment',
-        'Second Patient,404-555-0125,DUPLICATE@example.com,Wellness Consultation',
+        'Repeat Patient,404 555 0125,duplicate@example.com,Spinal Adjustment',
+        'Repeat Patient,404-555-0125,DUPLICATE@example.com,Wellness Consultation',
       ].join('\n'),
     );
     assert.equal(withinFileDuplicatePreview.totalRows, 2);
@@ -299,20 +301,56 @@ async function testCsvIngestionMatrix() {
     assert.equal(withinFileDuplicatePreview.rows[0].duplicate, false);
     assert.equal(withinFileDuplicatePreview.rows[1].duplicate, true);
 
+    // Two people at one address in the same file are two patients.
+    const withinFileHouseholdPreview = await previewInquiryCsv(
+      [
+        'name,phone,email,service_needed',
+        'First Patient,404 555 0125,household@example.com,Spinal Adjustment',
+        'Second Patient,404-555-0125,HOUSEHOLD@example.com,Wellness Consultation',
+      ].join('\n'),
+    );
+    assert.equal(withinFileHouseholdPreview.importableRows, 2);
+    assert.equal(withinFileHouseholdPreview.duplicateRows, 0);
+
+    // The same patient already on file, reached by either contact detail and
+    // regardless of formatting or case.
     existingContacts = [{
+      name: 'Dana Whitfield',
       email: 'existing@example.com',
       phone: '4045550126',
     }];
     const existingDuplicatePreview = await previewInquiryCsv(
       [
         'name,phone,email,service_needed',
-        'Email Duplicate,404-555-0190,EXISTING@example.com,Spinal Adjustment',
-        'Phone Duplicate,404.555.0126,new@example.com,Wellness Consultation',
+        'Dana Whitfield,404-555-0190,EXISTING@example.com,Spinal Adjustment',
+        'dana  whitfield,404.555.0126,new@example.com,Wellness Consultation',
       ].join('\n'),
     );
     assert.equal(existingDuplicatePreview.importableRows, 0);
     assert.equal(existingDuplicatePreview.duplicateRows, 2);
     assert.ok(existingDuplicatePreview.rows.every((row) => row.duplicate));
+
+    // A household shares one phone and one address. Matching on contact alone
+    // treated the family as a single patient and silently discarded the rest,
+    // so distinct names must survive the import.
+    existingContacts = [{
+      name: 'Maria Alvarez',
+      email: 'alvarez.family@example.com',
+      phone: '4705550999',
+    }];
+    const householdPreview = await previewInquiryCsv(
+      [
+        'name,phone,email,service_needed',
+        'Diego Alvarez,470-555-0999,alvarez.family@example.com,Sports Injury Treatment',
+        'Sofia Alvarez,470-555-0999,alvarez.family@example.com,Wellness Consultation',
+        'Maria Alvarez,470-555-0999,alvarez.family@example.com,Spinal Adjustment',
+      ].join('\n'),
+    );
+    assert.equal(householdPreview.importableRows, 2, 'family members must not be treated as duplicates');
+    assert.equal(householdPreview.duplicateRows, 1, 'only the patient already on file is a duplicate');
+    assert.equal(householdPreview.rows[0].duplicate, false);
+    assert.equal(householdPreview.rows[1].duplicate, false);
+    assert.equal(householdPreview.rows[2].duplicate, true);
   } finally {
     Inquiry.find = originalInquiryFind;
   }

@@ -60,10 +60,9 @@ const inquirySchema = new mongoose.Schema(
  * Without these every read is a collection scan. Measured at 20,000 records, a
  * single lookup by email examined all 20,000 documents to return one.
  *
- * Email and phone are not unique here on purpose. Duplicate prevention lives in
- * importService, and existing collections may already contain duplicates that a
- * unique index would reject at startup. Promoting these to unique needs a
- * de-duplication pass first.
+ * Email and phone are indexed but deliberately not unique. Households share a
+ * phone number and an address, so a unique constraint would refuse the second
+ * family member. Audited on 2026-08-14; see docs/DUPLICATE_POLICY.md.
  */
 inquirySchema.index({ email: 1 });
 inquirySchema.index({ phone: 1 });
