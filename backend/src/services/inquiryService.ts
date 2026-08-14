@@ -1,6 +1,10 @@
-import { DEAD_LEAD_PATIENT_TYPE, LOST_STATUS } from '../config/constants.js';
+import {
+  DEAD_LEAD_PATIENT_TYPE,
+  FOLLOW_UP_NEEDED_STATUS,
+  LOST_STATUS,
+} from '../config/constants.js';
 import { Inquiry } from '../models/Inquiry.js';
-import { parseDateOnly } from '../utils/date.js';
+import { addDays, parseDateOnly, startOfToday } from '../utils/date.js';
 import { logActivities, logActivity } from './activityService.js';
 
 export type InquiryInput = {
@@ -94,6 +98,112 @@ export async function listInquiriesCreatedSince(since: Date) {
 
 export async function listInquiries() {
   return Inquiry.find().sort({ created_at: -1, _id: -1 }).lean({ virtuals: true });
+}
+
+export type FollowUpFilter = 'All' | 'Needs Follow-Up' | 'Overdue' | 'Due Today';
+
+export type InquiryQuery = {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  status?: string;
+  source?: string;
+  followUp?: FollowUpFilter;
+};
+
+export const MAX_PAGE_SIZE = 100;
+export const DEFAULT_PAGE_SIZE = 25;
+
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Translates the list filters into a MongoDB query.
+ *
+ * These mirror what the Inquiries page previously evaluated in the browser over
+ * the whole collection. Keep the two in step: the browser compares date-only
+ * strings, and dates are stored at local midnight, so a "due today" match is
+ * the single midnight instant rather than a range of times.
+ *
+ * BSON orders null before dates, so every date comparison pairs with an
+ * explicit `$ne: null`; without it a missing follow-up date would satisfy
+ * `$lt: today`.
+ */
+export function buildInquiryFilter(query: InquiryQuery) {
+  // Collected as $and clauses so an explicit status filter and the follow-up
+  // view's own status rule cannot overwrite one another. Selecting status
+  // "Lost" together with any follow-up view correctly matches nothing, which
+  // is what the browser did.
+  const clauses: Record<string, unknown>[] = [];
+  const search = query.search?.trim();
+
+  if (search) {
+    const pattern = new RegExp(escapeRegex(search), 'i');
+    clauses.push({
+      $or: [
+        { name: pattern },
+        { phone: pattern },
+        { email: pattern },
+        { service_needed: pattern },
+        { notes: pattern },
+      ],
+    });
+  }
+
+  if (query.status && query.status !== 'All') clauses.push({ status: query.status });
+  if (query.source && query.source !== 'All') clauses.push({ source: query.source });
+
+  const followUp = query.followUp;
+  if (followUp && followUp !== 'All') {
+    const today = startOfToday();
+    const tomorrow = addDays(today, 1);
+
+    // Every follow-up view excludes Lost inquiries.
+    clauses.push({ status: { $ne: LOST_STATUS } });
+
+    if (followUp === 'Overdue') {
+      clauses.push({ next_follow_up_date: { $ne: null, $lt: today } });
+    } else if (followUp === 'Due Today') {
+      clauses.push({ next_follow_up_date: { $gte: today, $lt: tomorrow } });
+    } else {
+      // Needs Follow-Up: flagged by status, or dated today or earlier.
+      clauses.push({
+        $or: [
+          { status: FOLLOW_UP_NEEDED_STATUS },
+          { next_follow_up_date: { $ne: null, $lt: tomorrow } },
+        ],
+      });
+    }
+  }
+
+  return clauses.length ? { $and: clauses } : {};
+}
+
+/**
+ * One page of inquiries with the total matching count.
+ *
+ * The list previously returned every inquiry so the browser could filter and
+ * search it, which meant 12.75 MB across the wire at 20,000 records.
+ */
+export async function listInquiriesPage(query: InquiryQuery) {
+  const page = Math.max(1, Math.floor(Number(query.page) || 1));
+  const pageSize = Math.min(
+    MAX_PAGE_SIZE,
+    Math.max(1, Math.floor(Number(query.pageSize) || DEFAULT_PAGE_SIZE)),
+  );
+  const filter = buildInquiryFilter(query);
+
+  const [rows, total] = await Promise.all([
+    Inquiry.find(filter)
+      .sort({ created_at: -1, _id: -1 })
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .lean({ virtuals: true }),
+    Inquiry.countDocuments(filter),
+  ]);
+
+  return { rows, total, page, pageSize };
 }
 
 /**

@@ -14,7 +14,7 @@
 
 import mongoose from 'mongoose';
 import { Inquiry } from '../models/Inquiry.js';
-import { listInquiriesForReports, listReactivationCandidates } from '../services/inquiryService.js';
+import { listInquiriesForReports, listInquiriesPage, listReactivationCandidates } from '../services/inquiryService.js';
 import { calculateKpis, calculateKpisFromDatabase } from '../services/kpiService.js';
 import { buildReactivationQueue } from '../services/reactivationService.js';
 import { buildWeeklySummary } from '../services/reportService.js';
@@ -125,7 +125,17 @@ async function main() {
     return rows.length;
   }));
 
-  results.push(await time('GET /api/inquiries', async () => {
+  results.push(await time('GET /api/inquiries (page 1)', async () => {
+    const result = await listInquiriesPage({ page: 1, pageSize: 25 });
+    return result.rows.length;
+  }));
+
+  results.push(await time('GET /api/inquiries (search)', async () => {
+    const result = await listInquiriesPage({ page: 1, pageSize: 25, search: 'Patient 1234' });
+    return result.rows.length;
+  }));
+
+  results.push(await time('GET /api/inquiries (whole collection)', async () => {
     const rows = await Inquiry.find().sort({ created_at: -1, _id: -1 }).lean();
     return rows.length;
   }));

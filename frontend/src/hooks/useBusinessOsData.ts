@@ -22,9 +22,20 @@ const emptyKpis: Kpis = {
   topInquirySource: 'None',
 };
 
+/** How many recent inquiries the dashboard panel shows. */
+const RECENT_INQUIRY_COUNT = 8;
+
+/**
+ * Upper bound on the dashboard's follow-up queue. The overdue, due-today, and
+ * workflow lists are all derived from this one bounded read.
+ */
+const FOLLOW_UP_QUEUE_LIMIT = 50;
+
 export function useBusinessOsData() {
   const [config, setConfig] = useState<AppConfig | null>(null);
-  const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+  const [recentInquiries, setRecentInquiries] = useState<Inquiry[]>([]);
+  const [followUps, setFollowUps] = useState<Inquiry[]>([]);
+  const [inquiryTotal, setInquiryTotal] = useState(0);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [kpis, setKpis] = useState<Kpis>(emptyKpis);
   const [summary, setSummary] = useState<WeeklySummary | null>(null);
@@ -41,9 +52,14 @@ export function useBusinessOsData() {
 
   async function loadData() {
     setError('');
+    // Two bounded reads replace what used to be the whole collection. The
+    // dashboard only ever showed the eight most recent inquiries and the
+    // follow-up queue, so it no longer downloads a clinic's entire history to
+    // render them. The Inquiries page fetches its own page as filters change.
     const [
       nextConfig,
-      nextInquiries,
+      nextRecent,
+      nextFollowUps,
       nextReactivations,
       nextActivities,
       nextKpis,
@@ -51,7 +67,8 @@ export function useBusinessOsData() {
       nextMonthlySummary,
     ] = await Promise.all([
       api.config(),
-      api.inquiries(),
+      api.inquiries({ pageSize: RECENT_INQUIRY_COUNT }),
+      api.inquiries({ followUp: 'Needs Follow-Up', pageSize: FOLLOW_UP_QUEUE_LIMIT }),
       api.reactivations(),
       api.activities(),
       api.kpis(),
@@ -59,7 +76,9 @@ export function useBusinessOsData() {
       api.monthlySummary(),
     ]);
     setConfig(nextConfig);
-    setInquiries(nextInquiries);
+    setRecentInquiries(nextRecent.rows);
+    setInquiryTotal(nextRecent.total);
+    setFollowUps(nextFollowUps.rows);
     setReactivations(nextReactivations);
     setActivities(nextActivities);
     setKpis(nextKpis);
@@ -81,7 +100,9 @@ export function useBusinessOsData() {
 
   return {
     config,
-    inquiries,
+    recentInquiries,
+    followUps,
+    inquiryTotal,
     activities,
     kpis,
     summary,

@@ -11,46 +11,41 @@ import { addDaysIso, displayDate, money, percent, todayIso } from '../utils/form
 type DashboardPageProps = {
   kpis: Kpis;
   config: AppConfig | null;
-  inquiries: Inquiry[];
+  /** The eight most recent inquiries, for the Recent Patient Inquiries panel. */
+  recentInquiries: Inquiry[];
+  /** The follow-up queue, already narrowed to Needs Follow-Up by the server. */
+  followUps: Inquiry[];
   onChanged: (message: string) => Promise<void>;
   setError: (message: string) => void;
 };
 
-export function DashboardPage({ kpis, config, inquiries, onChanged, setError }: DashboardPageProps) {
+export function DashboardPage({
+  kpis,
+  config,
+  recentInquiries,
+  followUps,
+  onChanged,
+  setError,
+}: DashboardPageProps) {
+  // Overdue, due-today, and the workflow queue are all subsets of the
+  // follow-up list the server already filtered, so they need no further fetch.
   const overdue = useMemo(
     () =>
-      inquiries.filter(
-        (inquiry) =>
-          inquiry.status !== 'Lost' &&
-          inquiry.next_follow_up_date &&
-          inquiry.next_follow_up_date < todayIso(),
+      followUps.filter(
+        (inquiry) => inquiry.next_follow_up_date && inquiry.next_follow_up_date < todayIso(),
       ),
-    [inquiries],
+    [followUps],
   );
 
   const dueToday = useMemo(
     () =>
-      inquiries.filter(
-        (inquiry) =>
-          inquiry.status !== 'Lost' &&
-          inquiry.next_follow_up_date &&
-          inquiry.next_follow_up_date === todayIso(),
+      followUps.filter(
+        (inquiry) => inquiry.next_follow_up_date && inquiry.next_follow_up_date === todayIso(),
       ),
-    [inquiries],
+    [followUps],
   );
 
-  const todayQueue = useMemo(
-    () =>
-      inquiries
-        .filter(
-          (inquiry) =>
-            inquiry.status !== 'Lost' &&
-            (inquiry.status === 'Follow-Up Needed' ||
-              Boolean(inquiry.next_follow_up_date && inquiry.next_follow_up_date <= todayIso())),
-        )
-        .slice(0, 6),
-    [inquiries],
-  );
+  const todayQueue = useMemo(() => followUps.slice(0, 6), [followUps]);
 
   async function updateWorkflow(inquiry: Inquiry, status: InquiryStatus, nextFollowUpDate = inquiry.next_follow_up_date) {
     setError('');
@@ -125,7 +120,7 @@ export function DashboardPage({ kpis, config, inquiries, onChanged, setError }: 
           )}
         </Panel>
         <Panel title="Recent Patient Inquiries" description="Latest inquiry activity and current status.">
-          <InquiryTable inquiries={inquiries.slice(0, 8)} compact />
+          <InquiryTable inquiries={recentInquiries} compact />
         </Panel>
         <Panel title="Follow-Up Focus" description="Overdue and due-today follow-ups to handle first.">
           <FollowUpList title="Overdue" inquiries={overdue} variant="danger" />

@@ -5,6 +5,8 @@ import {
   ImportPreview,
   ImportResult,
   Inquiry,
+  InquiryPage,
+  InquiryQuery,
   Kpis,
   LoginResult,
   MonthlySummary,
@@ -52,7 +54,17 @@ export const api = {
   login: (password: string) =>
     request<LoginResult>('/auth/login', { method: 'POST', body: JSON.stringify({ password }) }),
   config: () => request<AppConfig>('/config'),
-  inquiries: () => request<Inquiry[]>('/inquiries'),
+  inquiries: (query: InquiryQuery = {}) => {
+    const params = new URLSearchParams();
+    if (query.page) params.set('page', String(query.page));
+    if (query.pageSize) params.set('pageSize', String(query.pageSize));
+    if (query.search?.trim()) params.set('search', query.search.trim());
+    if (query.status && query.status !== 'All') params.set('status', query.status);
+    if (query.source && query.source !== 'All') params.set('source', query.source);
+    if (query.followUp && query.followUp !== 'All') params.set('followUp', query.followUp);
+    const suffix = params.toString();
+    return request<InquiryPage>(`/inquiries${suffix ? `?${suffix}` : ''}`);
+  },
   reactivations: () => request<ReactivationQueue>('/reactivations'),
   activities: () => request<Activity[]>('/activities'),
   kpis: () => request<Kpis>('/kpis'),

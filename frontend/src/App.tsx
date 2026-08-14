@@ -52,7 +52,9 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
   const {
     activities,
     config,
-    inquiries,
+    recentInquiries,
+    followUps,
+    inquiryTotal,
     kpis,
     monthlySummary,
     reactivations,
@@ -84,13 +86,14 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
         <DashboardPage
           kpis={kpis}
           config={config}
-          inquiries={inquiries}
+          recentInquiries={recentInquiries}
+          followUps={followUps}
           onChanged={refreshWithMessage}
           setError={setError}
         />
       )}
       {view === 'inquiries' && (
-        <InquiriesPage config={config} inquiries={inquiries} onChanged={refreshWithMessage} setError={setError} />
+        <InquiriesPage config={config} onChanged={refreshWithMessage} setError={setError} />
       )}
       {view === 'reactivations' && (
         <ReactivationsPage
@@ -103,7 +106,7 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
       {view === 'summary' && <WeeklySummaryPage summary={summary} />}
       {view === 'monthly' && <MonthlySummaryPage summary={monthlySummary} />}
       {view === 'activity' && <ActivityPage activities={activities} />}
-      {view === 'exports' && <ExportsPage inquiries={inquiries} onChanged={refreshWithMessage} setError={setError} />}
+      {view === 'exports' && <ExportsPage inquiryTotal={inquiryTotal} onChanged={refreshWithMessage} setError={setError} />}
       {view === 'settings' && <SettingsPage config={config} onChanged={refreshWithMessage} setError={setError} />}
       {view === 'public-intake' && <PublicInquiryPage config={config} />}
     </AppShell>

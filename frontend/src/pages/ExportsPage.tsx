@@ -4,12 +4,13 @@ import { api } from '../services/api';
 import type { ImportPreview, Inquiry } from '../types';
 
 type ExportsPageProps = {
-  inquiries: Inquiry[];
+  /** Total inquiries available to export, from the paginated list endpoint. */
+  inquiryTotal: number;
   onChanged: (message: string) => Promise<void>;
   setError: (message: string) => void;
 };
 
-export function ExportsPage({ inquiries, onChanged, setError }: ExportsPageProps) {
+export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPageProps) {
   const [csvText, setCsvText] = useState('');
   const [preview, setPreview] = useState<ImportPreview | null>(null);
   const [importing, setImporting] = useState(false);
@@ -71,7 +72,7 @@ export function ExportsPage({ inquiries, onChanged, setError }: ExportsPageProps
         <Download />
         <div>
           <h3>Patient Inquiries CSV</h3>
-          <p>{inquiries.length ? `${inquiries.length} patient inquiries ready to export.` : 'No export data yet.'}</p>
+          <p>{inquiryTotal ? `${inquiryTotal} patient inquiries ready to export.` : 'No export data yet.'}</p>
         </div>
         <button className="primary-button" type="button" onClick={downloadCsv}>
           Download CSV

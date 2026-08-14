@@ -187,3 +187,22 @@ export type ReactivationQueue = {
   dueToday: number;
   upcoming: number;
 };
+
+export type FollowUpFilter = 'All' | 'Needs Follow-Up' | 'Overdue' | 'Due Today';
+
+export type InquiryQuery = {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  status?: InquiryStatus | 'All';
+  source?: InquirySource | 'All';
+  followUp?: FollowUpFilter;
+};
+
+/** One page of inquiries plus the total matching the current filters. */
+export type InquiryPage = {
+  rows: Inquiry[];
+  total: number;
+  page: number;
+  pageSize: number;
+};

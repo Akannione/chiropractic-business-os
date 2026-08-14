@@ -6,6 +6,7 @@ import { api } from '../services/api';
 import type {
   AppConfig,
   AppointmentStatus,
+  FollowUpFilter,
   FollowUpOutcome,
   Inquiry,
   InquirySource,
@@ -35,14 +36,16 @@ type InquiryFormState = {
   follow_up_outcome: FollowUpOutcome;
 };
 
-type FollowUpFilter = 'All' | 'Needs Follow-Up' | 'Overdue' | 'Due Today';
-
 type InquiriesPageProps = {
   config: AppConfig | null;
-  inquiries: Inquiry[];
   onChanged: (message: string) => Promise<void>;
   setError: (message: string) => void;
 };
+
+const PAGE_SIZE = 25;
+
+/** Delay before a keystroke turns into a request. */
+const SEARCH_DEBOUNCE_MS = 300;
 
 const emptyForm = (config: AppConfig | null): InquiryFormState => ({
   name: '',
@@ -84,17 +87,7 @@ const formFromInquiry = (inquiry: Inquiry): InquiryFormState => ({
   follow_up_outcome: inquiry.follow_up_outcome || 'Not Contacted',
 });
 
-function matchesFollowUpFilter(inquiry: Inquiry, filter: FollowUpFilter) {
-  if (filter === 'All') return true;
-  if (inquiry.status === 'Lost') return false;
-  if (filter === 'Needs Follow-Up') {
-    return inquiry.status === 'Follow-Up Needed' || Boolean(inquiry.next_follow_up_date && inquiry.next_follow_up_date <= todayIso());
-  }
-  if (filter === 'Overdue') return Boolean(inquiry.next_follow_up_date && inquiry.next_follow_up_date < todayIso());
-  return inquiry.next_follow_up_date === todayIso();
-}
-
-export function InquiriesPage({ config, inquiries, onChanged, setError }: InquiriesPageProps) {
+export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProps) {
   const [form, setForm] = useState<InquiryFormState>(() => emptyForm(config));
   const [selectedId, setSelectedId] = useState('');
   const [detailForm, setDetailForm] = useState<InquiryFormState | null>(null);
@@ -103,9 +96,57 @@ export function InquiriesPage({ config, inquiries, onChanged, setError }: Inquir
   const [sourceFilter, setSourceFilter] = useState<InquirySource | 'All'>('All');
   const [followUpFilter, setFollowUpFilter] = useState<FollowUpFilter>('All');
 
+  const [rows, setRows] = useState<Inquiry[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [listLoading, setListLoading] = useState(true);
+  const [reloadToken, setReloadToken] = useState(0);
+
+  // Searching is debounced so a request is not issued per keystroke.
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(search), SEARCH_DEBOUNCE_MS);
+    return () => window.clearTimeout(timer);
+  }, [search]);
+
+  // Any change to the filters invalidates the current page number.
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, statusFilter, sourceFilter, followUpFilter]);
+
+  // Filtering and searching run in the database; this page holds one page of
+  // results rather than the whole collection.
+  useEffect(() => {
+    let cancelled = false;
+    setListLoading(true);
+    api
+      .inquiries({
+        page,
+        pageSize: PAGE_SIZE,
+        search: debouncedSearch,
+        status: statusFilter,
+        source: sourceFilter,
+        followUp: followUpFilter,
+      })
+      .then((result) => {
+        if (cancelled) return;
+        setRows(result.rows);
+        setTotal(result.total);
+      })
+      .catch((error: Error) => {
+        if (!cancelled) setError(error.message);
+      })
+      .finally(() => {
+        if (!cancelled) setListLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [page, debouncedSearch, statusFilter, sourceFilter, followUpFilter, reloadToken]);
+
   const selectedInquiry = useMemo(
-    () => inquiries.find((inquiry) => inquiry.id === selectedId) || inquiries[0] || null,
-    [inquiries, selectedId],
+    () => rows.find((inquiry) => inquiry.id === selectedId) || rows[0] || null,
+    [rows, selectedId],
   );
 
   useEffect(() => {
@@ -116,20 +157,15 @@ export function InquiriesPage({ config, inquiries, onChanged, setError }: Inquir
     }
     setSelectedId(selectedInquiry.id);
     setDetailForm(formFromInquiry(selectedInquiry));
-  }, [selectedInquiry?.id, inquiries]);
+  }, [selectedInquiry?.id, rows]);
 
-  const filteredInquiries = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
-    return inquiries.filter((inquiry) => {
-      const searchText = [inquiry.name, inquiry.phone, inquiry.email, inquiry.service_needed, inquiry.notes]
-        .join(' ')
-        .toLowerCase();
-      const matchesSearch = !normalizedSearch || searchText.includes(normalizedSearch);
-      const matchesStatus = statusFilter === 'All' || inquiry.status === statusFilter;
-      const matchesSource = sourceFilter === 'All' || inquiry.source === sourceFilter;
-      return matchesSearch && matchesStatus && matchesSource && matchesFollowUpFilter(inquiry, followUpFilter);
-    });
-  }, [followUpFilter, inquiries, search, sourceFilter, statusFilter]);
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  /** Refetches the current page after a create or update. */
+  async function reloadList(message: string) {
+    setReloadToken((token) => token + 1);
+    await onChanged(message);
+  }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -138,7 +174,7 @@ export function InquiriesPage({ config, inquiries, onChanged, setError }: Inquir
       const created = await api.createInquiry(form);
       setSelectedId(created.id);
       setForm(emptyForm(config));
-      await onChanged('Patient inquiry added.');
+      await reloadList('Patient inquiry added.');
     } catch (nextError) {
       setError((nextError as Error).message);
     }
@@ -150,7 +186,7 @@ export function InquiriesPage({ config, inquiries, onChanged, setError }: Inquir
     setError('');
     try {
       await api.updateInquiry(selectedInquiry.id, detailForm);
-      await onChanged('Patient inquiry updated.');
+      await reloadList('Patient inquiry updated.');
     } catch (nextError) {
       setError((nextError as Error).message);
     }
@@ -163,7 +199,7 @@ export function InquiriesPage({ config, inquiries, onChanged, setError }: Inquir
     setError('');
     try {
       await api.updateInquiry(selectedInquiry.id, nextForm);
-      await onChanged(`Patient inquiry moved to ${status}.`);
+      await reloadList(`Patient inquiry moved to ${status}.`);
     } catch (nextError) {
       setError((nextError as Error).message);
     }
@@ -387,10 +423,10 @@ export function InquiriesPage({ config, inquiries, onChanged, setError }: Inquir
       </Panel>
 
       <div className="detail-grid">
-        <Panel title={`Inquiry List (${filteredInquiries.length})`} description="Select a patient inquiry to review or update details.">
-          {filteredInquiries.length ? (
+        <Panel title={`Inquiry List (${total})`} description="Select a patient inquiry to review or update details.">
+          {rows.length ? (
             <div className="inquiry-list">
-              {filteredInquiries.map((inquiry) => (
+              {rows.map((inquiry) => (
                 <button
                   className={`inquiry-list-item ${selectedInquiry?.id === inquiry.id ? 'selected' : ''}`}
                   key={inquiry.id}
@@ -411,7 +447,31 @@ export function InquiriesPage({ config, inquiries, onChanged, setError }: Inquir
               ))}
             </div>
           ) : (
-            <div className="empty-state">No patient inquiries match these filters.</div>
+            <div className="empty-state">
+              {listLoading ? 'Loading patient inquiries...' : 'No patient inquiries match these filters.'}
+            </div>
+          )}
+
+          {pageCount > 1 && (
+            <div className="pagination">
+              <button
+                type="button"
+                disabled={page <= 1 || listLoading}
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+              >
+                Previous
+              </button>
+              <span>
+                Page {page} of {pageCount}
+              </span>
+              <button
+                type="button"
+                disabled={page >= pageCount || listLoading}
+                onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
+              >
+                Next
+              </button>
+            </div>
           )}
         </Panel>
 
