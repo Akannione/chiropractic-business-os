@@ -1,9 +1,10 @@
 import {
   AutomatedInquiryInput,
-  createAutomatedInquiry,
+  buildAutomatedInquiryInput,
   estimateTreatmentValue,
   normalizeSource,
 } from './automationService.js';
+import { createInquiriesBulk } from './inquiryService.js';
 import { Inquiry } from '../models/Inquiry.js';
 import {
   APPOINTMENT_STATUSES,
@@ -225,30 +226,44 @@ export async function previewInquiryCsv(csvText: string) {
   };
 }
 
+/**
+ * Imports every acceptable row in one bulk write.
+ *
+ * Previously this looped row by row, issuing an inquiry write and an activity
+ * write for each, so a 5,000-row clinic export cost 10,000 sequential round
+ * trips. It also called createAutomatedInquiry, which fires a "new patient
+ * inquiry" notification per row; importing a back catalogue would have sent
+ * one email per patient once SMTP is configured. A bulk backfill is not an
+ * inbound inquiry, so the import no longer notifies.
+ */
 export async function importInquiryCsv(csvText: string) {
   const preview = await previewInquiryCsv(csvText);
   const rows = parseInquiryCsv(csvText).map(mapExternalRow);
-  let imported = 0;
   let skippedDuplicates = 0;
   const errors: string[] = [];
 
+  // Keep the CSV row number alongside each accepted row so a failure from the
+  // bulk write can be reported against the line the user actually sees.
+  const accepted: { input: ReturnType<typeof buildAutomatedInquiryInput>; rowNumber: number }[] = [];
+
   for (const [index, row] of rows.entries()) {
     const previewRow = preview.rows[index];
+    const rowNumber = previewRow?.rowNumber ?? index + 2;
     if (previewRow?.duplicate) {
       skippedDuplicates += 1;
       continue;
     }
     if (previewRow?.errors.length) {
-      errors.push(`Row ${previewRow.rowNumber}: ${previewRow.errors.join(' ')}`);
+      errors.push(`Row ${rowNumber}: ${previewRow.errors.join(' ')}`);
       continue;
     }
-    try {
-      await createAutomatedInquiry(row, 'CSV import');
-      imported += 1;
-    } catch (error) {
-      errors.push(`Row ${index + 2}: ${(error as Error).message}`);
-    }
+    accepted.push({ input: buildAutomatedInquiryInput(row, 'CSV import'), rowNumber });
   }
 
-  return { imported, skippedDuplicates, failed: errors.length, errors };
+  const { inserted, failures } = await createInquiriesBulk(accepted.map((entry) => entry.input));
+  for (const failure of failures) {
+    errors.push(`Row ${accepted[failure.index]?.rowNumber ?? failure.index + 2}: ${failure.message}`);
+  }
+
+  return { imported: inserted, skippedDuplicates, failed: errors.length, errors };
 }

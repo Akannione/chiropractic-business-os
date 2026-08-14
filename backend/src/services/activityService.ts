@@ -17,6 +17,22 @@ export async function logActivity(input: ActivityInput) {
   });
 }
 
+/** One write for a whole batch, used by the CSV import. */
+export async function logActivities(inputs: ActivityInput[]) {
+  if (!inputs.length) return;
+  const now = new Date();
+  await Activity.insertMany(
+    inputs.map((input) => ({
+      inquiry_id: input.inquiryId || null,
+      patient_name: input.patientName || '',
+      action: input.action,
+      detail: input.detail || '',
+      created_at: now,
+    })),
+    { ordered: false },
+  );
+}
+
 export async function listActivities(limit = 40) {
   const activities = await Activity.find().sort({ created_at: -1, _id: -1 }).limit(limit).lean();
   return activities.map((activity) => ({

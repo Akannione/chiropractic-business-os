@@ -1,7 +1,7 @@
 import { DEAD_LEAD_PATIENT_TYPE, LOST_STATUS } from '../config/constants.js';
 import { Inquiry } from '../models/Inquiry.js';
 import { parseDateOnly } from '../utils/date.js';
-import { logActivity } from './activityService.js';
+import { logActivities, logActivity } from './activityService.js';
 
 export type InquiryInput = {
   name: string;
@@ -96,9 +96,12 @@ export async function listInquiries() {
   return Inquiry.find().sort({ created_at: -1, _id: -1 }).lean({ virtuals: true });
 }
 
-export async function createInquiry(input: InquiryInput) {
-  const now = new Date();
-  const inquiry = await Inquiry.create({
+/**
+ * Normalises an input into the exact shape stored in MongoDB. Shared by the
+ * single-record path and the bulk import so both write identical documents.
+ */
+export function buildInquiryDocument(input: InquiryInput, now = new Date()) {
+  return {
     ...input,
     name: input.name.trim(),
     phone: input.phone.trim(),
@@ -117,7 +120,11 @@ export async function createInquiry(input: InquiryInput) {
     follow_up_outcome: input.follow_up_outcome || 'Not Contacted',
     created_at: now,
     updated_at: now,
-  });
+  };
+}
+
+export async function createInquiry(input: InquiryInput) {
+  const inquiry = await Inquiry.create(buildInquiryDocument(input));
   await logActivity({
     inquiryId: inquiry.id,
     patientName: inquiry.name,
@@ -125,6 +132,60 @@ export async function createInquiry(input: InquiryInput) {
     detail: `Created from ${inquiry.source} with status ${inquiry.status}.`,
   });
   return inquiry;
+}
+
+export type BulkInsertFailure = { index: number; message: string };
+
+/**
+ * Inserts many inquiries in one round trip instead of one per row.
+ *
+ * A CSV import previously issued two sequential writes per row, an inquiry and
+ * an activity, so a 5,000-row clinic export meant 10,000 round trips.
+ *
+ * Runs unordered so one bad row does not abandon the rest. `index` on each
+ * failure refers to the position in `inputs`, letting the caller map a failure
+ * back to its CSV row number.
+ */
+export async function createInquiriesBulk(inputs: InquiryInput[]) {
+  if (!inputs.length) return { inserted: 0, failures: [] as BulkInsertFailure[] };
+
+  const now = new Date();
+  const documents = inputs.map((input) => buildInquiryDocument(input, now));
+
+  let insertedDocs: { id?: string; _id?: unknown; name: string; source: string; status: string }[] = [];
+  const failures: BulkInsertFailure[] = [];
+
+  try {
+    insertedDocs = await Inquiry.insertMany(documents, { ordered: false }) as never;
+  } catch (error) {
+    // An unordered insertMany that partially fails reports what did land plus
+    // one entry per rejected document.
+    const bulkError = error as {
+      insertedDocs?: typeof insertedDocs;
+      writeErrors?: { index: number; errmsg?: string; err?: { errmsg?: string } }[];
+      message?: string;
+    };
+    insertedDocs = bulkError.insertedDocs ?? [];
+    const writeErrors = bulkError.writeErrors ?? [];
+    if (!writeErrors.length) throw error;
+    for (const writeError of writeErrors) {
+      failures.push({
+        index: writeError.index,
+        message: writeError.errmsg || writeError.err?.errmsg || 'Could not save this row.',
+      });
+    }
+  }
+
+  if (insertedDocs.length) {
+    await logActivities(insertedDocs.map((doc) => ({
+      inquiryId: String(doc.id ?? doc._id ?? ''),
+      patientName: doc.name,
+      action: 'Inquiry created',
+      detail: `Created from ${doc.source} with status ${doc.status}.`,
+    })));
+  }
+
+  return { inserted: insertedDocs.length, failures };
 }
 
 export async function updateInquiry(
