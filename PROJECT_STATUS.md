@@ -26,8 +26,8 @@ Paused on 2026-08-11 by Tobi's decision. Do not send the existing Gmail follow-u
 
 1. Add database indexes. The `inquiries` and `activities` collections carry only the default `_id_` index, so every query is a collection scan.
 2. Stop loading the whole collection into Node on every read. `/api/kpis`, `/api/weekly-summary`, `/api/monthly-summary`, `/api/reactivations`, `/api/inquiries`, and the CSV export each call an unfiltered `find()` and compute in JavaScript.
-3. Decide whether the API needs real authentication. `ADMIN_PASSWORD` is unset in production, so `authEnabled` is false and every endpoint is open.
-4. Fix the rate limiter memory leak and set `trust proxy` so per-client limiting works behind Vercel.
+3. Close the production API before any real patient data is entered. The application-side hardening is done; the remaining three steps need Vercel and Atlas access and are listed in `docs/SECURITY.md`.
+4. Consider a unique index on email and phone, which needs a de-duplication audit first.
 
 ## Known Issues And Blockers
 

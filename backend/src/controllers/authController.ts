@@ -7,9 +7,15 @@ export function getAuthStatus(_req: Request, res: Response) {
 }
 
 export async function postLogin(req: Request, res: Response) {
+  // Previously this issued a token for any password while auth was disabled,
+  // which reads as a working login and is not one.
+  if (!isAuthEnabled()) {
+    throw new HttpError(400, 'Staff login is not configured for this deployment.');
+  }
+
   const password = String(req.body?.password || '');
   if (!validateAdminPassword(password)) {
     throw new HttpError(401, 'Incorrect password.');
   }
-  res.json({ token: createAuthToken(), authEnabled: isAuthEnabled() });
+  res.json({ token: createAuthToken(), authEnabled: true });
 }

@@ -16,6 +16,8 @@ import {
   type ReactivationQueue,
 } from '../services/reactivationService.js';
 import { buildWeeklySummary } from '../services/reportService.js';
+import { assertSecureAuthConfig, env } from '../config/env.js';
+import { resetSampleData, seedSampleDataIfEmpty } from '../services/seedService.js';
 
 const today = new Date();
 const yesterday = new Date(today);
@@ -533,10 +535,55 @@ async function testReactivationApiContract() {
   }
 }
 
+/**
+ * Enabling staff login while the token secret is still a placeholder produces
+ * forgeable sessions, which looks like protection and is not. Startup must
+ * refuse rather than come up in that state.
+ */
+function testAuthConfigGuard() {
+  const secureBase = {
+    adminPassword: 'a-real-password',
+    authTokenSecret: 'f'.repeat(64),
+  } as typeof env;
+
+  // Auth switched off is a valid posture and must not be blocked.
+  assert.doesNotThrow(() =>
+    assertSecureAuthConfig({ adminPassword: '', authTokenSecret: 'local-dev-secret-change-me' } as typeof env));
+
+  assert.doesNotThrow(() => assertSecureAuthConfig(secureBase));
+
+  for (const placeholder of ['local-dev-secret-change-me', 'change-this-long-random-secret', 'change-me']) {
+    assert.throws(
+      () => assertSecureAuthConfig({ ...secureBase, authTokenSecret: placeholder } as typeof env),
+      /placeholder/i,
+      `expected a placeholder secret to be rejected: ${placeholder}`,
+    );
+  }
+
+  assert.throws(
+    () => assertSecureAuthConfig({ ...secureBase, authTokenSecret: 'short' } as typeof env),
+    /characters/i,
+  );
+}
+
+/** The demo seed must never materialise fake patients in a real deployment. */
+async function testSeedRefusesOutsideDemoMode() {
+  const originalDemoMode = env.demoMode;
+  try {
+    (env as { demoMode: boolean }).demoMode = false;
+    assert.equal(await seedSampleDataIfEmpty(), 0);
+    await assert.rejects(() => resetSampleData(), /demo mode is disabled/i);
+  } finally {
+    (env as { demoMode: boolean }).demoMode = originalDemoMode;
+  }
+}
+
 async function runTests() {
   await testCsvIngestionMatrix();
   await testReactivationSmokeWorkflow();
   await testReactivationApiContract();
+  testAuthConfigGuard();
+  await testSeedRefusesOutsideDemoMode();
 }
 
 runTests()

@@ -27,8 +27,17 @@ export function verifyAuthToken(token: string) {
   return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected)) && expiresAt > Date.now();
 }
 
+/**
+ * Compares digests rather than the raw values.
+ *
+ * timingSafeEqual requires equal-length buffers, so the previous length check
+ * had to run first and returned early on a mismatch, revealing the configured
+ * password's length. Hashing both sides yields fixed-width buffers, so one
+ * constant-time comparison covers length and content together.
+ */
 export function validateAdminPassword(password: string) {
-  if (!isAuthEnabled()) return true;
-  if (password.length !== env.adminPassword.length) return false;
-  return crypto.timingSafeEqual(Buffer.from(password), Buffer.from(env.adminPassword));
+  if (!isAuthEnabled()) return false;
+  const supplied = crypto.createHash('sha256').update(password).digest();
+  const expected = crypto.createHash('sha256').update(env.adminPassword).digest();
+  return crypto.timingSafeEqual(supplied, expected);
 }

@@ -20,9 +20,14 @@ import {
 export const inquiryRouter = Router();
 const intakeLimiter = rateLimit({ maxRequests: 30, windowMs: 15 * 60 * 1000 });
 
+// Login was previously unlimited, leaving the staff password open to unlimited
+// guessing once auth is switched on. Tighter than intake because a legitimate
+// user needs only a handful of attempts.
+const loginLimiter = rateLimit({ maxRequests: 10, windowMs: 15 * 60 * 1000 });
+
 inquiryRouter.get('/config', getConfig);
 inquiryRouter.get('/auth/status', getAuthStatus);
-inquiryRouter.post('/auth/login', asyncHandler(postLogin));
+inquiryRouter.post('/auth/login', loginLimiter, asyncHandler(postLogin));
 inquiryRouter.post('/public/inquiries', intakeLimiter, asyncHandler(postPublicInquiry));
 inquiryRouter.post('/webhooks/inquiries', intakeLimiter, asyncHandler(postWebhookInquiry));
 inquiryRouter.use(requireStaffAuth);
