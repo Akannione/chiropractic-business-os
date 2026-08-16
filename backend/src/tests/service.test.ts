@@ -18,6 +18,7 @@ import {
 import { buildWeeklySummary } from '../services/reportService.js';
 import { assertSecureAuthConfig, env } from '../config/env.js';
 import { resetSampleData, seedSampleDataIfEmpty } from '../services/seedService.js';
+import { findDuplicateGroups } from '../services/duplicateService.js';
 
 const today = new Date();
 const yesterday = new Date(today);
@@ -616,8 +617,38 @@ async function testSeedRefusesOutsideDemoMode() {
   }
 }
 
+/**
+ * Grouping must catch the same patient recorded twice without ever proposing
+ * that a household be combined into one person.
+ */
+async function testDuplicateGrouping() {
+  const originalInquiryFind = Inquiry.find;
+  const rows = [
+    { _id: 'a', name: 'Priya Raman', email: 'priya@example.com', phone: '470-555-0812' },
+    { _id: 'b', name: 'priya  raman', email: 'PRIYA@example.com', phone: '(470) 555 0812' },
+    // Same household: one phone and one address, two different people.
+    { _id: 'c', name: 'Elena Rossi', email: 'rossi@example.com', phone: '470-555-0900' },
+    { _id: 'd', name: 'Marco Rossi', email: 'rossi@example.com', phone: '470-555-0900' },
+    { _id: 'e', name: 'Solo Patient', email: 'solo@example.com', phone: '470-555-0111' },
+  ];
+  Inquiry.find = (() => ({ lean: async () => rows })) as unknown as typeof Inquiry.find;
+
+  try {
+    const groups = await findDuplicateGroups();
+    assert.equal(groups.length, 1, 'only the repeated patient forms a group');
+    assert.deepEqual([...groups[0]].sort(), ['a', 'b']);
+    assert.ok(
+      !groups.some((group) => group.includes('c') || group.includes('d')),
+      'a household must never be offered as a duplicate',
+    );
+  } finally {
+    Inquiry.find = originalInquiryFind;
+  }
+}
+
 async function runTests() {
   await testCsvIngestionMatrix();
+  await testDuplicateGrouping();
   await testReactivationSmokeWorkflow();
   await testReactivationApiContract();
   testAuthConfigGuard();

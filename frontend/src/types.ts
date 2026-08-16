@@ -5,6 +5,7 @@ export type View =
   | 'summary'
   | 'monthly'
   | 'activity'
+  | 'duplicates'
   | 'exports'
   | 'settings'
   | 'public-intake';
@@ -205,4 +206,15 @@ export type InquiryPage = {
   total: number;
   page: number;
   pageSize: number;
+};
+
+/** Inquiries that look like the same patient recorded more than once. */
+export type DuplicateGroups = {
+  groups: Inquiry[][];
+  total: number;
+};
+
+export type MergeResult = {
+  inquiry: Inquiry;
+  movedActivities: number;
 };

@@ -2,6 +2,7 @@ import {
   Activity,
   AppConfig,
   AuthStatus,
+  DuplicateGroups,
   ImportPreview,
   ImportResult,
   Inquiry,
@@ -9,6 +10,7 @@ import {
   InquiryQuery,
   Kpis,
   LoginResult,
+  MergeResult,
   MonthlySummary,
   PublicInquiryInput,
   ReactivationQueue,
@@ -65,6 +67,12 @@ export const api = {
     const suffix = params.toString();
     return request<InquiryPage>(`/inquiries${suffix ? `?${suffix}` : ''}`);
   },
+  duplicates: () => request<DuplicateGroups>('/duplicates'),
+  mergeInquiries: (targetId: string, sourceId: string) =>
+    request<MergeResult>(`/inquiries/${targetId}/merge`, {
+      method: 'POST',
+      body: JSON.stringify({ sourceId }),
+    }),
   reactivations: () => request<ReactivationQueue>('/reactivations'),
   activities: () => request<Activity[]>('/activities'),
   kpis: () => request<Kpis>('/kpis'),

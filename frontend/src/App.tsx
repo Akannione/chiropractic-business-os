@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { AppShell } from './components/AppShell';
 import { useBusinessOsData } from './hooks/useBusinessOsData';
 import { DashboardPage } from './pages/DashboardPage';
+import { DuplicatesPage } from './pages/DuplicatesPage';
 import { ExportsPage } from './pages/ExportsPage';
 import { InquiriesPage } from './pages/InquiriesPage';
 import { LoginPage } from './pages/LoginPage';
@@ -106,6 +107,9 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
       {view === 'summary' && <WeeklySummaryPage summary={summary} />}
       {view === 'monthly' && <MonthlySummaryPage summary={monthlySummary} />}
       {view === 'activity' && <ActivityPage activities={activities} />}
+      {view === 'duplicates' && (
+        <DuplicatesPage onChanged={refreshWithMessage} setError={setError} />
+      )}
       {view === 'exports' && <ExportsPage inquiryTotal={inquiryTotal} onChanged={refreshWithMessage} setError={setError} />}
       {view === 'settings' && <SettingsPage config={config} onChanged={refreshWithMessage} setError={setError} />}
       {view === 'public-intake' && <PublicInquiryPage config={config} />}

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import {
   Activity,
   BarChart3,
+  Copy,
   Download,
   FileText,
   Globe2,
@@ -70,6 +71,9 @@ export function AppShell({
           </NavButton>
           <NavButton icon={<Activity />} active={view === 'activity'} onClick={() => onViewChange('activity')}>
             Activity
+          </NavButton>
+          <NavButton icon={<Copy />} active={view === 'duplicates'} onClick={() => onViewChange('duplicates')}>
+            Duplicates
           </NavButton>
           <NavButton icon={<Download />} active={view === 'exports'} onClick={() => onViewChange('exports')}>
             Exports

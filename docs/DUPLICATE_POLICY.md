@@ -69,8 +69,31 @@ purpose is making sure nobody is forgotten.
   submits the form twice produces two records. Intake should probably stay
   permissive rather than reject a patient mid-form, but staff currently have no
   merge tool, which is the real gap.
-* **No merge feature.** Once duplicates exist there is no way to combine them
-  in the application.
+* ~~**No merge feature.**~~ Added 2026-08-16. See below.
+
+## Merging
+
+The Duplicates screen lists groups that share a name and a contact detail, the
+same rule the import uses, so a household never appears there. Staff pick the
+record to keep and the others are folded into it.
+
+Field rules, chosen so a merge cannot quietly lose information:
+
+| Field | Rule | Why |
+|---|---|---|
+| Any blank field on the kept record | Filled from the other record | A merge should only ever add detail |
+| Status | Whichever got further | A record showing the patient converted must not be discarded by one that says "New Inquiry" |
+| Estimated value | The higher figure | Summing two estimates for one patient would inflate pipeline revenue |
+| Notes | Both kept, separated by a blank line | Staff notes are the least recoverable field |
+| Created date | The earlier one | When the practice first heard from this patient |
+| Last visit | The later one | The reactivation queue must reflect the most recent visit |
+| Next follow-up | The earlier one | Keeps the most urgent callback |
+
+The discarded record's activity history is repointed to the survivor rather
+than deleted, and the merge itself is logged, so the trail stays intact.
+
+Merging is deliberate and confirmed in the interface. Nothing merges
+automatically, because an incorrect merge cannot be undone.
 
 ## If a unique constraint is ever wanted
 
