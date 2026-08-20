@@ -60,7 +60,32 @@ Authorization: Bearer admin.expiry.signature
 
 ### `GET /inquiries`
 
-Returns all patient inquiries, sorted newest first.
+Returns one page of patient inquiries, newest first, with the total number
+matching the filters. Filtering and searching run in the database; this
+endpoint no longer returns the whole collection.
+
+Query parameters, all optional:
+
+| Parameter | Default | Notes |
+|---|---|---|
+| `page` | `1` | 1-based |
+| `pageSize` | `25` | Capped at 100 |
+| `search` | none | Case-insensitive substring across name, phone, email, requested service, and notes |
+| `status` | `All` | Any configured status |
+| `source` | `All` | Any configured source |
+| `followUp` | `All` | `Needs Follow-Up`, `Overdue`, or `Due Today`. Every follow-up view excludes Lost inquiries, so combining one with `status=Lost` correctly matches nothing. |
+
+```json
+{
+  "rows": [],
+  "total": 0,
+  "page": 1,
+  "pageSize": 25
+}
+```
+
+Note for existing integrations: this previously returned a bare array. The rows
+are now under `rows`.
 
 ### `POST /inquiries`
 
@@ -111,6 +136,44 @@ JSON body:
 ```
 
 All clinic workflow fields are optional. Existing inquiry records remain valid without them.
+
+### `GET /duplicates`
+
+Returns groups of inquiries that look like the same patient recorded more than
+once. A group requires a shared name **and** a shared email or phone number.
+People who share a contact detail but have different names are treated as a
+household and are never returned here.
+
+```json
+{
+  "groups": [[]],
+  "total": 0
+}
+```
+
+### `POST /inquiries/:id/merge`
+
+Folds another inquiry into the one named by `:id` and deletes it. The request
+body names the record to merge in:
+
+```json
+{ "sourceId": "<inquiry id>" }
+```
+
+Blank fields on the surviving record are filled from the discarded one, status
+keeps whichever record got further, estimated value takes the higher figure
+rather than the sum, notes from both are kept, the created date keeps the
+earlier and the last visit the later. The discarded record's activity history
+is repointed to the survivor and the merge is recorded in the activity log.
+
+Merging is not reversible.
+
+```json
+{
+  "inquiry": {},
+  "movedActivities": 0
+}
+```
 
 ### `GET /reactivations`
 

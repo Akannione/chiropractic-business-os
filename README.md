@@ -23,9 +23,10 @@ A focused full-stack web app for chiropractic practices to capture patient inqui
 - Tracks activity history for inquiry creation and updates
 - Exports patient inquiries as CSV
 - Supports automated intake from website links, Google/referral source links, webhook payloads, and CSV imports
-- Previews CSV imports and skips duplicate email or phone matches
-- Optionally sends internal email notifications for new automated inquiries when SMTP is configured
-- Supports optional staff login when `ADMIN_PASSWORD` is configured
+- Previews CSV imports and skips rows matching a patient already on file by name and contact detail, while letting a household share a phone number and email address
+- Finds patients recorded more than once and merges them on request, keeping the fuller record and preserving both histories
+- Optionally sends internal email notifications for new automated inquiries when SMTP is configured. Bulk CSV imports do not notify.
+- Supports optional staff login when `ADMIN_PASSWORD` is configured, which also requires a real `AUTH_TOKEN_SECRET`; see `docs/SECURITY.md`
 
 ## Project Structure
 
@@ -198,14 +199,19 @@ Useful source links:
 More details:
 
 - `docs/DEMO_WALKTHROUGH.md`
+- `docs/CALL_RUN_SHEET.md`
+- `docs/OBJECTION_ALREADY_CALLED.md`
 - `docs/CASE_STUDY.md`
 - `docs/ANALYTICS_CONTRACT.md`
+- `docs/SECURITY.md`
+- `docs/DUPLICATE_POLICY.md`
 - `docs/API.md`
 - `docs/PRODUCTION_DEPLOYMENT.md`
 - `docs/WORKFLOW_AUTOMATION.md`
 - `docs/INTAKE_EMBED_SNIPPETS.md`
 - `docs/CSV_IMPORT_EXAMPLE.csv`
 - `docs/METASOFT_REACTIVATION_DEMO.csv`
+- `docs/NEW_PATIENT_IMPORT_DEMO.csv`
 
 ## Verification
 
@@ -250,6 +256,54 @@ npm run smoke:reactivation
 ```
 
 Do not run the reset workflow against client or non-demo data.
+
+### Read-Path Benchmark
+
+The demo database holds around a dozen records, which hides the cost of any
+query that reads the whole collection. This seeds a synthetic clinic into a
+dedicated benchmark database, times each read path, reports how many documents
+each one fetched, and asserts that the KPI aggregation still agrees with the
+documented JavaScript definition on every metric:
+
+```bash
+npm run bench
+```
+
+It refuses to run against any database not named for benchmarking, so it cannot
+touch demo or production data. Override the size with `BENCH_SIZE`.
+
+### Duplicate Audit
+
+Reports contact collisions and distinguishes a repeated name from distinct
+names sharing a contact detail. Read-only. Run it before considering any unique
+constraint:
+
+```bash
+npm run audit:duplicates
+```
+
+It also accepts a CSV export on stdin, which is how to audit a deployment
+without database credentials:
+
+```bash
+curl -s https://cbos-api.vercel.app/api/exports/inquiries.csv \
+  | npm run audit:duplicates -- --csv
+```
+
+See `docs/DUPLICATE_POLICY.md` for why email and phone are deliberately not
+unique.
+
+### Demo Import File
+
+Regenerates `docs/NEW_PATIENT_IMPORT_DEMO.csv` with dates relative to today, so
+a walkthrough never shows patients who are implausibly overdue:
+
+```bash
+npm run demo:csv
+```
+
+It is built to preview as three importable rows, one duplicate, and one
+validation error.
 
 ## Scope
 
