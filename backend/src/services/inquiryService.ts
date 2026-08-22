@@ -126,9 +126,12 @@ function escapeRegex(value: string) {
  * strings, and dates are stored at local midnight, so a "due today" match is
  * the single midnight instant rather than a range of times.
  *
- * BSON orders null before dates, so every date comparison pairs with an
- * explicit `$ne: null`; without it a missing follow-up date would satisfy
- * `$lt: today`.
+ * The `$ne: null` beside each date comparison is belt and braces, not a
+ * correction. MongoDB type-brackets range queries, so `$lt` against a Date
+ * only ever considers Date values and never matches null or a missing field.
+ * BSON *sort* order does place null before dates, which is a separate thing
+ * and easy to conflate; `database.test.ts` pins the query behaviour so the
+ * assumption is verified rather than remembered.
  */
 export function buildInquiryFilter(query: InquiryQuery) {
   // Collected as $and clauses so an explicit status filter and the follow-up

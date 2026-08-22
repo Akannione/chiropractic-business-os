@@ -57,10 +57,11 @@ export type Kpis = ReturnType<typeof calculateKpis>;
  * analytics contract describes; this must agree with it exactly, which the
  * benchmark asserts against 20,000 varied records.
  *
- * Note on null handling: BSON sorts null before dates, so a bare
- * `$lt: today` would match inquiries with no follow-up date at all. Each date
- * comparison therefore pairs with an explicit `$ne: null`, matching the
- * truthiness check the JavaScript version performs.
+ * Note on null handling: the `$ne: null` beside each date comparison mirrors
+ * the truthiness check the JavaScript version performs, but MongoDB does not
+ * need it. Range queries are type-bracketed, so `$lt` against a Date ignores
+ * null and missing fields. BSON sort order does put null first, which is a
+ * different mechanism; see database.test.ts.
  */
 export async function calculateKpisFromDatabase(): Promise<Kpis> {
   const today = startOfToday();

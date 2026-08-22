@@ -223,6 +223,17 @@ npm run build
 npm run test
 ```
 
+`npm run test` is fast and needs no database; it stubs Mongoose. That leaves the
+query layer itself untested, so filters, pagination, the KPI aggregation, and
+merging are covered separately against a real MongoDB:
+
+```bash
+npm run test:db
+```
+
+It uses a dedicated database, drops it afterwards, and skips with a message
+when no MongoDB is reachable, so it is safe to run anywhere.
+
 Health check:
 
 ```bash
