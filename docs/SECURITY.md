@@ -6,16 +6,34 @@ CBOS holds patient names, phone numbers, email addresses, and clinical service
 interest. That is personal health-adjacent data even though the application
 stores no diagnoses or notes from treatment.
 
-## Current posture: open demo
+## Current posture: closed
 
-The production deployment runs with `ADMIN_PASSWORD` unset, so `authEnabled` is
-false and every endpoint is reachable by anyone who knows the URL. Setting that
-one variable closes it; see "Turning on staff login" below. Combined
-with an Atlas network rule permitting all addresses, there is no access control
-at any layer.
+Staff login was switched on in production on 2026-08-22. `ADMIN_PASSWORD` is
+set as a Vercel sensitive secret and `AUTH_TOKEN_SECRET` is a freshly generated
+64-character value. Verified against the live deployment immediately after:
 
-That is acceptable only because the database contains nothing but fabricated
-demo records. **It must be closed before a single real patient is entered.**
+| Check | Result |
+|---|---|
+| `/api/auth/status` | `{"authEnabled":true}` |
+| Eight staff read routes without a token | 401 |
+| `POST /api/demo/reset` and `/api/seed` without a token | 401 |
+| Wrong password | 401 `Incorrect password.` |
+| Forged bearer token | 401 |
+| Response headers | nosniff, DENY, no-referrer present |
+
+The routes that must stay open still are: `/api/health`, `/api/config`, and
+`/api/auth/status` return 200, and `POST /api/public/inquiries` returns 201, so
+the website intake form still accepts patients. CORS returns the frontend
+origin, and the frontend loads and now presents the login screen.
+
+One layer remains open: Atlas still permits all network addresses. See below.
+
+### Note on the demo data
+
+The check above submitted one record through the public intake form, named
+"Verification Probe", to confirm the form still worked after the change. It is
+still in the production demo database and will appear in the inquiry list.
+Clearing it needs `Reset demo data`, which now requires logging in.
 
 ## Fixed in the application
 
@@ -35,17 +53,19 @@ Route protection itself was already correct: `requireStaffAuth` is mounted
 ahead of every staff route, with only config, auth, public intake, and the
 webhook above it.
 
-## Turning on staff login
+## How staff login was turned on
 
-The API project is `cbos-api`. `AUTH_TOKEN_SECRET` was rotated on 2026-08-22 to
-a freshly generated 64-character value, so the startup guard can no longer be
-tripped by a leftover placeholder. Its previous value could not be read back:
-Vercel stores these encrypted and `vercel env pull` returns them empty, so
-rotation was the only way to know what was there.
+Kept for the next deployment, and for rotating the password.
 
-One step remains, and it is deliberately manual. The staff password is a
-credential its owner should choose and store, so it is set directly rather than
-passed through anything that would record it.
+The API project is `cbos-api`. `AUTH_TOKEN_SECRET` was rotated first, to a
+freshly generated 64-character value, so the startup guard could not be tripped
+by a leftover placeholder. Its previous value could not be read back: Vercel
+stores these encrypted and `vercel env pull` returns them empty, so rotation was
+the only way to know what was there. Rotating cost nothing at that point because
+login was still off and no sessions existed.
+
+The password itself is set directly and never passed through anything that would
+record it.
 
 **Run these from `backend/`, which is the API's deploy root and is linked to
 `cbos-api`.** The repository root links to a different project, and running
