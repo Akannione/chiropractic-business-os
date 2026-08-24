@@ -1,6 +1,6 @@
 # CBOS Security Posture
 
-Last reviewed: 2026-08-14.
+Last reviewed: 2026-08-22.
 
 CBOS holds patient names, phone numbers, email addresses, and clinical service
 interest. That is personal health-adjacent data even though the application
@@ -16,7 +16,6 @@ at any layer.
 
 That is acceptable only because the database contains nothing but fabricated
 demo records. **It must be closed before a single real patient is entered.**
-The three steps are in "Before real data" below.
 
 ## Fixed in the application
 
