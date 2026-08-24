@@ -9,7 +9,8 @@ stores no diagnoses or notes from treatment.
 ## Current posture: open demo
 
 The production deployment runs with `ADMIN_PASSWORD` unset, so `authEnabled` is
-false and every endpoint is reachable by anyone who knows the URL. Combined
+false and every endpoint is reachable by anyone who knows the URL. Setting that
+one variable closes it; see "Turning on staff login" below. Combined
 with an Atlas network rule permitting all addresses, there is no access control
 at any layer.
 
@@ -35,30 +36,55 @@ Route protection itself was already correct: `requireStaffAuth` is mounted
 ahead of every staff route, with only config, auth, public intake, and the
 webhook above it.
 
-## Before real data
+## Turning on staff login
 
-These need access CBOS does not have and were not performed.
+The API project is `cbos-api`. `AUTH_TOKEN_SECRET` was rotated on 2026-08-22 to
+a freshly generated 64-character value, so the startup guard can no longer be
+tripped by a leftover placeholder. Its previous value could not be read back:
+Vercel stores these encrypted and `vercel env pull` returns them empty, so
+rotation was the only way to know what was there.
 
-1. **Set the staff credentials in Vercel** on the API project, then redeploy:
+One step remains, and it is deliberately manual. The staff password is a
+credential its owner should choose and store, so it is set directly rather than
+passed through anything that would record it:
 
-   ```
-   ADMIN_PASSWORD=<a strong password>
-   AUTH_TOKEN_SECRET=<openssl rand -hex 32>
-   ```
+```bash
+vercel env add ADMIN_PASSWORD production
+```
 
-   If the secret is missing or weak the deployment will fail to boot, by
-   design. Verify afterwards that `/api/auth/status` reports
-   `{"authEnabled":true}` and that `/api/inquiries` returns 401 without a
-   token.
+Then redeploy and confirm:
 
-2. **Set `BUSINESS_OS_DEMO_MODE=false`.** While it is true, `/api/demo/reset`
-   will delete every record, and that route is reachable by anyone whenever
-   login is off.
+```bash
+vercel --prod
+curl -s https://cbos-api.vercel.app/api/auth/status     # {"authEnabled":true}
+curl -so /dev/null -w '%{http_code}\n' \
+  https://cbos-api.vercel.app/api/inquiries             # 401
+```
 
-3. **Restrict Atlas network access.** It currently permits all addresses to
-   accommodate Vercel's dynamic egress. The strong database credential is the
-   only thing limiting access. Options, best first: a dedicated static egress
-   address, Atlas private endpoints, or at minimum a documented review.
+If the deployment refuses to boot citing `AUTH_TOKEN_SECRET`, that is the guard
+working: generate one with `openssl rand -hex 32` and set it the same way.
+
+## Demo mode
+
+An earlier version of this document said to set `BUSINESS_OS_DEMO_MODE=false`
+as a general hardening step. That was too blunt.
+
+The production deployment is a genuine demo holding fabricated records, and
+demo mode is what makes `Reset demo data` work. The real hazard is that
+`/api/demo/reset` deletes every record and is reachable by anyone **while login
+is off**. Once staff login is on, that route requires a token and the exposure
+is gone.
+
+So: demo mode may stay true for a demo with fake data, provided login is on. It
+must be false before the deployment holds a single real patient, at which point
+resetting the collection is never something anyone should be able to do.
+
+## Atlas network access
+
+Still open, and outside anything CBOS can reach. Atlas currently permits all
+addresses to accommodate Vercel's dynamic egress, leaving the database
+credential as the only control. Options, best first: a dedicated static egress
+address, Atlas private endpoints, or at minimum a documented review.
 
 ## Known gaps
 
