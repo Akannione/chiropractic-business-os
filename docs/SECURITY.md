@@ -45,16 +45,22 @@ rotation was the only way to know what was there.
 
 One step remains, and it is deliberately manual. The staff password is a
 credential its owner should choose and store, so it is set directly rather than
-passed through anything that would record it:
+passed through anything that would record it.
+
+**Run these from `backend/`, which is the API's deploy root and is linked to
+`cbos-api`.** The repository root links to a different project, and running
+them from a home directory will either fail or, worse, offer to deploy that
+directory:
 
 ```bash
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp/backend"
 vercel env add ADMIN_PASSWORD production
+vercel --prod
 ```
 
-Then redeploy and confirm:
+Then confirm:
 
 ```bash
-vercel --prod
 curl -s https://cbos-api.vercel.app/api/auth/status     # {"authEnabled":true}
 curl -so /dev/null -w '%{http_code}\n' \
   https://cbos-api.vercel.app/api/inquiries             # 401
