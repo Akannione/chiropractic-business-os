@@ -164,7 +164,8 @@ Current production endpoints:
 cd "/Users/tobiloba202/Developer/New project/business_os_mvp/backend"
 vercel env ls production
 curl -sS -i https://cbos-api.vercel.app/api/health | sed -n '1,40p'
-curl -sS -i https://cbos-api.vercel.app/api/reactivations | sed -n '1,80p'
+# Staff routes require a bearer token since 2026-08-22; 401 here is correct.
+curl -sS -i https://cbos-api.vercel.app/api/auth/status | sed -n '1,40p'
 ```
 
 Expected:
@@ -181,7 +182,13 @@ cd "/Users/tobiloba202/Developer/New project/business_os_mvp/backend"
 vercel env ls production
 vercel deploy --prod --force
 curl -sS https://cbos-api.vercel.app/api/health
-curl -sS https://cbos-api.vercel.app/api/reactivations
+# /api/reactivations now requires a staff token and returns 401 without one.
+# That is the intended state, not a fault. To check it, log in first:
+#   TOKEN=$(curl -sS -X POST https://cbos-api.vercel.app/api/auth/login \
+#     -H 'Content-Type: application/json' -d '{"password":"<staff password>"}' \
+#     | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
+#   curl -sS -H "Authorization: Bearer $TOKEN" https://cbos-api.vercel.app/api/reactivations
+curl -sS https://cbos-api.vercel.app/api/auth/status
 ```
 
 Deploy the frontend:
@@ -196,7 +203,13 @@ After production deploy, run:
 ```bash
 cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
 curl -sS https://cbos-api.vercel.app/api/health
-curl -sS https://cbos-api.vercel.app/api/reactivations
+# /api/reactivations now requires a staff token and returns 401 without one.
+# That is the intended state, not a fault. To check it, log in first:
+#   TOKEN=$(curl -sS -X POST https://cbos-api.vercel.app/api/auth/login \
+#     -H 'Content-Type: application/json' -d '{"password":"<staff password>"}' \
+#     | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
+#   curl -sS -H "Authorization: Bearer $TOKEN" https://cbos-api.vercel.app/api/reactivations
+curl -sS https://cbos-api.vercel.app/api/auth/status
 gh pr checks 1
 ```
 

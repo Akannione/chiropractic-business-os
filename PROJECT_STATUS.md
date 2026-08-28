@@ -8,11 +8,13 @@ Full-stack CBOS for small chiropractic practices to capture patient inquiries, t
 
 Production proven. The React frontend is live at `https://frontend-gold-alpha-31.vercel.app`, the API is live at `https://cbos-api.vercel.app`, and MongoDB Atlas-backed routes are working. The clinic-feedback reactivation workflow is deployed with overdue, due-today, and upcoming queues plus follow-up owner and outcome tracking.
 
+Staff login is enabled in production as of 2026-08-22, so every staff route requires a token while health, config, and the public intake form stay open. The read paths are indexed and no longer load the whole collection, the inquiry list is paginated and filtered in the database, CSV import writes in bulk, and a Duplicates screen merges patients recorded twice.
+
 Pull Request #1 was merged into `main` at commit `b46add8`, so the public source now matches the production deployment. Dr. McIntyre Canva collateral remains preserved separately from the deployment branch.
 
 ## Last Completed Task
 
-2026-07-13: Reconciled the existing clinic Gmail thread, confirmed it still contains only the June 29 invite with no reply or follow-up, and created a concise threaded follow-up draft without sending it.
+2026-08-22: Enabled staff login in production. Rotated `AUTH_TOKEN_SECRET` first so the startup guard could not be tripped by an unreadable leftover value, then verified against the live deployment that staff and destructive demo routes return 401 without a token while the public intake form still returns 201.
 
 ## Current Task
 
@@ -24,18 +26,27 @@ Paused on 2026-08-11 by Tobi's decision. Do not send the existing Gmail follow-u
 
 ## Next Actions
 
-1. Add database indexes. The `inquiries` and `activities` collections carry only the default `_id_` index, so every query is a collection scan.
-2. Stop loading the whole collection into Node on every read. `/api/kpis`, `/api/weekly-summary`, `/api/monthly-summary`, `/api/reactivations`, `/api/inquiries`, and the CSV export each call an unfiltered `find()` and compute in JavaScript.
-3. Done on 2026-08-22: staff login is on in production. Every staff route and both destructive demo routes return 401 without a token, while health, config, and the public intake form stay open. Atlas network access is the one layer still open; see `docs/SECURITY.md`.
-4. Audited on 2026-08-14: no unique index on email or phone. Households share contact details, so the constraint would refuse legitimate family members. The audit found that duplicate detection was matching on contact alone and silently discarding family members during import; it now requires the name to match as well. See `docs/DUPLICATE_POLICY.md`.
-5. Built on 2026-08-16: a Duplicates screen that groups patients recorded more than once and merges them on request. Households are never proposed. Merging is confirmed by staff, never automatic, and the discarded record's activity history is repointed to the survivor. The intake form still creates duplicates by design rather than rejecting a patient mid-form; the merge screen is how they are cleared.
+1. Restrict Atlas network access. It still permits all addresses, so the database credential is the only control at that layer. This needs the Atlas console; options are in `docs/SECURITY.md`.
+2. Clear the `Verification Probe` record from the production demo. It was submitted through the public intake form to prove the form still worked after login was enabled, and removing it now requires signing in and using `Reset demo data`.
+3. Consider indexing search. `GET /api/inquiries?search=` is an unanchored case-insensitive regex, which cannot use an index and measured 46.6 ms against 20,000 records. A MongoDB text index would fix that but changes the semantics: `$text` matches whole words, so "smi" would stop finding "Smith". Substring matching was kept deliberately; revisit only if search becomes slow in practice.
+4. Consider narrowing the weekly summary. It still reads every inquiry, projected to five fields, because it reports on the whole practice rather than a date range. An aggregation like the KPI one would remove that read.
+
+## Completed This Cycle
+
+* 2026-08-11: Moved the workspace out of iCloud, which was the cause of the recurring duplicate `@types` folders and stale `.git/index` copies.
+* 2026-08-11 to 08-14: Indexed both collections, narrowed every read path, moved the KPI calculation into an aggregation with a parity check, paginated and filtered the inquiry list in the database, and replaced the row-by-row CSV import with a bulk write.
+* 2026-08-14: Hardened authentication, seeding, and rate limiting. See `docs/SECURITY.md`.
+* 2026-08-14: Audited duplicates and decided against a unique index on email or phone, because households share contact details. The audit found detection was matching on contact alone and silently discarding family members during import; it now requires the name to match. See `docs/DUPLICATE_POLICY.md`.
+* 2026-08-16: Built the Duplicates screen and merge.
+* 2026-08-22: Added `npm run test:db`, which exercises the query layer against a real MongoDB rather than a stub, and corrected a false claim about how MongoDB compares null to dates.
 
 ## Known Issues And Blockers
 
 * Vercel Hobby and Atlas M0 are demo infrastructure, not the final paying-client hosting plan.
 * Atlas permits public network access for Vercel's dynamic demo egress; the strong unique database credential limits access, but paid deployment should use stricter infrastructure.
 * Resolved on August 11, 2026: the recurring duplicate `@types` folders were caused by iCloud Desktop and Documents sync, which was syncing the repository including `node_modules`, `.git`, and `.mongo-data`. Its file provider raced with the atomic file replacement that npm, git, and Vite all rely on, and materialised the losing copy as `react 2`, `react 3`, and so on. The same mechanism produced stale `.git/index` copies. The workspace now lives at `/Users/tobiloba202/Developer/New project`, outside any synced location, and `brctl status` no longer tracks it. `npm ci --prefix frontend` remains the repair if duplicates are ever seen again.
-* The live clinic walkthrough depends on Dr. McIntyre replying with availability. The June 29 invite has no reply, and a threaded follow-up draft now exists in Gmail but remains unsent by design.
+* Outreach is paused by Tobi's decision, so the clinic walkthrough is not currently blocked on anything; see the Outreach Hold above.
+* Production now requires a staff password. Anyone demonstrating the app needs it, and it is stored only in Vercel and Tobi's password manager. There is no recovery path other than setting a new one.
 
 ## Reusable Lessons
 
@@ -46,20 +57,17 @@ Paused on 2026-08-11 by Tobi's decision. Do not send the existing Gmail follow-u
 * Destructive smoke workflows should verify demo mode, require explicit remote opt-in, and restore a known baseline in cleanup.
 * Governed metric definitions should record grain, denominators, exclusions, ownership, and tests without requiring a new analytics platform.
 
-## Modified Files
+## Where The Work Lives
 
-* `backend/src/services/reactivationService.ts`
-* `backend/src/services/importService.ts`
-* `backend/src/tests/service.test.ts`
-* `backend/src/scripts/reactivationSmoke.ts`
-* `backend/package.json`
-* `package.json`
-* `README.md`
-* `docs/API.md`
-* `PROJECT_STATUS.md`
-* `CONTINUE_COMMANDS.md`
-* `docs/ANALYTICS_CONTRACT.md`
-* `docs/CASE_STUDY.md`
+Rather than a file list that goes stale between cycles, the durable references:
+
+* `docs/SECURITY.md` for the production posture and how login was enabled
+* `docs/DUPLICATE_POLICY.md` for duplicate matching and merge rules
+* `docs/ANALYTICS_CONTRACT.md` for KPI and reactivation definitions
+* `docs/API.md` for the endpoint contracts
+* `npm run bench`, `npm run test:db`, and `npm run audit:duplicates` for the
+  measurements and checks behind the recent work
+
 
 ## Current Branch
 
@@ -84,12 +92,17 @@ The documented `npm ci --prefix frontend` repair removed corrupted duplicate typ
 
 `npm run test` now covers the nine-case CSV-ingestion matrix, the complete smoke-workflow orchestration through an isolated fake API, and populated/empty `/api/reactivations` response contracts without MongoDB. The real command also passed against the local demo stack: 5 rows previewed and imported, 3 eligible reactivation rows verified, one follow-up updated and exported, and cleanup restored 8 sample records. The remote production demo was not reset.
 
-Production evidence:
+Production evidence, from before staff login was enabled:
 
 * API deployment status: Ready
 * Health, config, reactivations, KPIs, weekly summary, and monthly summary: HTTP 200
 * Desktop WebKit: content loaded, API requests returned 200, no console errors
 * Mobile WebKit at 390x844: no console errors or page-level horizontal overflow
+
+Those endpoint results no longer describe production. Since 2026-08-22 the staff
+routes require a bearer token and return 401 without one, which is the intended
+state rather than a fault. Only `/api/health`, `/api/config`, `/api/auth/status`,
+and the public intake form answer unauthenticated.
 
 Outreach evidence on July 13, 2026: Gmail returned one sent message in the clinic thread, no reply, and no prior follow-up. The newly created reply remained labeled `DRAFT`; no email was sent during the autonomous cycle.
 
