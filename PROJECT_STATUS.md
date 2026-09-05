@@ -14,7 +14,7 @@ Pull Request #1 was merged into `main` at commit `b46add8`, so the public source
 
 ## Last Completed Task
 
-2026-08-22: Enabled staff login in production. Rotated `AUTH_TOKEN_SECRET` first so the startup guard could not be tripped by an unreadable leftover value, then verified against the live deployment that staff and destructive demo routes return 401 without a token while the public intake form still returns 201.
+2026-09-05: Re-ran the requested deployment command set from the current repo path, confirmed `MONGODB_URI` exists in `cbos-api`, patched npm audit findings, redeployed the backend and frontend to Vercel production, and verified public health/auth/frontend routes.
 
 ## Current Task
 
@@ -109,3 +109,5 @@ Outreach evidence on July 13, 2026: Gmail returned one sent message in the clini
 Local verification passed again on July 13, 2026. The documented `npm ci --prefix frontend` repair removed duplicate generated type folders, then `npm run typecheck`, `npm run test`, and `npm run build` all completed successfully.
 
 Re-verified on August 10, 2026 before committing the governed analytics documentation. The duplicate `@types/react 2` and `@types/react-dom 2` folders had reappeared and were again cleared by `npm ci --prefix frontend`; afterwards `npm run typecheck`, `npm run test`, and `npm run build` all passed, and `git diff --check` reported no whitespace errors. Production remained live: `/api/health`, `/api/reactivations`, `/api/kpis`, and the frontend each returned HTTP 200.
+
+Re-verified and redeployed on September 5, 2026 from `/Users/tobiloba202/Developer/New project/business_os_mvp`: `npm ci --prefix frontend`, `npm run typecheck`, `npm run test`, `npm run build`, and `git diff --check` passed. `npm audit --prefix frontend --audit-level=high` and `npm audit --prefix backend --audit-level=moderate` both reported zero vulnerabilities after patching transitive dependency locks and adding a narrow backend `qs` override. `vercel env ls production` confirmed `MONGODB_URI` exists for `cbos-api`. Backend production deployment `dpl_9rcPtNa2aWA1XvhPXeubmyauWATi` aliased to `https://cbos-api.vercel.app`; frontend production deployment `dpl_FXQr7vLD3jcapuB75dQ5tD1b4suj` aliased to `https://frontend-gold-alpha-31.vercel.app`. `/api/health` returned 200, `/api/auth/status` returned `{"authEnabled":true}`, `/api/reactivations` returned 401 without a token as intended, and the frontend returned 200.
