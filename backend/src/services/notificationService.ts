@@ -29,6 +29,7 @@ export async function notifyNewInquiry(inquiry: InquiryInput) {
       `Phone: ${inquiry.phone}`,
       `Email: ${inquiry.email}`,
       `Requested Service: ${inquiry.service_needed}`,
+      `Activity Context: ${inquiry.activity_context || 'None'}`,
       `Source: ${inquiry.source}`,
       `Status: ${inquiry.status}`,
       `Follow-Up Date: ${inquiry.next_follow_up_date || 'Not set'}`,

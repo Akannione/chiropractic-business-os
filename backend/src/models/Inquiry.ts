@@ -14,6 +14,7 @@ const inquirySchema = new mongoose.Schema(
     phone: { type: String, required: true, trim: true },
     email: { type: String, required: true, trim: true, lowercase: true },
     service_needed: { type: String, required: true, trim: true },
+    activity_context: { type: String, default: '', trim: true, maxlength: 500 },
     source: { type: String, required: true, enum: SOURCES },
     status: { type: String, required: true, enum: STATUSES },
     estimated_value: { type: Number, required: true, default: 0, min: 0 },

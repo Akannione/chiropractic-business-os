@@ -99,6 +99,7 @@ Example JSON body. The original inquiry fields remain required; the clinic workf
   "phone": "404-555-0198",
   "email": "jordan@example.com",
   "service_needed": "Spinal Adjustment",
+  "activity_context": "Runner; return-to-sport goal",
   "source": "Website",
   "status": "New Inquiry",
   "estimated_value": 200,
@@ -127,6 +128,7 @@ JSON body:
   "phone": "404-555-0198",
   "email": "jordan@example.com",
   "service_needed": "Spinal Adjustment",
+  "activity_context": "Desk worker; neck mobility goal",
   "source": "Website",
   "status": "Consultation Scheduled",
   "estimated_value": 250,
@@ -205,6 +207,7 @@ JSON body:
   "phone": "404-555-0100",
   "email": "taylor@example.com",
   "service_needed": "Sports Injury Treatment",
+  "activity_context": "Basketball player; wants to return to practice.",
   "source": "Google",
   "notes": "Submitted from website."
 }
@@ -222,6 +225,7 @@ Accepted field aliases:
 - `phone`
 - `email`
 - `service_needed`, `requested_service`, `service`
+- `activity_context`, `movement_context`, `movement_pattern`, `Activity Context`, `Movement Context`, `Movement Pattern`, `Activity / Movement Context`
 - `source`
 - `notes`, `message`, `Message`
 - `patient_type`, `Patient Type`
@@ -259,6 +263,7 @@ Response:
       "phone": "404-555-0121",
       "email": "morgan@example.com",
       "service_needed": "Spinal Adjustment",
+      "activity_context": "Runner; return-to-sport goal",
       "source": "Website",
       "estimated_value": 200,
       "duplicate": false,
@@ -282,8 +287,8 @@ Content-Type: text/csv
 Example CSV:
 
 ```csv
-name,phone,email,service_needed,source,notes,estimated_value
-Morgan Allen,404-555-0121,morgan@example.com,Spinal Adjustment,Website,Imported inquiry,200
+name,phone,email,service_needed,activity_context,source,notes,estimated_value
+Morgan Allen,404-555-0121,morgan@example.com,Spinal Adjustment,Desk worker with lower-back stiffness,Website,Imported inquiry,200
 ```
 
 Response:

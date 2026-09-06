@@ -23,6 +23,7 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
     phone: '',
     email: '',
     service_needed: config?.services[0] || 'Spinal Adjustment',
+    activity_context: '',
     source,
     notes: '',
   });
@@ -50,6 +51,7 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
         phone: '',
         email: '',
         service_needed: pageConfig?.services[0] || 'Spinal Adjustment',
+        activity_context: '',
         source,
         notes: '',
       });
@@ -104,6 +106,15 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
             <datalist id="public-services">
               {pageConfig?.services.map((service) => <option value={service} key={service} />)}
             </datalist>
+          </label>
+          <label className="full">
+            Activity or Movement Context
+            <input
+              value={form.activity_context || ''}
+              onChange={(event) => setForm({ ...form, activity_context: event.target.value })}
+              placeholder="Example: runner, desk worker, return-to-sport goal, or mobility goal"
+              maxLength={500}
+            />
           </label>
           <label className="full">
             Notes

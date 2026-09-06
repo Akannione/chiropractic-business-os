@@ -38,6 +38,7 @@ export type Inquiry = {
   phone: string;
   email: string;
   service_needed: string;
+  activity_context: string;
   source: InquirySource;
   status: InquiryStatus;
   estimated_value: number;
@@ -60,6 +61,7 @@ export type PublicInquiryInput = {
   phone: string;
   email: string;
   service_needed: string;
+  activity_context?: string;
   source?: InquirySource;
   notes?: string;
 };
@@ -132,6 +134,7 @@ export type ImportPreviewRow = {
   phone: string;
   email: string;
   service_needed: string;
+  activity_context: string;
   source: InquirySource;
   estimated_value: number;
   appointment_status: AppointmentStatus;
@@ -169,6 +172,7 @@ export type ReactivationRow = {
   phone: string;
   email: string;
   service_needed: string;
+  activity_context: string;
   status: InquiryStatus;
   patient_type: PatientType;
   last_visit_date: string;

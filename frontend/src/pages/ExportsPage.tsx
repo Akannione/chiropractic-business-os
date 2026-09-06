@@ -112,6 +112,7 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
           <span>Phone: `phone`, `Phone`</span>
           <span>Email: `email`, `Email`</span>
           <span>Requested Service: `service_needed`, `requested_service`, `service`, `Requested Service`</span>
+          <span>Activity Context: `activity_context`, `movement_context`, `movement_pattern`, `Activity Context`, `Movement Context`, `Movement Pattern`</span>
           <span>Source: `source`, `Source`, `inquiry_source`</span>
           <span>Notes: `notes`, `message`, `Message`, `Notes`</span>
           <span>Patient Type: `patient_type`, `Patient Type`</span>

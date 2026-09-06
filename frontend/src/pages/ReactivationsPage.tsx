@@ -67,7 +67,14 @@ export function ReactivationsPage({
       const matchesFilter = filter === 'All' || row.reactivation_status === filter;
       const matchesOwner =
         ownerFilter === 'All' || row.assigned_follow_up_owner === ownerFilter;
-      const searchText = [row.name, row.phone, row.email, row.service_needed, row.notes]
+      const searchText = [
+        row.name,
+        row.phone,
+        row.email,
+        row.service_needed,
+        row.activity_context,
+        row.notes,
+      ]
         .join(' ')
         .toLowerCase();
       return (
@@ -198,6 +205,7 @@ export function ReactivationsPage({
                     <td>
                       <strong>{row.name}</strong>
                       <span>{row.phone}</span>
+                      {row.activity_context && <small>{row.activity_context}</small>}
                     </td>
                     <td>
                       <span className={`urgency-label ${row.reactivation_status.toLowerCase().replace(' ', '-')}`}>
@@ -235,7 +243,10 @@ export function ReactivationsPage({
             <div className="detail-summary full">
               <div>
                 <strong>{selectedRow.phone}</strong>
-                <span>{selectedRow.email} · {selectedRow.service_needed}</span>
+                <span>
+                  {selectedRow.email} · {selectedRow.service_needed}
+                  {selectedRow.activity_context ? ` · ${selectedRow.activity_context}` : ''}
+                </span>
               </div>
               <span className={`urgency-label ${selectedRow.reactivation_status.toLowerCase().replace(' ', '-')}`}>
                 {selectedRow.reactivation_status}

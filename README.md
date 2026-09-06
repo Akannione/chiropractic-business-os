@@ -16,6 +16,7 @@ A focused full-stack web app for chiropractic practices to capture patient inqui
 - Tracks inquiry status and follow-up dates
 - Builds a patient reactivation call list from last visit date and expected visit frequency
 - Records appointment status, patient type, offer context, follow-up owner, and follow-up outcome
+- Captures optional activity or movement context, such as athlete, desk worker, sport, mobility goal, or return-to-care note
 - Shows a dashboard follow-up workflow with one-click actions for urgent inquiries
 - Shows practice KPIs such as active patients, follow-ups needed, overdue follow-ups, estimated treatment value, and inquiry-to-patient rate
 - Provides a printable and downloadable weekly practice summary
@@ -184,6 +185,7 @@ POST /api/imports/inquiries.csv
 
 The preview route flags duplicate email or phone matches and rows with missing required fields before the import runs.
 It also accepts optional clinic workflow columns such as patient type, appointment status, last visit date, visit frequency, follow-up owner, and follow-up outcome. Use `docs/METASOFT_REACTIVATION_DEMO.csv` as a fake-data import example before working with a real practice export.
+It also accepts optional activity context columns, such as `activity_context`, `movement_context`, `movement_pattern`, or `Activity / Movement Context`. Use this for simple operational context like "runner returning to training" or "desk worker with neck stiffness"; it is not an EHR field or clinical diagnosis.
 Quoted CSV fields can contain commas, escaped double quotes, and line breaks. Nonblank last-visit dates must be real `YYYY-MM-DD` dates, and visit-frequency values must be positive whole numbers; invalid values are reported during preview instead of being imported silently.
 
 Useful source links:

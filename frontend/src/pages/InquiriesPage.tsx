@@ -21,6 +21,7 @@ type InquiryFormState = {
   phone: string;
   email: string;
   service_needed: string;
+  activity_context: string;
   source: InquirySource;
   status: InquiryStatus;
   estimated_value: number;
@@ -52,6 +53,7 @@ const emptyForm = (config: AppConfig | null): InquiryFormState => ({
   phone: '',
   email: '',
   service_needed: config?.services[0] || 'Spinal Adjustment',
+  activity_context: '',
   source: 'Google',
   status: 'New Inquiry',
   estimated_value: 200,
@@ -72,6 +74,7 @@ const formFromInquiry = (inquiry: Inquiry): InquiryFormState => ({
   phone: inquiry.phone,
   email: inquiry.email,
   service_needed: inquiry.service_needed,
+  activity_context: inquiry.activity_context || '',
   source: inquiry.source,
   status: inquiry.status,
   estimated_value: inquiry.estimated_value,
@@ -237,6 +240,15 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
             <datalist id="services">
               {config?.services.map((service) => <option value={service} key={service} />)}
             </datalist>
+          </label>
+          <label className="full">
+            Activity / Movement Context
+            <input
+              value={form.activity_context}
+              onChange={(event) => setForm({ ...form, activity_context: event.target.value })}
+              placeholder="Example: Athlete; runner; return-to-sport goal"
+              maxLength={500}
+            />
           </label>
           <label>
             Inquiry Source
@@ -436,6 +448,7 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
                   <div>
                     <strong>{inquiry.name}</strong>
                     <span>{inquiry.service_needed}</span>
+                    {inquiry.activity_context && <small>{inquiry.activity_context}</small>}
                     <small>{inquiry.email} · {inquiry.phone}</small>
                   </div>
                   <div className="inquiry-list-meta">
@@ -514,6 +527,17 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
                 <datalist id="detail-services">
                   {config?.services.map((service) => <option value={service} key={service} />)}
                 </datalist>
+              </label>
+              <label className="full">
+                Activity / Movement Context
+                <input
+                  value={detailForm.activity_context}
+                  onChange={(event) =>
+                    setDetailForm({ ...detailForm, activity_context: event.target.value })
+                  }
+                  placeholder="Example: Desk worker; neck mobility goal"
+                  maxLength={500}
+                />
               </label>
               <label>
                 Inquiry Source

@@ -22,6 +22,7 @@ The public form captures:
 - Phone
 - Email
 - Requested service
+- Activity or movement context
 - Notes
 - Inquiry source
 
@@ -37,6 +38,7 @@ The backend automatically creates a MongoDB patient inquiry with:
 - `source`: `Website` by default
 - `next_follow_up_date`: today
 - `estimated_value`: `200`
+- `activity_context`: optional activity, sport, movement pattern, or return-to-care context
 - `notes`: patient-provided notes or a public-form note
 
 This means staff no longer needs to manually enter every website inquiry. Staff only needs to review the dashboard, follow up, update status, and add notes.
@@ -119,6 +121,7 @@ Accepted field names:
 - `phone`
 - `email`
 - `service_needed`, `requested_service`, or `service`
+- `activity_context`, `movement_context`, `movement_pattern`, `Activity Context`, `Movement Context`, `Movement Pattern`, or `Activity / Movement Context`
 - `source`
 - `notes`, `message`, or `Message`
 
@@ -130,6 +133,7 @@ Example:
   "phone": "404-555-0198",
   "email": "jordan@example.com",
   "requested_service": "Sports Injury Treatment",
+  "activity_context": "Runner; return-to-sport goal",
   "source": "Google",
   "message": "Submitted from website form provider."
 }

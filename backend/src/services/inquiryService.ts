@@ -12,6 +12,7 @@ export type InquiryInput = {
   phone: string;
   email: string;
   service_needed: string;
+  activity_context?: string;
   source: string;
   status: string;
   estimated_value: number;
@@ -51,6 +52,7 @@ const REACTIVATION_FIELDS = {
   phone: 1,
   email: 1,
   service_needed: 1,
+  activity_context: 1,
   status: 1,
   patient_type: 1,
   last_visit_date: 1,
@@ -149,6 +151,7 @@ export function buildInquiryFilter(query: InquiryQuery) {
         { phone: pattern },
         { email: pattern },
         { service_needed: pattern },
+        { activity_context: pattern },
         { notes: pattern },
       ],
     });
@@ -220,6 +223,7 @@ export function buildInquiryDocument(input: InquiryInput, now = new Date()) {
     phone: input.phone.trim(),
     email: input.email.trim(),
     service_needed: input.service_needed.trim(),
+    activity_context: input.activity_context?.trim() || '',
     estimated_value: Number(input.estimated_value || 0),
     notes: input.notes?.trim() || '',
     next_follow_up_date: parseDateOnly(input.next_follow_up_date),
@@ -313,6 +317,7 @@ export async function updateInquiry(
       ...(input.phone !== undefined ? { phone: input.phone.trim() } : {}),
       ...(input.email !== undefined ? { email: input.email.trim() } : {}),
       ...(input.service_needed !== undefined ? { service_needed: input.service_needed.trim() } : {}),
+      ...(input.activity_context !== undefined ? { activity_context: input.activity_context.trim() } : {}),
       ...(input.source !== undefined ? { source: input.source } : {}),
       ...(input.status !== undefined ? { status: input.status } : {}),
       ...(input.estimated_value !== undefined ? { estimated_value: Number(input.estimated_value || 0) } : {}),
@@ -344,6 +349,12 @@ export async function updateInquiry(
       changes.push(`follow-up to ${input.next_follow_up_date || 'none'}`);
     }
     if (input.notes !== undefined && previous?.notes !== input.notes) changes.push('notes updated');
+    if (
+      input.activity_context !== undefined &&
+      previous?.activity_context !== input.activity_context
+    ) {
+      changes.push('activity context updated');
+    }
     if (
       input.follow_up_outcome !== undefined &&
       previous?.follow_up_outcome !== input.follow_up_outcome

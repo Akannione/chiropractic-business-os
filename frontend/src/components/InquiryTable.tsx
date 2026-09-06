@@ -17,6 +17,7 @@ export function InquiryTable({ inquiries, compact = false }: InquiryTableProps) 
           <tr>
             <th>Patient</th>
             <th>Requested Service</th>
+            {!compact && <th>Activity Context</th>}
             <th>Status</th>
             {!compact && <th>Source</th>}
             {!compact && <th>Value</th>}
@@ -31,6 +32,7 @@ export function InquiryTable({ inquiries, compact = false }: InquiryTableProps) 
                 {!compact && <span>{inquiry.email}</span>}
               </td>
               <td>{inquiry.service_needed}</td>
+              {!compact && <td>{inquiry.activity_context || 'Not provided'}</td>}
               <td>
                 <StatusChip status={inquiry.status} />
               </td>

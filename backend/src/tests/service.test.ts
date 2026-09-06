@@ -204,6 +204,15 @@ assert.equal(mappedMetaSoftRow.expected_visit_frequency_days, 30);
 assert.equal(mappedMetaSoftRow.assigned_follow_up_owner, 'Front Desk');
 assert.equal(mappedMetaSoftRow.follow_up_outcome, 'Left Voicemail');
 
+const movementContextRows = parseInquiryCsv(
+  [
+    'name,phone,email,service_needed,Activity / Movement Context',
+    'Athlete Patient,404-555-0188,athlete@example.com,Sports Injury Treatment,Runner; return-to-sport goal',
+  ].join('\n'),
+);
+const mappedMovementContextRow = mapExternalRow(movementContextRows[0]);
+assert.equal(mappedMovementContextRow.activity_context, 'Runner; return-to-sport goal');
+
 function assertReactivationQueueContract(value: unknown): asserts value is ReactivationQueue {
   assert.ok(value && typeof value === 'object');
   const queue = value as Record<string, unknown>;
@@ -217,6 +226,7 @@ function assertReactivationQueueContract(value: unknown): asserts value is React
     assert.ok(valueRow && typeof valueRow === 'object');
     const row = valueRow as Record<string, unknown>;
     assert.deepEqual(Object.keys(row).sort(), [
+      'activity_context',
       'assigned_follow_up_owner',
       'days_overdue',
       'email',
@@ -236,6 +246,7 @@ function assertReactivationQueueContract(value: unknown): asserts value is React
     ]);
     for (const key of [
       'assigned_follow_up_owner',
+      'activity_context',
       'email',
       'follow_up_outcome',
       'id',

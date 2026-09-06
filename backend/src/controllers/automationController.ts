@@ -13,6 +13,7 @@ export async function postPublicInquiry(req: Request, res: Response) {
       phone: String(req.body.phone || ''),
       email: String(req.body.email || ''),
       service_needed: String(req.body.service_needed || ''),
+      activity_context: String(req.body.activity_context || ''),
       source: normalizeSource(req.body.source),
       notes: String(req.body.notes || ''),
     },

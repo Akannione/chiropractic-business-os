@@ -35,6 +35,7 @@ export type AutomatedInquiryInput = {
   phone: string;
   email: string;
   service_needed: string;
+  activity_context?: string;
   source?: string;
   notes?: string;
   estimated_value?: number;
@@ -72,6 +73,7 @@ export function buildAutomatedInquiryInput(input: AutomatedInquiryInput, intakeL
     phone: String(input.phone || '').trim(),
     email: String(input.email || '').trim(),
     service_needed: serviceNeeded,
+    activity_context: String(input.activity_context || '').trim(),
     source,
     status: FOLLOW_UP_NEEDED_STATUS,
     estimated_value: estimateTreatmentValue(serviceNeeded, input.estimated_value),

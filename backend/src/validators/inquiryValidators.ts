@@ -10,6 +10,7 @@ import { HttpError } from '../middleware/errorHandler.js';
 
 const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const phonePattern = /^\+?[0-9][0-9\s().-]{6,19}$/;
+const maxActivityContextLength = 500;
 
 function assertValid(errors: string[]) {
   if (errors.length) throw new HttpError(400, errors.join(' '));
@@ -17,6 +18,12 @@ function assertValid(errors: string[]) {
 
 function workflowErrors(body: Record<string, unknown>) {
   const errors: string[] = [];
+  if (
+    body.activity_context !== undefined &&
+    String(body.activity_context).length > maxActivityContextLength
+  ) {
+    errors.push('Activity context must be 500 characters or less.');
+  }
   if (
     body.appointment_status !== undefined &&
     !(APPOINTMENT_STATUSES as readonly string[]).includes(String(body.appointment_status))

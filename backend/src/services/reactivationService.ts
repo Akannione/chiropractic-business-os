@@ -10,6 +10,7 @@ type ReactivationInquiry = {
   phone: string;
   email: string;
   service_needed: string;
+  activity_context?: string;
   status: string;
   patient_type?: string;
   last_visit_date?: Date | string | null;
@@ -26,6 +27,7 @@ export type ReactivationRow = {
   phone: string;
   email: string;
   service_needed: string;
+  activity_context: string;
   status: string;
   patient_type: string;
   last_visit_date: string;
@@ -82,6 +84,7 @@ export function buildReactivationQueue(
       phone: inquiry.phone,
       email: inquiry.email,
       service_needed: inquiry.service_needed,
+      activity_context: inquiry.activity_context || '',
       status: inquiry.status,
       patient_type: inquiry.patient_type || 'Existing Patient',
       last_visit_date: formatDate(lastVisit),

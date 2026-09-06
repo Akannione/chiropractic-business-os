@@ -183,6 +183,7 @@ export async function mergeInquiries(targetId: string, sourceId: string) {
     phone: preferTarget(target.phone, source.phone),
     email: preferTarget(target.email, source.email),
     service_needed: preferTarget(target.service_needed, source.service_needed),
+    activity_context: preferTarget(target.activity_context, source.activity_context),
     status: sourceRank > targetRank ? source.status : target.status,
     estimated_value: Math.max(Number(target.estimated_value || 0), Number(source.estimated_value || 0)),
     notes: mergeNotes(String(target.notes || ''), String(source.notes || '')),

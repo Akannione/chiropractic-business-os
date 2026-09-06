@@ -3,6 +3,7 @@ const friendlyHeaders: Record<string, string> = {
   phone: 'Phone',
   email: 'Email',
   service_needed: 'Requested Service',
+  activity_context: 'Activity / Movement Context',
   source: 'Inquiry Source',
   status: 'Status',
   estimated_value: 'Estimated Treatment Value',
