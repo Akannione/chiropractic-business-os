@@ -172,15 +172,21 @@ Expected:
 
 ```text
 /api/health returns 200.
-/api/reactivations returns 200 with overdue, dueToday, upcoming, and rows fields.
+/api/auth/status returns {"authEnabled":true}.
+/api/reactivations returns 401 without a staff token, which is expected.
+With a staff token, /api/reactivations returns 200 with overdue, dueToday, upcoming, and rows fields.
 ```
 
-Redeploy the API only after validation passes:
+Redeploy the API only after validation passes. The Vercel project root is
+already configured as `backend`, so prefer a Git-triggered deployment or
+Vercel's redeploy action. A direct CLI deploy from inside `backend/` can
+double-apply the root and look for `backend/backend`.
 
 ```bash
 cd "/Users/tobiloba202/Developer/New project/business_os_mvp/backend"
 vercel env ls production
-vercel deploy --prod --force
+# Preferred manual path if a deployment URL exists:
+#   vercel redeploy <api-deployment-url> --target production
 curl -sS https://cbos-api.vercel.app/api/health
 # /api/reactivations now requires a staff token and returns 401 without one.
 # That is the intended state, not a fault. To check it, log in first:
@@ -195,7 +201,8 @@ Deploy the frontend:
 
 ```bash
 cd "/Users/tobiloba202/Developer/New project/business_os_mvp/frontend"
-vercel deploy --prod --force
+# Preferred path: push main and let Vercel deploy with root directory `frontend`,
+# or use Vercel's redeploy action for the latest frontend deployment.
 ```
 
 After production deploy, run:

@@ -13,7 +13,7 @@ This guide keeps the CBOS demo deployment costless: MongoDB Atlas M0 for data an
 
 If a credential is exposed, rotate the Atlas database-user password before continuing.
 
-Production proof completed on June 29, 2026: the Atlas credential was rotated, `MONGODB_URI` was stored as a sensitive Vercel production variable, and health plus database-backed workflow routes returned HTTP 200. Continue checking `/api/reactivations` because health alone does not prove database connectivity.
+Production proof was rechecked on September 7, 2026: the API and frontend Vercel projects use the correct root directories, `MONGODB_URI` is present as a sensitive production variable, `/api/health` returns HTTP 200, `/api/auth/status` reports staff login enabled, and protected staff routes return HTTP 401 without a token as intended.
 
 ## 2. Vercel Express API
 
@@ -23,6 +23,8 @@ Create a Vercel project with these settings:
 - Repository: `https://github.com/Akannione/chiropractic-business-os`
 - Root directory: `backend`
 - Framework: Express
+
+This root directory is configured on the Vercel project for Git deployments. If you redeploy manually with the CLI from inside `backend/`, Vercel can double-apply the root and look for `backend/backend`. Prefer Git-triggered deployments or use Vercel's redeploy action for the latest API deployment.
 
 Required environment variables:
 
@@ -68,13 +70,27 @@ Health check:
 curl https://cbos-api.vercel.app/api/health
 ```
 
-Database route check:
+Unauthenticated staff-route check:
 
 ```bash
-curl https://cbos-api.vercel.app/api/reactivations
+curl -i https://cbos-api.vercel.app/api/reactivations
 ```
 
-If health succeeds but this route fails, the API is deployed but cannot connect to MongoDB.
+Expected result when staff login is enabled: HTTP 401 with `{"message":"Staff login is required."}`. That proves the route is protected, not broken.
+
+Authenticated database route check:
+
+```bash
+TOKEN=$(curl -sS -X POST https://cbos-api.vercel.app/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"password":"<staff password>"}' \
+  | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
+
+curl -H "Authorization: Bearer $TOKEN" \
+  https://cbos-api.vercel.app/api/reactivations
+```
+
+If health succeeds but the authenticated route fails, the API is deployed but cannot complete a database-backed workflow.
 
 ## 3. Vercel React Frontend
 
@@ -84,6 +100,8 @@ Use these settings:
 - Repository: `https://github.com/Akannione/chiropractic-business-os`
 - Root directory: `frontend`
 - Framework: Vite
+
+This root directory is configured on the Vercel project for Git deployments. Prefer Git-triggered deployments or Vercel's redeploy action so the project root stays consistent.
 
 Production environment variable:
 
@@ -99,7 +117,7 @@ https://frontend-gold-alpha-31.vercel.app
 
 ## 4. Staff Login
 
-Leave `ADMIN_PASSWORD` blank for a controlled demo, or set it before sharing staff access publicly. When it is set, staff dashboard APIs require login. The public `/intake` form remains open.
+`ADMIN_PASSWORD` is the CBOS staff login password. It is not the MongoDB password, Vercel account password, or a clinic EHR password. Current production has staff login enabled, so staff dashboard APIs require login. The public `/intake` form remains open.
 
 Do not reuse the demo password across clients.
 

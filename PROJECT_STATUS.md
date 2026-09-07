@@ -6,7 +6,7 @@ Full-stack CBOS for small chiropractic practices to capture patient inquiries, t
 
 ## Current State
 
-Production proven. The React frontend is live at `https://frontend-gold-alpha-31.vercel.app`, the API is live at `https://cbos-api.vercel.app`, and MongoDB Atlas-backed routes are working. The clinic-feedback reactivation workflow is deployed with overdue, due-today, and upcoming queues plus follow-up owner and outcome tracking.
+Production proven. The React frontend is live at `https://frontend-gold-alpha-31.vercel.app`, the API is live at `https://cbos-api.vercel.app`, and MongoDB Atlas-backed routes are working. The clinic-feedback reactivation workflow is deployed with overdue, due-today, and upcoming queues plus follow-up owner and outcome tracking. Patient inquiries now include optional activity or movement context for details such as athlete status, desk-work posture, sport, mobility goal, or return-to-care context.
 
 Staff login is enabled in production as of 2026-08-22, so every staff route requires a token while health, config, and the public intake form stay open. The read paths are indexed and no longer load the whole collection, the inquiry list is paginated and filtered in the database, CSV import writes in bulk, and a Duplicates screen merges patients recorded twice.
 
@@ -14,7 +14,7 @@ Pull Request #1 was merged into `main` at commit `b46add8`, so the public source
 
 ## Last Completed Task
 
-2026-09-05: Re-ran the requested deployment command set from the current repo path, confirmed `MONGODB_URI` exists in `cbos-api`, patched npm audit findings, redeployed the backend and frontend to Vercel production, and verified public health/auth/frontend routes.
+2026-09-07: Added optional activity/movement context across intake, staff workflows, reactivation queues, imports, exports, notifications, sample data, and docs. Rechecked Vercel project roots, verified production health/auth responses, and documented the staff-login deployment behavior.
 
 ## Current Task
 
@@ -39,6 +39,7 @@ Paused on 2026-08-11 by Tobi's decision. Do not send the existing Gmail follow-u
 * 2026-08-14: Audited duplicates and decided against a unique index on email or phone, because households share contact details. The audit found detection was matching on contact alone and silently discarding family members during import; it now requires the name to match. See `docs/DUPLICATE_POLICY.md`.
 * 2026-08-16: Built the Duplicates screen and merge.
 * 2026-08-22: Added `npm run test:db`, which exercises the query layer against a real MongoDB rather than a stub, and corrected a false claim about how MongoDB compares null to dates.
+* 2026-09-07: Added optional activity/movement context from clinic feedback without changing the core workflow: public intake, staff inquiry forms, CSV import/export, reactivation review, notifications, and demo records now carry that context where available.
 
 ## Known Issues And Blockers
 
@@ -111,3 +112,5 @@ Local verification passed again on July 13, 2026. The documented `npm ci --prefi
 Re-verified on August 10, 2026 before committing the governed analytics documentation. The duplicate `@types/react 2` and `@types/react-dom 2` folders had reappeared and were again cleared by `npm ci --prefix frontend`; afterwards `npm run typecheck`, `npm run test`, and `npm run build` all passed, and `git diff --check` reported no whitespace errors. Production remained live: `/api/health`, `/api/reactivations`, `/api/kpis`, and the frontend each returned HTTP 200.
 
 Re-verified and redeployed on September 5, 2026 from `/Users/tobiloba202/Developer/New project/business_os_mvp`: `npm ci --prefix frontend`, `npm run typecheck`, `npm run test`, `npm run build`, and `git diff --check` passed. `npm audit --prefix frontend --audit-level=high` and `npm audit --prefix backend --audit-level=moderate` both reported zero vulnerabilities after patching transitive dependency locks and adding a narrow backend `qs` override. `vercel env ls production` confirmed `MONGODB_URI` exists for `cbos-api`. Backend production deployment `dpl_9rcPtNa2aWA1XvhPXeubmyauWATi` aliased to `https://cbos-api.vercel.app`; frontend production deployment `dpl_FXQr7vLD3jcapuB75dQ5tD1b4suj` aliased to `https://frontend-gold-alpha-31.vercel.app`. `/api/health` returned 200, `/api/auth/status` returned `{"authEnabled":true}`, `/api/reactivations` returned 401 without a token as intended, and the frontend returned 200.
+
+Re-verified on September 7, 2026 after the activity-context update: `npm run typecheck`, `npm run test`, `npm run build`, `git diff --check`, and `npm run test:db` passed locally. Local API health returned 200, local frontend returned 200, activity context was created, updated, searched, exported, and reset in demo data. Production `cbos-api` root directory is `backend`, production frontend root directory is `frontend`, `/api/health` returned 200, `/api/auth/status` returned `{"authEnabled":true}`, and `/api/reactivations` returned 401 without a staff token as intended.
