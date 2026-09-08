@@ -18,18 +18,21 @@ Pull Request #1 was merged into `main` at commit `b46add8`, so the public source
 
 ## Current Task
 
-Strengthen the application itself: security, database performance, and correctness. Client outreach is paused.
+Resume consulting validation prep while preserving manual client gates. Codex can verify production, demo data, walkthrough materials, and readiness evidence; Tobi controls the external clinic follow-up send and any real-data approval.
 
-## Outreach Hold
+## Validation Resume Gate
 
-Paused on 2026-08-11 by Tobi's decision. Do not send the existing Gmail follow-up draft, do not create new outreach drafts, and do not contact the clinic contact. The draft stays in Gmail, unsent. The walkthrough, run sheet, and objection notes are kept as prepared work for whenever outreach resumes; nothing in them should be treated as a pending action.
+Outreach was paused on 2026-08-11. Tobi asked on 2026-09-07 what it looks like to resume CBOS consulting validation. Resume only the preparation and review lane automatically: verify the app, fake data, walkthrough, and existing follow-up draft. Do not create a new outreach draft, resend the old invite, or send the existing Gmail draft automatically. The client message and any real clinic data use remain Tobi-controlled manual gates.
 
 ## Next Actions
 
-1. Restrict Atlas network access. It still permits all addresses, so the database credential is the only control at that layer. This needs the Atlas console; options are in `docs/SECURITY.md`.
-2. Clear the `Verification Probe` record from the production demo. It was submitted through the public intake form to prove the form still worked after login was enabled, and removing it now requires signing in and using `Reset demo data`.
-3. Consider indexing search. `GET /api/inquiries?search=` is an unanchored case-insensitive regex, which cannot use an index and measured 46.6 ms against 20,000 records. A MongoDB text index would fix that but changes the semantics: `$text` matches whole words, so "smi" would stop finding "Smith". Substring matching was kept deliberately; revisit only if search becomes slow in practice.
-4. Consider narrowing the weekly summary. It still reads every inquiry, projected to five fields, because it reports on the whole practice rather than a date range. An aggregation like the KPI one would remove that read.
+1. Re-verify production health, auth status, public-intake behavior, and protected-route 401 behavior without using real patient data.
+2. Review `docs/DEMO_WALKTHROUGH.md`, `docs/CALL_RUN_SHEET.md`, `docs/WALKTHROUGH_REHEARSAL.md`, and `docs/OBJECTION_ALREADY_CALLED.md` as the current validation package.
+3. Confirm `docs/METASOFT_REACTIVATION_DEMO.csv` remains the only demo CSV for the walkthrough.
+4. Review the existing threaded Gmail follow-up draft without recreating it. Tobi decides whether and when to send it.
+5. When accepted, run the 20-minute fake-data walkthrough and record the clinic's Go / Revise / Stop decision.
+6. If `Go`, draft the smallest paid pilot offer: setup, approved-data import plan, staff handoff, weekly owner summary, and one review checkpoint.
+7. Keep Atlas network tightening and `Verification Probe` cleanup as secondary hardening/manual-access tasks, not blockers to fake-data validation.
 
 ## Completed This Cycle
 
@@ -46,7 +49,7 @@ Paused on 2026-08-11 by Tobi's decision. Do not send the existing Gmail follow-u
 * Vercel Hobby and Atlas M0 are demo infrastructure, not the final paying-client hosting plan.
 * Atlas permits public network access for Vercel's dynamic demo egress; the strong unique database credential limits access, but paid deployment should use stricter infrastructure.
 * Resolved on August 11, 2026: the recurring duplicate `@types` folders were caused by iCloud Desktop and Documents sync, which was syncing the repository including `node_modules`, `.git`, and `.mongo-data`. Its file provider raced with the atomic file replacement that npm, git, and Vite all rely on, and materialised the losing copy as `react 2`, `react 3`, and so on. The same mechanism produced stale `.git/index` copies. The workspace now lives at `/Users/tobiloba202/Developer/New project`, outside any synced location, and `brctl status` no longer tracks it. `npm ci --prefix frontend` remains the repair if duplicates are ever seen again.
-* Outreach is paused by Tobi's decision, so the clinic walkthrough is not currently blocked on anything; see the Outreach Hold above.
+* Client outreach and real-data use remain manual gates; see the Validation Resume Gate above.
 * Production now requires a staff password. Anyone demonstrating the app needs it, and it is stored only in Vercel and Tobi's password manager. There is no recovery path other than setting a new one.
 
 ## Reusable Lessons

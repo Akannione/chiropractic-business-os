@@ -136,7 +136,7 @@ sed -n '1,320p' docs/DEMO_WALKTHROUGH.md
 open -a Safari https://frontend-gold-alpha-31.vercel.app
 ```
 
-The approved invite was sent June 29, 2026 to the clinic contact. The thread was reconciled on July 13 and still contained only that sent invite. A concise threaded follow-up draft now exists in Gmail and has not been sent. Review and manually send that existing draft; do not recreate it or resend the invite. When accepted, use only the production demo's fake records or `docs/METASOFT_REACTIVATION_DEMO.csv` during the walkthrough. Keep private contact identifiers out of this public repository.
+The approved invite was sent June 29, 2026 to the clinic contact. The thread was reconciled on July 13 and still contained only that sent invite. A concise threaded follow-up draft now exists in Gmail and has not been sent. Tobi reactivated the CBOS validation lane on 2026-09-07, but the external send is still manual: review the existing draft without recreating it, and let Tobi decide whether to send or edit it. When accepted, use only the production demo's fake records or `docs/METASOFT_REACTIVATION_DEMO.csv` during the walkthrough. Keep private contact identifiers out of this public repository.
 
 ## Preserved Local Collateral
 
@@ -230,6 +230,6 @@ Read AGENTS.md, PROJECT_STATUS.md, and CONTINUE_COMMANDS.md in
 Continue from the production-proven CBOS state.
 Do not repeat the completed reactivation prototype.
 Uncommitted Dr. McIntyre Canva collateral is preserved in a Git stash named preserve-dr-mcintyre-canva-assets-before-cbos-deploy.
-Pull Request #1 is merged and production proof is complete. The measured clinic-validation invite was sent June 29. The thread was reconciled July 13 and a concise threaded follow-up draft exists in Gmail but is unsent. Review and manually send that existing draft; do not recreate it or resend the invite. When accepted, run the measured 20-minute fake-data walkthrough in docs/DEMO_WALKTHROUGH.md and record the clinic's workflow evidence and Go / Revise / Stop decision. Use private tracking for contact identifiers.
+Pull Request #1 is merged and production proof is complete. The measured clinic-validation invite was sent June 29. The thread was reconciled July 13 and a concise threaded follow-up draft exists in Gmail but is unsent. The validation lane is active again for preparation and review, but external send remains manual. Review the existing draft; do not recreate it or resend the invite automatically. When accepted, run the measured 20-minute fake-data walkthrough in docs/DEMO_WALKTHROUGH.md and record the clinic's workflow evidence and Go / Revise / Stop decision. Use private tracking for contact identifiers.
 Before ending, update the root continuity files, TOBI_OS state, portfolio pipeline, and resume system.
 ```
