@@ -207,6 +207,9 @@ Useful source links:
 
 More details:
 
+- `demo_recordings/README.md`
+- `demo_recordings/cbos_walkthrough_demo_narrated.mp4`
+- `demo_recordings/cbos_walkthrough_presenter_script.md`
 - `docs/DEMO_WALKTHROUGH.md`
 - `docs/CALL_RUN_SHEET.md`
 - `docs/OBJECTION_ALREADY_CALLED.md`

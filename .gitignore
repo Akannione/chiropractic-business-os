@@ -28,3 +28,8 @@ CLAUDE.md
 
 # Foglamp scan artifacts (contains edit token)
 .foglamp/
+
+# Demo recording intermediates; keep final MP4s and scripts explicitly.
+demo_recordings/*.aiff
+demo_recordings/*.mov
+demo_recordings/cbos_walkthrough_demo.mp4

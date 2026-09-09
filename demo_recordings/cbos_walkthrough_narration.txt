@@ -1,0 +1,17 @@
+This is CBOS, a lightweight Chiropractic Business OS. It helps a practice track patient inquiries, follow-ups, active patients, and estimated treatment value without replacing the EHR, billing, insurance, or scheduling software.
+
+The dashboard is built for a quick owner or front desk review. In under 30 seconds, the practice can see the estimated treatment value, how many follow-ups need attention, how many active patients are in the system, and which inquiry source is producing the most activity.
+
+On Patient Inquiries, staff can enter a new inquiry from a phone call, website request, Google, referral, or insurance question. The record includes contact details, requested service, source, status, next follow-up date, notes, and optional activity or movement context, such as athlete, desk worker, sport, or return-to-care goal.
+
+The inquiry detail screen keeps the follow-up workflow beside the patient record. Staff can update the status, schedule the next follow-up, record appointment context, and keep a simple operational note without turning CBOS into clinical documentation.
+
+The Reactivations view is for patients who may be due back based on last visit and expected visit frequency. It creates a focused call list for overdue, due-today, and upcoming patients, with owner and outcome tracking so the office can see who has been worked.
+
+The Public Intake form can be linked from the practice website, Google Business Profile, or referral partners. It lets new inquiries enter the system more cleanly, while the source can still be tracked.
+
+The Weekly Summary gives the practice owner a simple review of inquiry activity, follow-ups, active patients, and estimated treatment value. It is meant for a quick weekly conversation, not a complex report.
+
+The Export area reinforces data ownership. The practice can export inquiry data, preview CSV imports, and catch duplicates or bad dates before adding information.
+
+The main value is simple: every inquiry in one place, every follow-up visible, and a weekly view of whether patient interest is turning into active patients.
