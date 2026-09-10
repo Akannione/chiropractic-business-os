@@ -90,6 +90,23 @@ const formFromInquiry = (inquiry: Inquiry): InquiryFormState => ({
   follow_up_outcome: inquiry.follow_up_outcome || 'Not Contacted',
 });
 
+function followUpTiming(nextFollowUpDate: string) {
+  if (!nextFollowUpDate) {
+    return { label: 'No follow-up date', className: 'neutral' };
+  }
+  const today = todayIso();
+  if (nextFollowUpDate < today) return { label: 'Overdue', className: 'overdue' };
+  if (nextFollowUpDate === today) return { label: 'Due today', className: 'due-today' };
+  return { label: 'Upcoming', className: 'upcoming' };
+}
+
+function needsAttention(inquiry: Inquiry) {
+  return (
+    inquiry.status === 'Follow-Up Needed' ||
+    Boolean(inquiry.next_follow_up_date && inquiry.next_follow_up_date <= todayIso())
+  );
+}
+
 export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProps) {
   const [form, setForm] = useState<InquiryFormState>(() => emptyForm(config));
   const [selectedId, setSelectedId] = useState('');
@@ -163,6 +180,9 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
   }, [selectedInquiry?.id, rows]);
 
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const selectedFollowUpTiming = detailForm
+    ? followUpTiming(detailForm.next_follow_up_date)
+    : null;
 
   /** Refetches the current page after a create or update. */
   async function reloadList(message: string) {
@@ -206,6 +226,37 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
     } catch (nextError) {
       setError((nextError as Error).message);
     }
+  }
+
+  function showFollowUps() {
+    setStatusFilter('All');
+    setSourceFilter('All');
+    setFollowUpFilter('Needs Follow-Up');
+  }
+
+  function showOverdue() {
+    setStatusFilter('All');
+    setSourceFilter('All');
+    setFollowUpFilter('Overdue');
+  }
+
+  function showNewInquiries() {
+    setStatusFilter('New Inquiry');
+    setSourceFilter('All');
+    setFollowUpFilter('All');
+  }
+
+  function showActivePatients() {
+    setStatusFilter('Active Patient');
+    setSourceFilter('All');
+    setFollowUpFilter('All');
+  }
+
+  function clearFilters() {
+    setSearch('');
+    setStatusFilter('All');
+    setSourceFilter('All');
+    setFollowUpFilter('All');
   }
 
   return (
@@ -432,32 +483,55 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
             </select>
           </label>
         </div>
+        <div className="quick-filter-bar" aria-label="Common patient inquiry filters">
+          <button type="button" onClick={showFollowUps}>
+            Needs Follow-Up
+          </button>
+          <button type="button" onClick={showOverdue}>
+            Overdue
+          </button>
+          <button type="button" onClick={showNewInquiries}>
+            New Inquiries
+          </button>
+          <button type="button" onClick={showActivePatients}>
+            Active Patients
+          </button>
+          <button type="button" onClick={clearFilters}>
+            Clear
+          </button>
+        </div>
       </Panel>
 
       <div className="detail-grid">
         <Panel title={`Inquiry List (${total})`} description="Select a patient inquiry to review or update details.">
           {rows.length ? (
             <div className="inquiry-list">
-              {rows.map((inquiry) => (
-                <button
-                  className={`inquiry-list-item ${selectedInquiry?.id === inquiry.id ? 'selected' : ''}`}
-                  key={inquiry.id}
-                  onClick={() => setSelectedId(inquiry.id)}
-                  type="button"
-                >
-                  <div>
-                    <strong>{inquiry.name}</strong>
-                    <span>{inquiry.service_needed}</span>
-                    {inquiry.activity_context && <small>{inquiry.activity_context}</small>}
-                    <small>{inquiry.email} · {inquiry.phone}</small>
-                  </div>
-                  <div className="inquiry-list-meta">
-                    <StatusChip status={inquiry.status} />
-                    <span>{money(inquiry.estimated_value)}</span>
-                    <small>{displayDate(inquiry.next_follow_up_date)}</small>
-                  </div>
-                </button>
-              ))}
+              {rows.map((inquiry) => {
+                const timing = followUpTiming(inquiry.next_follow_up_date);
+                return (
+                  <button
+                    className={`inquiry-list-item ${selectedInquiry?.id === inquiry.id ? 'selected' : ''} ${needsAttention(inquiry) ? 'needs-attention' : ''}`}
+                    key={inquiry.id}
+                    onClick={() => setSelectedId(inquiry.id)}
+                    type="button"
+                  >
+                    <div>
+                      <strong>{inquiry.name}</strong>
+                      <span>{inquiry.service_needed}</span>
+                      {inquiry.activity_context && <small>{inquiry.activity_context}</small>}
+                      <small>{inquiry.email} · {inquiry.phone}</small>
+                    </div>
+                    <div className="inquiry-list-meta">
+                      {timing.className !== 'neutral' && (
+                        <span className={`urgency-label ${timing.className}`}>{timing.label}</span>
+                      )}
+                      <StatusChip status={inquiry.status} />
+                      <span>{money(inquiry.estimated_value)}</span>
+                      <small>Follow-up: {displayDate(inquiry.next_follow_up_date)}</small>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           ) : (
             <div className="empty-state">
@@ -488,16 +562,38 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
           )}
         </Panel>
 
-        <Panel title="Inquiry Details" description="Update contact information, notes, status, and follow-up timing.">
-          {selectedInquiry && detailForm ? (
-            <form className="inquiry-form detail-form" onSubmit={saveDetails}>
-              <div className="detail-summary full">
-                <div>
-                  <strong>{selectedInquiry.name}</strong>
-                  <span>Created {displayDate(selectedInquiry.created_at.slice(0, 10))}</span>
+        <div className="sticky-detail">
+          <Panel
+            title={selectedInquiry ? `Work ${selectedInquiry.name}` : 'Inquiry Details'}
+            description="Update the patient record, follow-up timing, and next workflow step."
+          >
+            {selectedInquiry && detailForm ? (
+              <form className="inquiry-form detail-form" onSubmit={saveDetails}>
+                <div className="detail-summary full">
+                  <div>
+                    <strong>{selectedInquiry.name}</strong>
+                    <span>Created {displayDate(selectedInquiry.created_at.slice(0, 10))}</span>
+                  </div>
+                  <StatusChip status={detailForm.status} />
                 </div>
-                <StatusChip status={detailForm.status} />
-              </div>
+
+                <div className="detail-insight-grid full">
+                  <div className={`detail-insight ${selectedFollowUpTiming?.className || ''}`}>
+                    <span>Follow-Up</span>
+                    <strong>{displayDate(detailForm.next_follow_up_date)}</strong>
+                    <small>{selectedFollowUpTiming?.label}</small>
+                  </div>
+                  <div className="detail-insight">
+                    <span>Treatment Value</span>
+                    <strong>{money(detailForm.estimated_value)}</strong>
+                    <small>Estimated patient opportunity</small>
+                  </div>
+                  <div className="detail-insight">
+                    <span>Owner</span>
+                    <strong>{detailForm.assigned_follow_up_owner || 'Unassigned'}</strong>
+                    <small>{detailForm.follow_up_outcome}</small>
+                  </div>
+                </div>
 
               <label>
                 Patient Name
@@ -703,18 +799,19 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
               <div className="quick-actions full">
                 <button type="button" onClick={() => quickStatus('Follow-Up Needed')}>Needs Follow-Up</button>
                 <button type="button" onClick={() => quickStatus('Consultation Scheduled')}>Consultation Scheduled</button>
-                <button type="button" onClick={() => quickStatus('Active Patient')}>Active Patient</button>
-                <button type="button" onClick={() => quickStatus('Lost')}>Lost</button>
+                <button className="success-action" type="button" onClick={() => quickStatus('Active Patient')}>Active Patient</button>
+                <button className="danger-action" type="button" onClick={() => quickStatus('Lost')}>Lost</button>
               </div>
 
               <button className="primary-button full" type="submit">
                 Save Inquiry Details
               </button>
             </form>
-          ) : (
-            <div className="empty-state">Select a patient inquiry to see details.</div>
-          )}
-        </Panel>
+            ) : (
+              <div className="empty-state">Select a patient inquiry to see details.</div>
+            )}
+          </Panel>
+        </div>
       </div>
     </section>
   );
