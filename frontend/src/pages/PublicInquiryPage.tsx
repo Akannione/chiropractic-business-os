@@ -67,11 +67,17 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
       <section className="public-card">
         <div className="section-heading">
           <span className="eyebrow">CBOS</span>
-          <h1>Request a Chiropractic Follow-Up</h1>
+          <h1>Tell the Practice What You Need</h1>
           <p>
-            Share your contact information and requested service. The practice team will receive your inquiry and
-            follow up with next steps during normal office workflow.
+            Share a short chiropractic inquiry. The practice team can review it,
+            call you back, and keep the follow-up visible in their office workflow.
           </p>
+        </div>
+
+        <div className="public-trust-strip" aria-label="What this inquiry form does">
+          <span>No payment</span>
+          <span>No insurance details</span>
+          <span>No appointment confirmation</span>
         </div>
 
         {message && <div className="notice success">{message}</div>}
@@ -80,18 +86,32 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
         <form className="inquiry-form public-form" onSubmit={submit}>
           <label>
             Patient Name
-            <input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
+            <input
+              autoComplete="name"
+              value={form.name}
+              onChange={(event) => setForm({ ...form, name: event.target.value })}
+              placeholder="Full name"
+              required
+            />
           </label>
           <label>
             Phone
-            <input value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} required />
+            <input
+              autoComplete="tel"
+              value={form.phone}
+              onChange={(event) => setForm({ ...form, phone: event.target.value })}
+              placeholder="Best callback number"
+              required
+            />
           </label>
           <label>
             Email
             <input
+              autoComplete="email"
               type="email"
               value={form.email}
               onChange={(event) => setForm({ ...form, email: event.target.value })}
+              placeholder="Best email"
               required
             />
           </label>
@@ -101,6 +121,7 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
               value={form.service_needed}
               onChange={(event) => setForm({ ...form, service_needed: event.target.value })}
               list="public-services"
+              placeholder="Example: Spinal Adjustment"
               required
             />
             <datalist id="public-services">
@@ -121,18 +142,19 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
             <textarea
               value={form.notes}
               onChange={(event) => setForm({ ...form, notes: event.target.value })}
-              placeholder="Briefly describe the reason for your inquiry."
+              placeholder="Briefly describe what you are looking for or what you want the practice to know before calling you."
             />
           </label>
           <input type="hidden" value={form.source} />
           <button className="primary-button full" type="submit" disabled={submitting}>
-            {submitting ? 'Submitting...' : 'Submit Inquiry'}
+            {submitting ? 'Sending Inquiry...' : 'Send Inquiry to Practice'}
           </button>
         </form>
 
         <p className="public-footnote">
-          Source: {source}. This form sends an inquiry only. It does not schedule an appointment, replace clinical advice,
-          or collect insurance or payment information.
+          Inquiry source: {source}. This form sends a message to the practice only.
+          It does not schedule an appointment, replace clinical advice, or collect
+          insurance or payment information.
         </p>
       </section>
     </main>

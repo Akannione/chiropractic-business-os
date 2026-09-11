@@ -68,7 +68,7 @@ export function DashboardPage({
     if (dueToday.length > 0) {
       return {
         title: `${dueToday.length} follow-up${dueToday.length === 1 ? '' : 's'} due today`,
-        detail: 'Clear today’s queue before working future follow-ups.',
+        detail: "Clear today's queue before working future follow-ups.",
         tone: 'today',
       };
     }

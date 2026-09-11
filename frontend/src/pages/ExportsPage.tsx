@@ -1,7 +1,8 @@
 import { Download } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { KpiCard } from '../components/KpiCard';
 import { api } from '../services/api';
-import type { ImportPreview, Inquiry } from '../types';
+import type { ImportPreview } from '../types';
 
 type ExportsPageProps = {
   /** Total inquiries available to export, from the paginated list endpoint. */
@@ -132,9 +133,15 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
             <div>
               <h3>Import Preview</h3>
               <p>
-                {preview.importableRows} ready, {preview.duplicateRows} duplicates, {preview.errorRows} rows need cleanup.
+                Review the file before import. Only rows marked Ready will be added.
               </p>
             </div>
+          </div>
+          <div className="kpi-grid small import-preview-metrics">
+            <KpiCard label="Rows In File" value={String(preview.totalRows)} help="All rows found in the uploaded CSV." />
+            <KpiCard label="Ready To Import" value={String(preview.importableRows)} help="Clean patient inquiry rows that can be imported." success />
+            <KpiCard label="Possible Duplicates" value={String(preview.duplicateRows)} help="Rows matching a patient already on file." warning />
+            <KpiCard label="Need Cleanup" value={String(preview.errorRows)} help="Rows missing required fields or valid dates." warning />
           </div>
           {previewRows.length ? (
             <div className="table-wrap">
@@ -147,12 +154,21 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
                     <th>Patient Type</th>
                     <th>Last Visit</th>
                     <th>Source</th>
-                    <th>Status</th>
+                    <th>Preview Result</th>
                   </tr>
                 </thead>
                 <tbody>
                   {previewRows.map((row) => (
-                    <tr key={row.rowNumber}>
+                    <tr
+                      className={
+                        row.duplicate
+                          ? 'import-row duplicate'
+                          : row.errors.length
+                            ? 'import-row error'
+                            : 'import-row ready'
+                      }
+                      key={row.rowNumber}
+                    >
                       <td>{row.rowNumber}</td>
                       <td>
                         {row.name}
@@ -164,11 +180,18 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
                       <td>{row.last_visit_date || 'Not provided'}</td>
                       <td>{row.source}</td>
                       <td>
-                        {row.duplicate
-                          ? 'Duplicate'
-                          : row.errors.length
-                            ? row.errors.join(' ')
-                            : 'Ready'}
+                        <span
+                          className={
+                            row.duplicate
+                              ? 'preview-pill duplicate'
+                              : row.errors.length
+                                ? 'preview-pill error'
+                                : 'preview-pill ready'
+                          }
+                        >
+                          {row.duplicate ? 'Duplicate' : row.errors.length ? 'Needs Cleanup' : 'Ready'}
+                        </span>
+                        {row.errors.length > 0 && <small>{row.errors.join(' ')}</small>}
                       </td>
                     </tr>
                   ))}
@@ -178,6 +201,11 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
           ) : (
             <div className="empty-state">No importable rows were found in this CSV.</div>
           )}
+          <div className="notice import-guidance">
+            <strong>Import rule:</strong> CBOS imports clean rows only and skips
+            likely duplicates, so staff can preview a MetaSoft or spreadsheet
+            export before adding anything.
+          </div>
         </div>
       )}
     </section>

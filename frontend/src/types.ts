@@ -1,6 +1,7 @@
 export type View =
   | 'dashboard'
   | 'inquiries'
+  | 'pipeline'
   | 'reactivations'
   | 'summary'
   | 'monthly'

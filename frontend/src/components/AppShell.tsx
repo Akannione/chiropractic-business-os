@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import {
   Activity,
   BarChart3,
+  Columns3,
   Copy,
   Download,
   FileText,
@@ -51,10 +52,13 @@ export function AppShell({
         </div>
         <nav>
           <NavButton icon={<LayoutDashboard />} active={view === 'dashboard'} onClick={() => onViewChange('dashboard')}>
-            Dashboard
+            Today
           </NavButton>
           <NavButton icon={<Users />} active={view === 'inquiries'} onClick={() => onViewChange('inquiries')}>
             Patient Inquiries
+          </NavButton>
+          <NavButton icon={<Columns3 />} active={view === 'pipeline'} onClick={() => onViewChange('pipeline')}>
+            Pipeline
           </NavButton>
           <NavButton
             icon={<RotateCcw />}
@@ -64,7 +68,7 @@ export function AppShell({
             Reactivations
           </NavButton>
           <NavButton icon={<FileText />} active={view === 'summary'} onClick={() => onViewChange('summary')}>
-            Weekly Summary
+            Owner Review
           </NavButton>
           <NavButton icon={<BarChart3 />} active={view === 'monthly'} onClick={() => onViewChange('monthly')}>
             Monthly Report

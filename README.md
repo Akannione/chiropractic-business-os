@@ -18,8 +18,9 @@ A focused full-stack web app for chiropractic practices to capture patient inqui
 - Records appointment status, patient type, offer context, follow-up owner, and follow-up outcome
 - Captures optional activity or movement context, such as athlete, desk worker, sport, mobility goal, or return-to-care note
 - Shows a dashboard follow-up workflow with one-click actions for urgent inquiries
+- Provides a simple patient pipeline board grouped by inquiry status
 - Shows practice KPIs such as active patients, follow-ups needed, overdue follow-ups, estimated treatment value, and inquiry-to-patient rate
-- Provides a printable and downloadable weekly practice summary
+- Provides a printable and downloadable weekly owner review with an action plan
 - Provides a month-to-date owner report
 - Tracks activity history for inquiry creation and updates
 - Exports patient inquiries as CSV
@@ -62,6 +63,7 @@ business_os_mvp/
     INTAKE_EMBED_SNIPPETS.md
     PRODUCTION_DEPLOYMENT.md
     RUNTIME_TROUBLESHOOTING.md
+    UX_VALIDATION.md
     WORKFLOW_AUTOMATION.md
     METASOFT_REACTIVATION_DEMO.csv
   package.json

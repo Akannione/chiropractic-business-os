@@ -8,6 +8,7 @@ import { InquiriesPage } from './pages/InquiriesPage';
 import { LoginPage } from './pages/LoginPage';
 import { ActivityPage } from './pages/ActivityPage';
 import { MonthlySummaryPage } from './pages/MonthlySummaryPage';
+import { PipelinePage } from './pages/PipelinePage';
 import { PublicInquiryPage } from './pages/PublicInquiryPage';
 import { ReactivationsPage } from './pages/ReactivationsPage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -95,6 +96,9 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
       )}
       {view === 'inquiries' && (
         <InquiriesPage config={config} onChanged={refreshWithMessage} setError={setError} />
+      )}
+      {view === 'pipeline' && (
+        <PipelinePage config={config} onChanged={refreshWithMessage} setError={setError} />
       )}
       {view === 'reactivations' && (
         <ReactivationsPage
