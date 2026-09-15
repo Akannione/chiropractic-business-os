@@ -26,11 +26,13 @@ Outreach was paused on 2026-08-11. Tobi asked on 2026-09-07 what it looks like t
 
 ## Next Actions
 
-1. Set `WEBHOOK_SECRET` securely before using machine webhook intake in production.
-2. Keep `PRACTICE_TIME_ZONE` explicit for each clinic deployment.
-3. Validate EHR/export sync and Schedule Intelligence only with de-identified clinic exports or additional clinic feedback; do not build EHR replacement features.
-4. Tobi reviews the existing threaded Gmail follow-up draft and decides whether to send, edit, or hold it.
-5. When accepted, run the 20-minute fake-data walkthrough and record the clinic's Go / Revise / Stop decision.
+1. Configure production `WEBHOOK_SECRET` before using machine webhook intake: https://github.com/Akannione/chiropractic-business-os/issues/2
+2. Validate EHR/export sync with a de-identified clinic export before building upsert/sync: https://github.com/Akannione/chiropractic-business-os/issues/3
+3. Validate Schedule Intelligence before building calendar features: https://github.com/Akannione/chiropractic-business-os/issues/4
+4. Decide reactivation queue behavior after follow-up outcomes: https://github.com/Akannione/chiropractic-business-os/issues/5
+5. Keep `PRACTICE_TIME_ZONE` explicit for each clinic deployment.
+6. Tobi reviews the existing threaded Gmail follow-up draft and decides whether to send, edit, or hold it.
+7. When accepted, run the 20-minute fake-data walkthrough and record the clinic's Go / Revise / Stop decision.
 
 ## Completed This Cycle
 
@@ -45,6 +47,7 @@ Outreach was paused on 2026-08-11. Tobi asked on 2026-09-07 what it looks like t
 * 2026-09-08: Ran the internal 20-minute fake-data walkthrough rehearsal. Decision: `Go` to manual client follow-up and a real fake-data validation call; customer-level `Go / Revise / Stop` remains pending until the clinic participates.
 * 2026-09-15: Audited the full backend and frontend codebase. Fixed the confirmed reliability/security/data-integrity issues documented in `docs/CBOS_AUDIT_2026-09-15.md`, added lightweight frontend tests, and kept CBOS positioned as an operational action layer rather than an EHR.
 * 2026-09-15: Pushed commits `91bc657` and `57604db` to GitHub. Production smoke checks showed the audit code is live enough to expose `practiceTimeZone` and disable unconfigured machine webhook intake.
+* 2026-09-15: Created GitHub issues #2-#5 for the next validation and production-readiness decisions: webhook secret setup, EHR/export sync validation, Schedule Intelligence validation, and reactivation queue outcome behavior.
 
 ## Known Issues And Blockers
 
