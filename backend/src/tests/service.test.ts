@@ -16,13 +16,23 @@ import {
   type ReactivationQueue,
 } from '../services/reactivationService.js';
 import { buildWeeklySummary } from '../services/reportService.js';
-import { assertSecureAuthConfig, env } from '../config/env.js';
+import { assertSecureAuthConfig, assertValidPracticeTimeZone, env } from '../config/env.js';
 import { resetSampleData, seedSampleDataIfEmpty } from '../services/seedService.js';
 import { findDuplicateGroups } from '../services/duplicateService.js';
+import { assertWebhookAuthorized } from '../controllers/automationController.js';
+import { toCsv } from '../utils/csv.js';
+import {
+  addDays,
+  dateOnlyInPracticeTimeZone,
+  formatDate,
+  parseDateOnly,
+  startOfPracticeDayInstant,
+  startOfToday,
+} from '../utils/date.js';
+import { validateInquiryUpdate } from '../validators/inquiryValidators.js';
 
-const today = new Date();
-const yesterday = new Date(today);
-yesterday.setDate(yesterday.getDate() - 1);
+const today = startOfToday();
+const yesterday = addDays(today, -1);
 
 const inquiries = [
   {
@@ -363,6 +373,30 @@ async function testCsvIngestionMatrix() {
     assert.equal(householdPreview.rows[0].duplicate, false);
     assert.equal(householdPreview.rows[1].duplicate, false);
     assert.equal(householdPreview.rows[2].duplicate, true);
+
+    const zeroValuePreview = await previewInquiryCsv(
+      [
+        'name,phone,email,service_needed,estimated_value',
+        'Zero Value,404-555-0127,zero@example.com,Spinal Adjustment,0',
+      ].join('\n'),
+    );
+    assert.equal(zeroValuePreview.importableRows, 1);
+    assert.equal(zeroValuePreview.rows[0].estimated_value, 0, 'CSV value 0 must remain intentional');
+
+    const invalidSemanticPreview = await previewInquiryCsv(
+      [
+        'name,phone,email,service_needed,source,estimated_value,patient_type,appointment_status,follow_up_outcome',
+        'Bad Semantics,404-555-0128,bad@example.com,Spinal Adjustment,TikTok,-10,VIP,Booked,Texted',
+        'NaN Value,404-555-0129,nan@example.com,Spinal Adjustment,Website,not-a-number,New Patient,Not Scheduled,Not Contacted',
+      ].join('\n'),
+    );
+    assert.equal(invalidSemanticPreview.importableRows, 0);
+    assert.ok(invalidSemanticPreview.rows[0].errors.includes('Inquiry Source must be one of: Google, Referral, Insurance, Website, Phone Call.'));
+    assert.ok(invalidSemanticPreview.rows[0].errors.includes('Estimated Treatment Value cannot be negative.'));
+    assert.ok(invalidSemanticPreview.rows[0].errors.includes('Patient Type must be one of: New Patient, Existing Patient, Reactivation, Dead Lead.'));
+    assert.ok(invalidSemanticPreview.rows[0].errors.includes('Appointment Status must be one of: Not Scheduled, Appointment Scheduled, Cancelled, No Show.'));
+    assert.ok(invalidSemanticPreview.rows[0].errors.includes('Follow-Up Outcome must be one of: Not Contacted, Left Voicemail, Spoke - Scheduled, Spoke - Not Scheduled, No Response.'));
+    assert.ok(invalidSemanticPreview.rows[1].errors.includes('Estimated Treatment Value must be a number.'));
   } finally {
     Inquiry.find = originalInquiryFind;
   }
@@ -616,6 +650,81 @@ function testAuthConfigGuard() {
   );
 }
 
+function testPracticeTimezoneDateBoundaries() {
+  assert.doesNotThrow(() => assertValidPracticeTimeZone({
+    practiceTimeZone: 'America/New_York',
+  }));
+  assert.throws(() => assertValidPracticeTimeZone({ practiceTimeZone: 'Not/AZone' }), /not a valid IANA/);
+
+  assert.equal(
+    dateOnlyInPracticeTimeZone(new Date('2026-03-09T00:30:00.000Z'), 'America/New_York'),
+    '2026-03-08',
+    '8:30 PM ET must still be the same practice date',
+  );
+  assert.equal(
+    startOfPracticeDayInstant(new Date('2026-03-09T00:30:00.000Z'), 'America/New_York').toISOString(),
+    '2026-03-08T05:00:00.000Z',
+    'practice day starts at New York midnight, not server UTC midnight',
+  );
+  assert.equal(
+    startOfPracticeDayInstant(new Date('2026-03-08T18:00:00.000Z'), 'America/New_York').toISOString(),
+    '2026-03-08T05:00:00.000Z',
+    'DST start day uses the midnight offset for the day boundary',
+  );
+  assert.equal(formatDate(parseDateOnly('2026-02-28')), '2026-02-28');
+  assert.equal(parseDateOnly('2026-02-31'), null);
+}
+
+function testCsvFormulaInjectionMitigation() {
+  const csv = toCsv([{
+    name: '=HYPERLINK("https://example.com")',
+    phone: '+14045550100',
+    email: 'safe@example.com',
+    service_needed: '@danger',
+  }]);
+  assert.ok(csv.includes('\'=HYPERLINK(""https://example.com"")'));
+  assert.ok(csv.includes('\'+14045550100'));
+  assert.ok(csv.includes('\'@danger'));
+}
+
+function testWebhookAuthorization() {
+  const originalSecret = env.webhookSecret;
+  try {
+    (env as { webhookSecret: string }).webhookSecret = '';
+    assert.throws(
+      () => assertWebhookAuthorized({ get: () => undefined }),
+      /not configured/i,
+    );
+
+    (env as { webhookSecret: string }).webhookSecret = 'shared-test-secret';
+    assert.throws(
+      () => assertWebhookAuthorized({ get: () => 'wrong-secret' }),
+      /Webhook secret is required/i,
+    );
+    assert.doesNotThrow(() =>
+      assertWebhookAuthorized({ get: (name) => (name === 'x-cbos-webhook-secret' ? 'shared-test-secret' : undefined) }));
+  } finally {
+    (env as { webhookSecret: string }).webhookSecret = originalSecret;
+  }
+}
+
+function testPatchValidationMatchesCreate() {
+  assert.throws(() => validateInquiryUpdate({ email: 'not-an-email' }), /valid email/i);
+  assert.throws(() => validateInquiryUpdate({ phone: 'bad' }), /valid phone/i);
+  assert.throws(() => validateInquiryUpdate({ name: '   ' }), /Patient name is required/);
+  assert.throws(() => validateInquiryUpdate({ service_needed: '' }), /Requested Service is required/);
+  assert.throws(() => validateInquiryUpdate({ source: 'TikTok' }), /valid inquiry source/);
+  assert.throws(() => validateInquiryUpdate({ estimated_value: Number.NaN }), /must be a number/);
+  assert.throws(() => validateInquiryUpdate({ next_follow_up_date: '2026-02-31' }), /YYYY-MM-DD/);
+  assert.doesNotThrow(() => validateInquiryUpdate({
+    email: 'valid@example.com',
+    phone: '404-555-0199',
+    source: 'Website',
+    estimated_value: 0,
+    next_follow_up_date: '2026-02-28',
+  }));
+}
+
 /** The demo seed must never materialise fake patients in a real deployment. */
 async function testSeedRefusesOutsideDemoMode() {
   const originalDemoMode = env.demoMode;
@@ -637,6 +746,7 @@ async function testDuplicateGrouping() {
   const rows = [
     { _id: 'a', name: 'Priya Raman', email: 'priya@example.com', phone: '470-555-0812' },
     { _id: 'b', name: 'priya  raman', email: 'PRIYA@example.com', phone: '(470) 555 0812' },
+    { _id: 'f', name: 'Priya Raman', email: 'other@example.com', phone: '470-555-0812' },
     // Same household: one phone and one address, two different people.
     { _id: 'c', name: 'Elena Rossi', email: 'rossi@example.com', phone: '470-555-0900' },
     { _id: 'd', name: 'Marco Rossi', email: 'rossi@example.com', phone: '470-555-0900' },
@@ -647,7 +757,7 @@ async function testDuplicateGrouping() {
   try {
     const groups = await findDuplicateGroups();
     assert.equal(groups.length, 1, 'only the repeated patient forms a group');
-    assert.deepEqual([...groups[0]].sort(), ['a', 'b']);
+    assert.deepEqual([...groups[0]].sort(), ['a', 'b', 'f']);
     assert.ok(
       !groups.some((group) => group.includes('c') || group.includes('d')),
       'a household must never be offered as a duplicate',
@@ -663,6 +773,10 @@ async function runTests() {
   await testReactivationSmokeWorkflow();
   await testReactivationApiContract();
   testAuthConfigGuard();
+  testPracticeTimezoneDateBoundaries();
+  testCsvFormulaInjectionMitigation();
+  testWebhookAuthorization();
+  testPatchValidationMatchesCreate();
   await testSeedRefusesOutsideDemoMode();
 }
 

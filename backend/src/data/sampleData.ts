@@ -1,18 +1,13 @@
 import { FOLLOW_UP_NEEDED_STATUS } from '../config/constants.js';
-
-const day = 24 * 60 * 60 * 1000;
+import { addDays, startOfPracticeDayInstant, startOfToday } from '../utils/date.js';
 
 function dateFromOffset(offset: number | null): Date | null {
   if (offset === null) return null;
-  const value = new Date(Date.now() + offset * day);
-  value.setHours(0, 0, 0, 0);
-  return value;
+  return addDays(startOfToday(), offset);
 }
 
 function createdFromOffset(offset: number): Date {
-  const value = new Date(Date.now() + offset * day);
-  value.setHours(9, 0, 0, 0);
-  return value;
+  return startOfPracticeDayInstant(addDays(startOfToday(), offset));
 }
 
 export function buildSampleInquiries() {

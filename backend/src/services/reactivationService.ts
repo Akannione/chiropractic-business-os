@@ -52,8 +52,7 @@ const dayInMilliseconds = 24 * 60 * 60 * 1000;
 
 function normalizeDay(value: Date | string) {
   if (value instanceof Date) {
-    const isoDate = value.toISOString().slice(0, 10);
-    return parseDateOnly(isoDate);
+    return parseDateOnly(formatDate(value));
   }
   return parseDateOnly(String(value).slice(0, 10));
 }

@@ -13,7 +13,7 @@ import { PublicInquiryPage } from './pages/PublicInquiryPage';
 import { ReactivationsPage } from './pages/ReactivationsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { WeeklySummaryPage } from './pages/WeeklySummaryPage';
-import { api, clearAuthToken, getAuthToken } from './services/api';
+import { api, clearAuthToken, getAuthToken, setUnauthorizedHandler } from './services/api';
 import type { View } from './types';
 
 export function App() {
@@ -29,20 +29,53 @@ function StaffGate() {
   const [authRequired, setAuthRequired] = useState(false);
   const [authenticated, setAuthenticated] = useState(Boolean(getAuthToken()));
   const [error, setError] = useState('');
+  const [loginNotice, setLoginNotice] = useState('');
 
   useEffect(() => {
+    setUnauthorizedHandler(() => {
+      setAuthenticated(false);
+      setLoginNotice('Your staff session expired. Please sign in again.');
+    });
+
     api.authStatus()
-      .then((status) => {
+      .then(async (status) => {
         setAuthRequired(status.authEnabled);
-        if (!status.authEnabled) setAuthenticated(true);
+        if (!status.authEnabled) {
+          setAuthenticated(true);
+          return;
+        }
+        if (!getAuthToken()) {
+          setAuthenticated(false);
+          return;
+        }
+        try {
+          await api.verifyStaffSession();
+          setAuthenticated(true);
+        } catch {
+          clearAuthToken();
+          setAuthenticated(false);
+          setLoginNotice('Your staff session expired. Please sign in again.');
+        }
       })
       .catch((nextError: Error) => setError(nextError.message))
       .finally(() => setCheckingAuth(false));
+
+    return () => setUnauthorizedHandler(null);
   }, []);
 
   if (checkingAuth) return <div className="empty-state">Checking staff access...</div>;
   if (error) return <div className="notice error">{error}</div>;
-  if (authRequired && !authenticated) return <LoginPage onLogin={() => setAuthenticated(true)} />;
+  if (authRequired && !authenticated) {
+    return (
+      <LoginPage
+        notice={loginNotice}
+        onLogin={() => {
+          setLoginNotice('');
+          setAuthenticated(true);
+        }}
+      />
+    );
+  }
   return <StaffApp onLogout={() => {
     clearAuthToken();
     setAuthenticated(false);

@@ -2,7 +2,6 @@ import {
   AutomatedInquiryInput,
   buildAutomatedInquiryInput,
   estimateTreatmentValue,
-  normalizeSource,
 } from './automationService.js';
 import { createInquiriesBulk } from './inquiryService.js';
 import { Inquiry } from '../models/Inquiry.js';
@@ -11,6 +10,7 @@ import {
   FOLLOW_UP_OUTCOMES,
   OFFER_TYPES,
   PATIENT_TYPES,
+  SOURCES,
 } from '../config/constants.js';
 import { formatDate, parseDateOnly } from '../utils/date.js';
 
@@ -95,8 +95,20 @@ function firstValue(row: CsvRow, keys: string[]) {
 }
 
 function enumValue(value: string, options: readonly string[], fallback: string) {
-  const match = options.find((option) => option.toLowerCase() === value.trim().toLowerCase());
-  return match || fallback;
+  const trimmed = value.trim();
+  if (!trimmed) return fallback;
+  const match = options.find((option) => option.toLowerCase() === trimmed.toLowerCase());
+  return match || trimmed;
+}
+
+function isKnownOption(value: string, options: readonly string[]) {
+  return Boolean(options.find((option) => option.toLowerCase() === value.trim().toLowerCase()));
+}
+
+function optionalNumber(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  return Number(trimmed);
 }
 
 function positiveInteger(value: string) {
@@ -127,9 +139,9 @@ export function mapExternalRow(row: CsvRow): AutomatedInquiryInput {
       'Movement Pattern',
       'Activity / Movement Context',
     ]),
-    source: normalizeSource(firstValue(row, ['source', 'Source', 'inquiry_source'])),
+    source: firstValue(row, ['source', 'Source', 'inquiry_source']) || 'Website',
     notes: firstValue(row, ['notes', 'message', 'Message', 'Notes']),
-    estimated_value: Number(firstValue(row, ['estimated_value', 'Estimated Treatment Value'])) || undefined,
+    estimated_value: optionalNumber(firstValue(row, ['estimated_value', 'Estimated Treatment Value'])),
     patient_type: enumValue(patientType, PATIENT_TYPES, 'New Patient'),
     appointment_status: enumValue(appointmentStatus, APPOINTMENT_STATUSES, 'Not Scheduled'),
     appointment_request: firstValue(row, [
@@ -175,6 +187,39 @@ function validatePreviewRow(row: AutomatedInquiryInput, sourceRow: CsvRow) {
   if (!phonePattern.test(row.phone.trim())) errors.push('Enter a valid phone number.');
   if (!emailPattern.test(row.email.trim())) errors.push('Enter a valid email address.');
   if (!row.service_needed.trim()) errors.push('Requested Service is required.');
+  const source = firstValue(sourceRow, ['source', 'Source', 'inquiry_source']);
+  if (source && !isKnownOption(source, SOURCES)) {
+    errors.push(`Inquiry Source must be one of: ${SOURCES.join(', ')}.`);
+  }
+  const estimatedValue = firstValue(sourceRow, ['estimated_value', 'Estimated Treatment Value']);
+  if (estimatedValue) {
+    const number = Number(estimatedValue);
+    if (!Number.isFinite(number)) {
+      errors.push('Estimated Treatment Value must be a number.');
+    } else if (number < 0) {
+      errors.push('Estimated Treatment Value cannot be negative.');
+    }
+  }
+  const patientType = firstValue(sourceRow, ['patient_type', 'Patient Type']);
+  if (patientType && !isKnownOption(patientType, PATIENT_TYPES)) {
+    errors.push(`Patient Type must be one of: ${PATIENT_TYPES.join(', ')}.`);
+  }
+  const appointmentStatus = firstValue(sourceRow, [
+    'appointment_status',
+    'Appointment Status',
+    'Was Appointment Scheduled',
+  ]);
+  if (appointmentStatus && !isKnownOption(appointmentStatus, APPOINTMENT_STATUSES)) {
+    errors.push(`Appointment Status must be one of: ${APPOINTMENT_STATUSES.join(', ')}.`);
+  }
+  const followUpOutcome = firstValue(sourceRow, ['follow_up_outcome', 'Follow-Up Outcome']);
+  if (followUpOutcome && !isKnownOption(followUpOutcome, FOLLOW_UP_OUTCOMES)) {
+    errors.push(`Follow-Up Outcome must be one of: ${FOLLOW_UP_OUTCOMES.join(', ')}.`);
+  }
+  const offerType = firstValue(sourceRow, ['offer_type', 'Offer Type', 'Promotion']);
+  if (offerType && !isKnownOption(offerType, OFFER_TYPES)) {
+    errors.push(`Offer Type must be one of: ${OFFER_TYPES.join(', ')}.`);
+  }
   const lastVisitDate = firstValue(sourceRow, lastVisitDateKeys);
   if (lastVisitDate && !validDateOnly(lastVisitDate)) {
     errors.push('Last Visit Date must use YYYY-MM-DD and be a real date.');
@@ -243,7 +288,7 @@ export async function previewInquiryCsv(csvText: string) {
       phone: row.phone,
       email: row.email,
       service_needed: row.service_needed,
-      source: normalizeSource(row.source),
+      source: row.source || 'Website',
       estimated_value: estimateTreatmentValue(row.service_needed, row.estimated_value),
       duplicate,
       errors: validatePreviewRow(row, sourceRows[index]),

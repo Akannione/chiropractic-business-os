@@ -22,9 +22,14 @@ const friendlyHeaders: Record<string, string> = {
 export const exportColumns = Object.keys(friendlyHeaders);
 
 function escapeCsv(value: unknown): string {
-  const text = String(value ?? '');
+  const text = sanitizeCsvValue(value);
   if (!/[",\n]/.test(text)) return text;
   return `"${text.replaceAll('"', '""')}"`;
+}
+
+export function sanitizeCsvValue(value: unknown): string {
+  const text = String(value ?? '');
+  return /^[\t\r\n ]*[=+\-@]/.test(text) ? `'${text}` : text;
 }
 
 export function toCsv(rows: Record<string, unknown>[]): string {

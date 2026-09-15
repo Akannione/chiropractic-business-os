@@ -73,9 +73,11 @@ purpose is making sure nobody is forgotten.
 
 ## Merging
 
-The Duplicates screen lists groups that share a name and a contact detail, the
-same rule the import uses, so a household never appears there. Staff pick the
-record to keep and the others are folded into it.
+The Duplicates screen lists connected groups that share a name and at least one
+contact detail, the same rule the import uses, so a household never appears
+there. Connected grouping matters when A matches B by email and B matches C by
+phone; staff should see one candidate group, not overlapping partial groups.
+Staff pick the record to keep and the others are folded into it.
 
 Field rules, chosen so a merge cannot quietly lose information:
 
@@ -93,7 +95,13 @@ The discarded record's activity history is repointed to the survivor rather
 than deleted, and the merge itself is logged, so the trail stays intact.
 
 Merging is deliberate and confirmed in the interface. Nothing merges
-automatically, because an incorrect merge cannot be undone.
+automatically, because an incorrect merge cannot be undone. The backend now
+also refuses to merge arbitrary IDs unless the two records satisfy the same
+duplicate identity rule. On replica-set MongoDB deployments, the merge runs in
+a transaction so the target update, activity move, source delete, and merge log
+commit together. Local standalone MongoDB cannot run transactions; in that
+case the service falls back to the previous ordered writes after rejecting
+unrelated records.
 
 ## If a unique constraint is ever wanted
 

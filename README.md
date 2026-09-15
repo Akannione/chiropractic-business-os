@@ -119,9 +119,11 @@ PORT=4000
 MONGODB_URI=mongodb://127.0.0.1:27017/chiropractic_business_os
 CORS_ORIGIN=http://localhost:5173
 PRACTICE_NAME=Chiropractic Practice
+PRACTICE_TIME_ZONE=America/New_York
 ADMIN_PASSWORD=
 AUTH_TOKEN_SECRET=change-this-long-random-secret
 BUSINESS_OS_DEMO_MODE=true
+WEBHOOK_SECRET=
 INTERNAL_NOTIFICATION_EMAIL=owner@example.com
 SMTP_HOST=smtp.example.com
 SMTP_PORT=587
@@ -138,7 +140,8 @@ VITE_API_BASE_URL=http://localhost:4000/api
 ```
 
 SMTP variables are optional. If they are not configured, inquiry creation still works and notification is skipped.
-Public and webhook intake routes include a lightweight in-memory rate limit to reduce accidental spam. For a production deployment with multiple backend instances, replace this with platform-level or shared-store rate limiting.
+`PRACTICE_TIME_ZONE` controls date-only logic such as due-today follow-ups, weekly boundaries, and monthly reporting. Use a real IANA timezone such as `America/New_York`.
+Public intake includes a lightweight in-memory rate limit to reduce accidental spam. Webhook intake also has that limiter and requires `WEBHOOK_SECRET` in the `x-cbos-webhook-secret` header. For a production deployment with multiple backend instances, replace or supplement the in-memory limiter with platform-level or shared-store rate limiting.
 `ADMIN_PASSWORD` is optional for local demos. Set it in production so staff dashboard APIs require login. The public intake form remains open.
 
 ## Demo Deployment
@@ -180,6 +183,8 @@ Webhook intake for form tools:
 POST /api/webhooks/inquiries
 ```
 
+Webhook intake is disabled unless `WEBHOOK_SECRET` is configured. Send the secret in the `x-cbos-webhook-secret` header; do not put it in a query string.
+
 CSV import:
 
 ```text
@@ -192,7 +197,7 @@ Then:
 POST /api/imports/inquiries.csv
 ```
 
-The preview route flags duplicate email or phone matches and rows with missing required fields before the import runs.
+The preview route flags rows that match an existing patient by normalized name plus email or phone, and rows with missing or invalid fields before the import runs.
 It also accepts optional clinic workflow columns such as patient type, appointment status, last visit date, visit frequency, follow-up owner, and follow-up outcome. Use `docs/METASOFT_REACTIVATION_DEMO.csv` as a fake-data import example before working with a real practice export.
 It also accepts optional activity context columns, such as `activity_context`, `movement_context`, `movement_pattern`, or `Activity / Movement Context`. Use this for simple operational context like "runner returning to training" or "desk worker with neck stiffness"; it is not an EHR field or clinical diagnosis.
 Quoted CSV fields can contain commas, escaped double quotes, and line breaks. Nonblank last-visit dates must be real `YYYY-MM-DD` dates, and visit-frequency values must be positive whole numbers; invalid values are reported during preview instead of being imported silently.

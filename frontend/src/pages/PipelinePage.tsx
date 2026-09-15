@@ -14,6 +14,11 @@ type PipelinePageProps = {
 
 const BOARD_PAGE_SIZE = 100;
 
+export function pipelineLimitMessage(total: number, visible: number) {
+  if (total <= visible) return '';
+  return `Showing the ${visible} newest of ${total} patient inquiries. Use Patient Inquiries filters for the full list.`;
+}
+
 function openPipelineValue(inquiries: Inquiry[]) {
   return inquiries
     .filter((inquiry) => inquiry.status !== 'Lost')
@@ -22,6 +27,7 @@ function openPipelineValue(inquiries: Inquiry[]) {
 
 export function PipelinePage({ config, onChanged, setError }: PipelinePageProps) {
   const [rows, setRows] = useState<Inquiry[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState('');
 
@@ -56,6 +62,7 @@ export function PipelinePage({ config, onChanged, setError }: PipelinePageProps)
     try {
       const result = await api.inquiries({ pageSize: BOARD_PAGE_SIZE });
       setRows(result.rows);
+      setTotal(result.total);
     } catch (nextError) {
       setError((nextError as Error).message);
     } finally {
@@ -88,7 +95,7 @@ export function PipelinePage({ config, onChanged, setError }: PipelinePageProps)
         <div>
           <h2>Patient Pipeline Board</h2>
           <p>
-            See every inquiry by current status and move patients forward without
+            Review the newest patient inquiries by current status and move them forward without
             digging through a table.
           </p>
         </div>
@@ -104,52 +111,57 @@ export function PipelinePage({ config, onChanged, setError }: PipelinePageProps)
         {loading ? (
           <div className="empty-state">Loading patient pipeline...</div>
         ) : rows.length ? (
-          <div className="pipeline-board" aria-label="Patient inquiry pipeline board">
-            {grouped.map((column) => (
-              <section className="pipeline-column" key={column.status}>
-                <div className="pipeline-column-heading">
-                  <div>
-                    <StatusChip status={column.status} />
-                    <span>
-                      {column.inquiries.length} {column.inquiries.length === 1 ? 'inquiry' : 'inquiries'}
-                    </span>
+          <>
+            {pipelineLimitMessage(total, rows.length) && (
+              <div className="notice">{pipelineLimitMessage(total, rows.length)}</div>
+            )}
+            <div className="pipeline-board" aria-label="Patient inquiry pipeline board">
+              {grouped.map((column) => (
+                <section className="pipeline-column" key={column.status}>
+                  <div className="pipeline-column-heading">
+                    <div>
+                      <StatusChip status={column.status} />
+                      <span>
+                        {column.inquiries.length} {column.inquiries.length === 1 ? 'inquiry' : 'inquiries'}
+                      </span>
+                    </div>
+                    <strong>{money(column.value)}</strong>
                   </div>
-                  <strong>{money(column.value)}</strong>
-                </div>
-                <div className="pipeline-cards">
-                  {column.inquiries.length ? (
-                    column.inquiries.map((inquiry) => (
-                      <article className="pipeline-card" key={inquiry.id}>
-                        <div className="pipeline-card-head">
-                          <strong>{inquiry.name}</strong>
-                          <span>{money(inquiry.estimated_value)}</span>
-                        </div>
-                        <p>{inquiry.service_needed}</p>
-                        {inquiry.activity_context && <small>{inquiry.activity_context}</small>}
-                        <small>Follow-up: {displayDate(inquiry.next_follow_up_date)}</small>
-                        <label>
-                          Move To
-                          <select
-                            disabled={updatingId === inquiry.id}
-                            value={inquiry.status}
-                            onChange={(event) =>
-                              void moveInquiry(inquiry, event.target.value as InquiryStatus)
-                            }
-                          >
-                            {statuses.map((status) => (
-                              <option key={status}>{status}</option>
-                            ))}
-                          </select>
-                        </label>
-                      </article>
-                    ))
-                  ) : (
-                    <div className="empty-inline">No patients in this stage.</div>
-                  )}
-                </div>
-              </section>
-            ))}
-          </div>
+                  <div className="pipeline-cards">
+                    {column.inquiries.length ? (
+                      column.inquiries.map((inquiry) => (
+                        <article className="pipeline-card" key={inquiry.id}>
+                          <div className="pipeline-card-head">
+                            <strong>{inquiry.name}</strong>
+                            <span>{money(inquiry.estimated_value)}</span>
+                          </div>
+                          <p>{inquiry.service_needed}</p>
+                          {inquiry.activity_context && <small>{inquiry.activity_context}</small>}
+                          <small>Follow-up: {displayDate(inquiry.next_follow_up_date)}</small>
+                          <label>
+                            Move To
+                            <select
+                              disabled={updatingId === inquiry.id}
+                              value={inquiry.status}
+                              onChange={(event) =>
+                                void moveInquiry(inquiry, event.target.value as InquiryStatus)
+                              }
+                            >
+                              {statuses.map((status) => (
+                                <option key={status}>{status}</option>
+                              ))}
+                            </select>
+                          </label>
+                        </article>
+                      ))
+                    ) : (
+                      <div className="empty-inline">No patients in this stage.</div>
+                    )}
+                  </div>
+                </section>
+              ))}
+            </div>
+          </>
         ) : (
           <div className="empty-state">
             No patient inquiries yet. Add an inquiry or reset demo data to populate the board.

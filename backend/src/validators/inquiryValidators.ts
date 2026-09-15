@@ -7,9 +7,11 @@ import {
   STATUSES,
 } from '../config/constants.js';
 import { HttpError } from '../middleware/errorHandler.js';
+import { parseDateOnly } from '../utils/date.js';
 
 const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const phonePattern = /^\+?[0-9][0-9\s().-]{6,19}$/;
+const dateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/;
 const maxActivityContextLength = 500;
 
 function assertValid(errors: string[]) {
@@ -57,7 +59,28 @@ function workflowErrors(body: Record<string, unknown>) {
   ) {
     errors.push('Expected visit frequency must be a positive whole number of days.');
   }
+  for (const [key, label] of [
+    ['next_follow_up_date', 'Next Follow-Up Date'],
+    ['last_visit_date', 'Last Visit Date'],
+  ] as const) {
+    const value = body[key];
+    if (
+      value !== undefined &&
+      value !== null &&
+      value !== '' &&
+      (!dateOnlyPattern.test(String(value)) || !parseDateOnly(String(value)))
+    ) {
+      errors.push(`${label} must use YYYY-MM-DD.`);
+    }
+  }
   return errors;
+}
+
+function estimatedValueError(value: unknown) {
+  const number = Number(value ?? 0);
+  if (!Number.isFinite(number)) return 'Estimated Treatment Value must be a number.';
+  if (number < 0) return 'Estimated Treatment Value cannot be negative.';
+  return '';
 }
 
 export function validateInquiryBody(body: Record<string, unknown>) {
@@ -68,7 +91,8 @@ export function validateInquiryBody(body: Record<string, unknown>) {
   if (!String(body.service_needed || '').trim()) errors.push('Requested Service is required.');
   if (!(SOURCES as readonly string[]).includes(String(body.source))) errors.push('Choose a valid inquiry source.');
   if (!(STATUSES as readonly string[]).includes(String(body.status))) errors.push('Choose a valid status.');
-  if (Number(body.estimated_value || 0) < 0) errors.push('Estimated Treatment Value cannot be negative.');
+  const valueError = estimatedValueError(body.estimated_value);
+  if (valueError) errors.push(valueError);
   errors.push(...workflowErrors(body));
   assertValid(errors);
 }
@@ -82,16 +106,33 @@ export function validatePublicInquiryBody(body: Record<string, unknown>) {
   if (body.source && !(SOURCES as readonly string[]).includes(String(body.source))) {
     errors.push('Choose a valid inquiry source.');
   }
+  errors.push(...workflowErrors(body));
   assertValid(errors);
 }
 
 export function validateInquiryUpdate(body: Record<string, unknown>) {
   const errors = workflowErrors(body);
+  if (body.name !== undefined && !String(body.name || '').trim()) {
+    errors.push('Patient name is required.');
+  }
+  if (body.phone !== undefined && !phonePattern.test(String(body.phone || '').trim())) {
+    errors.push('Enter a valid phone number.');
+  }
+  if (body.email !== undefined && !emailPattern.test(String(body.email || '').trim())) {
+    errors.push('Enter a valid email address.');
+  }
+  if (body.service_needed !== undefined && !String(body.service_needed || '').trim()) {
+    errors.push('Requested Service is required.');
+  }
+  if (body.source !== undefined && !(SOURCES as readonly string[]).includes(String(body.source))) {
+    errors.push('Choose a valid inquiry source.');
+  }
   if (body.status !== undefined && !(STATUSES as readonly string[]).includes(String(body.status))) {
     errors.push('Choose a valid status.');
   }
-  if (body.estimated_value !== undefined && Number(body.estimated_value) < 0) {
-    errors.push('Estimated Treatment Value cannot be negative.');
+  if (body.estimated_value !== undefined) {
+    const valueError = estimatedValueError(body.estimated_value);
+    if (valueError) errors.push(valueError);
   }
   assertValid(errors);
 }

@@ -10,6 +10,7 @@
 
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import { addDays, formatDate, startOfToday } from '../utils/date.js';
 
 const outputPath = resolve(__dirname, '../../../docs/NEW_PATIENT_IMPORT_DEMO.csv');
 
@@ -34,20 +35,13 @@ const HEADERS = [
 type Row = Record<(typeof HEADERS)[number], string>;
 
 function dateFromOffset(days: number) {
-  const value = new Date();
-  value.setHours(0, 0, 0, 0);
-  value.setDate(value.getDate() + days);
-  return value.toISOString().slice(0, 10);
+  return formatDate(addDays(startOfToday(), days));
 }
 
 /** Renders a US-style date, which the importer must reject. */
 function usFormatDateFromOffset(days: number) {
-  const value = new Date();
-  value.setHours(0, 0, 0, 0);
-  value.setDate(value.getDate() + days);
-  const month = String(value.getMonth() + 1).padStart(2, '0');
-  const day = String(value.getDate()).padStart(2, '0');
-  return `${month}/${day}/${value.getFullYear()}`;
+  const [year, month, day] = dateFromOffset(days).split('-');
+  return `${month}/${day}/${year}`;
 }
 
 function buildRows(): Row[] {

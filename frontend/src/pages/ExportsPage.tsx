@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { KpiCard } from '../components/KpiCard';
 import { api } from '../services/api';
 import type { ImportPreview } from '../types';
+import { todayIso } from '../utils/format';
 
 type ExportsPageProps = {
   /** Total inquiries available to export, from the paginated list endpoint. */
@@ -55,7 +56,7 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `patient_inquiries_${new Date().toISOString().slice(0, 10)}.csv`;
+      link.download = `patient_inquiries_${todayIso()}.csv`;
       link.click();
       window.URL.revokeObjectURL(url);
     } catch (nextError) {
@@ -85,7 +86,8 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
         <div>
           <h3>Import Existing Patient Inquiries</h3>
           <p>
-            Upload a CSV to preview rows first. Duplicate emails or phone numbers are skipped during import.
+            Upload a CSV to preview rows first. Rows are treated as possible duplicates only when
+            the patient name and a contact detail match an existing record.
           </p>
           <input
             accept=".csv,text/csv"

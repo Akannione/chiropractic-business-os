@@ -9,6 +9,7 @@ import type {
   ReactivationQueue,
   WeeklySummary,
 } from '../types';
+import { setPracticeTimeZone } from '../utils/format';
 
 const emptyKpis: Kpis = {
   totalPatientInquiries: 0,
@@ -75,6 +76,7 @@ export function useBusinessOsData() {
       api.weeklySummary(),
       api.monthlySummary(),
     ]);
+    setPracticeTimeZone(nextConfig.practiceTimeZone);
     setConfig(nextConfig);
     setRecentInquiries(nextRecent.rows);
     setInquiryTotal(nextRecent.total);

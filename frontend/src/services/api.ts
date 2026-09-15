@@ -18,9 +18,12 @@ import {
   WeeklySummary,
 } from '../types';
 
+const viteEnv = (import.meta as ImportMeta & { env?: Record<string, string | boolean | undefined> }).env || {};
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:4000/api' : '/api');
+  viteEnv.VITE_API_BASE_URL || (viteEnv.DEV ? 'http://localhost:4000/api' : '/api');
 const authTokenKey = 'business-os-auth-token';
+const publicPaths = new Set(['/auth/status', '/auth/login', '/config', '/public/inquiries']);
+let unauthorizedHandler: (() => void) | null = null;
 
 export function getAuthToken() {
   return window.localStorage.getItem(authTokenKey) || '';
@@ -34,18 +37,38 @@ export function clearAuthToken() {
   window.localStorage.removeItem(authTokenKey);
 }
 
+export function setUnauthorizedHandler(handler: (() => void) | null) {
+  unauthorizedHandler = handler;
+}
+
+function mergeHeaders(path: string, options?: RequestInit) {
+  const token = getAuthToken();
+  const headers = new Headers();
+  headers.set('Content-Type', 'application/json');
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+
+  const optionHeaders = new Headers(options?.headers);
+  optionHeaders.forEach((value, key) => headers.set(key, value));
+
+  if (options?.body instanceof FormData) headers.delete('Content-Type');
+  if (!options?.body && !optionHeaders.has('Content-Type')) headers.delete('Content-Type');
+  if (publicPaths.has(path)) headers.delete('Authorization');
+
+  return headers;
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const token = getAuthToken();
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options?.headers,
-    },
     ...options,
+    headers: mergeHeaders(path, options),
   });
   if (!response.ok) {
     const body = await response.json().catch(() => ({ message: 'Request failed.' }));
+    if (response.status === 401 && token && !publicPaths.has(path)) {
+      clearAuthToken();
+      unauthorizedHandler?.();
+    }
     throw new Error(body.message || 'Request failed.');
   }
   return response.json() as Promise<T>;
@@ -56,6 +79,7 @@ export const api = {
   login: (password: string) =>
     request<LoginResult>('/auth/login', { method: 'POST', body: JSON.stringify({ password }) }),
   config: () => request<AppConfig>('/config'),
+  verifyStaffSession: () => request<InquiryPage>('/inquiries?pageSize=1'),
   inquiries: (query: InquiryQuery = {}) => {
     const params = new URLSearchParams();
     if (query.page) params.set('page', String(query.page));
@@ -103,6 +127,11 @@ export const api = {
     const response = await fetch(`${API_BASE_URL}/exports/inquiries.csv`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
+    if (response.status === 401 && token) {
+      clearAuthToken();
+      unauthorizedHandler?.();
+      throw new Error('Staff login is required.');
+    }
     if (!response.ok) throw new Error('CSV export failed.');
     return response.blob();
   },

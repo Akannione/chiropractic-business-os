@@ -14,11 +14,11 @@ Pull Request #1 was merged into `main` at commit `b46add8`, so the public source
 
 ## Last Completed Task
 
-2026-09-07: Added optional activity/movement context across intake, staff workflows, reactivation queues, imports, exports, notifications, sample data, and docs. Rechecked Vercel project roots, verified production health/auth responses, and documented the staff-login deployment behavior.
+2026-09-15: Completed the CBOS reliability and product audit in `docs/CBOS_AUDIT_2026-09-15.md`. Fixed staff-auth CSV import headers, practice timezone/date-only handling, webhook shared-secret gating, PATCH validation parity, CSV import validation, CSV formula-injection mitigation, pipeline-limit copy, expired-token UX, duplicate merge safety, and frontend test coverage. Full local validation passed.
 
 ## Current Task
 
-Resume consulting validation prep while preserving manual client gates. Codex can verify production, demo data, walkthrough materials, and readiness evidence; Tobi controls the external clinic follow-up send and any real-data approval.
+Reliability audit complete. Tobi controls whether to commit/push the current audit changes, whether to configure `WEBHOOK_SECRET` in production, and when to resume external clinic follow-up.
 
 ## Validation Resume Gate
 
@@ -26,13 +26,12 @@ Outreach was paused on 2026-08-11. Tobi asked on 2026-09-07 what it looks like t
 
 ## Next Actions
 
-1. Re-verify production health, auth status, public-intake behavior, and protected-route 401 behavior without using real patient data.
-2. Review `docs/DEMO_WALKTHROUGH.md`, `docs/CALL_RUN_SHEET.md`, `docs/WALKTHROUGH_REHEARSAL.md`, and `docs/OBJECTION_ALREADY_CALLED.md` as the current validation package.
-3. Confirm `docs/METASOFT_REACTIVATION_DEMO.csv` remains the only demo CSV for the walkthrough.
-4. Review the existing threaded Gmail follow-up draft without recreating it. Tobi decides whether and when to send it.
-5. When accepted, run the 20-minute fake-data walkthrough and record the clinic's Go / Revise / Stop decision.
-6. If `Go`, draft the smallest paid pilot offer: setup, approved-data import plan, staff handoff, weekly owner summary, and one review checkpoint.
-7. Keep Atlas network tightening and `Verification Probe` cleanup as secondary hardening/manual-access tasks, not blockers to fake-data validation.
+1. Review and commit/push the September 15 audit changes if Tobi approves the current diff.
+2. Set `WEBHOOK_SECRET` securely before using machine webhook intake in production.
+3. Keep `PRACTICE_TIME_ZONE` explicit for each clinic deployment.
+4. Validate EHR/export sync and Schedule Intelligence only with de-identified clinic exports or additional clinic feedback; do not build EHR replacement features.
+5. Tobi reviews the existing threaded Gmail follow-up draft and decides whether to send, edit, or hold it.
+6. When accepted, run the 20-minute fake-data walkthrough and record the clinic's Go / Revise / Stop decision.
 
 ## Completed This Cycle
 
@@ -43,6 +42,9 @@ Outreach was paused on 2026-08-11. Tobi asked on 2026-09-07 what it looks like t
 * 2026-08-16: Built the Duplicates screen and merge.
 * 2026-08-22: Added `npm run test:db`, which exercises the query layer against a real MongoDB rather than a stub, and corrected a false claim about how MongoDB compares null to dates.
 * 2026-09-07: Added optional activity/movement context from clinic feedback without changing the core workflow: public intake, staff inquiry forms, CSV import/export, reactivation review, notifications, and demo records now carry that context where available.
+* 2026-09-08: Re-verified the validation lane end to end without credentials or real patient data. The remaining gate is Tobi's manual send/edit/hold decision on the existing draft.
+* 2026-09-08: Ran the internal 20-minute fake-data walkthrough rehearsal. Decision: `Go` to manual client follow-up and a real fake-data validation call; customer-level `Go / Revise / Stop` remains pending until the clinic participates.
+* 2026-09-15: Audited the full backend and frontend codebase. Fixed the confirmed reliability/security/data-integrity issues documented in `docs/CBOS_AUDIT_2026-09-15.md`, added lightweight frontend tests, and kept CBOS positioned as an operational action layer rather than an EHR.
 
 ## Known Issues And Blockers
 
@@ -51,6 +53,7 @@ Outreach was paused on 2026-08-11. Tobi asked on 2026-09-07 what it looks like t
 * Resolved on August 11, 2026: the recurring duplicate `@types` folders were caused by iCloud Desktop and Documents sync, which was syncing the repository including `node_modules`, `.git`, and `.mongo-data`. Its file provider raced with the atomic file replacement that npm, git, and Vite all rely on, and materialised the losing copy as `react 2`, `react 3`, and so on. The same mechanism produced stale `.git/index` copies. The workspace now lives at `/Users/tobiloba202/Developer/New project`, outside any synced location, and `brctl status` no longer tracks it. `npm ci --prefix frontend` remains the repair if duplicates are ever seen again.
 * Client outreach and real-data use remain manual gates; see the Validation Resume Gate above.
 * Production now requires a staff password. Anyone demonstrating the app needs it, and it is stored only in Vercel and Tobi's password manager. There is no recovery path other than setting a new one.
+* Machine webhook intake now requires `WEBHOOK_SECRET`; production webhook intake should be treated as disabled until that secret is configured securely.
 
 ## Reusable Lessons
 
@@ -117,3 +120,9 @@ Re-verified on August 10, 2026 before committing the governed analytics document
 Re-verified and redeployed on September 5, 2026 from `/Users/tobiloba202/Developer/New project/business_os_mvp`: `npm ci --prefix frontend`, `npm run typecheck`, `npm run test`, `npm run build`, and `git diff --check` passed. `npm audit --prefix frontend --audit-level=high` and `npm audit --prefix backend --audit-level=moderate` both reported zero vulnerabilities after patching transitive dependency locks and adding a narrow backend `qs` override. `vercel env ls production` confirmed `MONGODB_URI` exists for `cbos-api`. Backend production deployment `dpl_9rcPtNa2aWA1XvhPXeubmyauWATi` aliased to `https://cbos-api.vercel.app`; frontend production deployment `dpl_FXQr7vLD3jcapuB75dQ5tD1b4suj` aliased to `https://frontend-gold-alpha-31.vercel.app`. `/api/health` returned 200, `/api/auth/status` returned `{"authEnabled":true}`, `/api/reactivations` returned 401 without a token as intended, and the frontend returned 200.
 
 Re-verified on September 7, 2026 after the activity-context update: `npm run typecheck`, `npm run test`, `npm run build`, `git diff --check`, and `npm run test:db` passed locally. Local API health returned 200, local frontend returned 200, activity context was created, updated, searched, exported, and reset in demo data. Production `cbos-api` root directory is `backend`, production frontend root directory is `frontend`, `/api/health` returned 200, `/api/auth/status` returned `{"authEnabled":true}`, and `/api/reactivations` returned 401 without a staff token as intended.
+
+Re-verified on September 8, 2026 for resumed consulting validation: `npm run typecheck`, `npm run test`, and `npm run build` passed. Production `/api/health` returned 200, `/api/auth/status` returned `{"authEnabled":true}`, `/api/config` returned public demo config with `demoMode:true`, `/api/reactivations` returned 401 without a staff token as intended, and the frontend returned 200. The existing threaded Gmail follow-up draft was confirmed present and unsent; no Gmail write or send action occurred.
+
+Internal fake-data walkthrough on September 8, 2026: `npm run demo:csv` regenerated `docs/NEW_PATIENT_IMPORT_DEMO.csv`, sample-data reactivation logic produced 2 overdue, 1 due-today, and 1 upcoming patient, and the CSV segment showed the intended 3 importable, 1 duplicate, and 1 invalid-date row. The Board decision is `Go` to manual client follow-up and a real fake-data validation call, with the customer decision still pending.
+
+Reliability audit verification on September 15, 2026: `npm run typecheck`, `npm run test`, `npm run build`, `npm run test:db`, `npm audit --prefix frontend --audit-level=high`, `npm audit --prefix backend --audit-level=moderate`, and `git diff --check` all passed locally. `npm run test` now includes backend service tests and lightweight frontend regression tests. `npm run test:db` passed against a local MongoDB process.

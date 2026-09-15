@@ -1,4 +1,5 @@
 import { Activity } from '../models/Activity.js';
+import type { ClientSession } from 'mongoose';
 
 type ActivityInput = {
   inquiryId?: string;
@@ -7,14 +8,14 @@ type ActivityInput = {
   detail?: string;
 };
 
-export async function logActivity(input: ActivityInput) {
-  await Activity.create({
+export async function logActivity(input: ActivityInput, session?: ClientSession) {
+  await Activity.create([{
     inquiry_id: input.inquiryId || null,
     patient_name: input.patientName || '',
     action: input.action,
     detail: input.detail || '',
     created_at: new Date(),
-  });
+  }], { session });
 }
 
 /** One write for a whole batch, used by the CSV import. */

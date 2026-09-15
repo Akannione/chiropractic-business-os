@@ -2,6 +2,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+type TimeZoneConfig = { practiceTimeZone: string };
+
 /**
  * Placeholders shipped in the example env files. Signing session tokens with
  * any of these is the same as having no secret at all, because the value is
@@ -23,6 +25,8 @@ export const env = {
   adminPassword: process.env.ADMIN_PASSWORD || '',
   authTokenSecret: process.env.AUTH_TOKEN_SECRET || 'local-dev-secret-change-me',
   practiceName: process.env.PRACTICE_NAME || 'Chiropractic Practice',
+  practiceTimeZone: process.env.PRACTICE_TIME_ZONE || 'America/New_York',
+  webhookSecret: process.env.WEBHOOK_SECRET || '',
   demoMode: ['1', 'true', 'yes', 'on'].includes(
     String(process.env.BUSINESS_OS_DEMO_MODE || '').toLowerCase(),
   ),
@@ -66,6 +70,17 @@ export function assertSecureAuthConfig(config = env) {
     throw new Error(
       `ADMIN_PASSWORD is set but AUTH_TOKEN_SECRET is only ${secret.length} characters; `
         + `at least ${MINIMUM_SECRET_LENGTH} are required. Generate one with: openssl rand -hex 32`,
+    );
+  }
+}
+
+export function assertValidPracticeTimeZone(config: TimeZoneConfig = env) {
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: config.practiceTimeZone }).format(new Date());
+  } catch {
+    throw new Error(
+      `PRACTICE_TIME_ZONE "${config.practiceTimeZone}" is not a valid IANA time zone. `
+        + 'Use a value such as America/New_York.',
     );
   }
 }

@@ -5,6 +5,7 @@ import {
 } from '../services/inquiryService.js';
 import { calculateKpisFromDatabase } from '../services/kpiService.js';
 import { buildMonthlySummary, buildWeeklySummary } from '../services/reportService.js';
+import { startOfMonthInstant } from '../utils/date.js';
 
 /**
  * Computed inside MongoDB. Fetching every document to count them costs about
@@ -21,9 +22,6 @@ export async function getWeeklySummary(_req: Request, res: Response) {
 }
 
 export async function getMonthlySummary(_req: Request, res: Response) {
-  const monthStart = new Date();
-  monthStart.setHours(0, 0, 0, 0);
-  monthStart.setDate(1);
-  const inquiries = await listInquiriesCreatedSince(monthStart);
+  const inquiries = await listInquiriesCreatedSince(startOfMonthInstant());
   res.json(buildMonthlySummary(inquiries as never));
 }

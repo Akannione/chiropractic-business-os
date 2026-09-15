@@ -67,7 +67,7 @@ This makes it possible to use different links in different places:
 
 ## Internal Email Notification
 
-When SMTP environment variables are configured, the backend sends an internal email notification each time an automated inquiry is created through the public form, webhook, or CSV import.
+When SMTP environment variables are configured, the backend sends an internal email notification each time an automated inquiry is created through the public form or webhook. Bulk CSV imports do not send notification emails.
 
 Backend environment variables:
 
@@ -93,7 +93,7 @@ The summary includes overdue follow-ups, due-today follow-ups, and new inquiries
 
 ## Staff Login
 
-Set `ADMIN_PASSWORD` in production to protect staff routes. The public intake form and webhook intake remain available so website inquiries can still enter the system.
+Set `ADMIN_PASSWORD` in production to protect staff routes. The public intake form remains available so website inquiries can still enter the system. Webhook intake is available only when `WEBHOOK_SECRET` is configured and supplied in the `x-cbos-webhook-secret` header.
 
 ## Source And Service Follow-Up Rules
 
@@ -114,6 +114,20 @@ No-code form tools can submit JSON to:
 ```text
 POST /api/webhooks/inquiries
 ```
+
+Webhook intake is for machine-to-machine integrations, not public browser forms. Configure:
+
+```bash
+WEBHOOK_SECRET=replace-with-a-long-random-value
+```
+
+Then send:
+
+```text
+x-cbos-webhook-secret: <secret>
+```
+
+Do not put webhook secrets in query strings.
 
 Accepted field names:
 
@@ -154,7 +168,7 @@ POST /api/imports/inquiries.csv
 ```
 
 Send the CSV body as `text/csv`.
-The preview step flags duplicates and rows that need cleanup before the import runs. The import step skips duplicate email or phone matches instead of inserting them again.
+The preview step flags duplicates and rows that need cleanup before the import runs. The import step skips rows matching a patient already on file by normalized patient name plus email or phone.
 
 Example file:
 

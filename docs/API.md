@@ -22,11 +22,11 @@ Response:
 
 ### `GET /config`
 
-Returns practice labels, status options, inquiry sources, requested services, KPI help text, and demo-mode state.
+Returns practice labels, practice timezone, status options, inquiry sources, requested services, KPI help text, and demo-mode state.
 
 ## Authentication
 
-Authentication is optional. When `ADMIN_PASSWORD` is configured, staff routes require a bearer token. Public intake and webhook intake remain open.
+Authentication is optional. When `ADMIN_PASSWORD` is configured, staff routes require a bearer token. Public intake remains open. Webhook intake is separate from staff login and requires `WEBHOOK_SECRET` when configured.
 
 ### `GET /auth/status`
 
@@ -213,11 +213,19 @@ JSON body:
 }
 ```
 
-Public and webhook intake routes include a lightweight in-memory rate limit to reduce accidental spam.
+Public and webhook intake routes include a lightweight in-memory rate limit to reduce accidental spam. The limiter is process-local, so Vercel/serverless deployments should not treat it as complete distributed abuse protection.
 
 ### `POST /webhooks/inquiries`
 
 Creates a patient inquiry from a no-code form tool or website builder.
+
+This route is disabled unless `WEBHOOK_SECRET` is configured on the backend. Send the secret in this header:
+
+```text
+x-cbos-webhook-secret: <secret>
+```
+
+Do not put webhook secrets into query strings.
 
 Accepted field aliases:
 
@@ -239,7 +247,7 @@ Accepted field aliases:
 
 ### `POST /imports/inquiries.csv/preview`
 
-Previews an existing inquiry CSV before import. The response flags duplicate emails or phone numbers and rows with missing required fields.
+Previews an existing inquiry CSV before import. The response flags possible duplicates using normalized patient name plus shared email or phone, and flags rows with missing or invalid fields.
 Quoted fields may contain commas, escaped double quotes, and line breaks. Blank clinic workflow fields remain optional. Nonblank `Last Visit Date` values must use `YYYY-MM-DD` and represent a real date, while nonblank `Visit Frequency Days` values must be positive whole numbers.
 
 Header:
@@ -276,7 +284,7 @@ Response:
 ### `POST /imports/inquiries.csv`
 
 Imports existing inquiries from a CSV request body.
-Duplicate emails or phone numbers are skipped. Rows with missing required fields are returned as errors.
+Rows matching an existing patient by normalized name plus email or phone are skipped. Rows with missing or invalid fields are returned as errors.
 
 Header:
 

@@ -1,12 +1,13 @@
 import cors from 'cors';
 import express from 'express';
 import { connectDatabase } from './config/database.js';
-import { assertSecureAuthConfig, env } from './config/env.js';
+import { assertSecureAuthConfig, assertValidPracticeTimeZone, env } from './config/env.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { inquiryRouter } from './routes/inquiryRoutes.js';
 
 // Checked before the app accepts traffic rather than at first login.
 assertSecureAuthConfig();
+assertValidPracticeTimeZone();
 
 export const app = express();
 

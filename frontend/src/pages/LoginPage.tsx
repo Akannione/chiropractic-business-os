@@ -3,10 +3,11 @@ import type { FormEvent } from 'react';
 import { api, setAuthToken } from '../services/api';
 
 type LoginPageProps = {
+  notice?: string;
   onLogin: () => void;
 };
 
-export function LoginPage({ onLogin }: LoginPageProps) {
+export function LoginPage({ notice, onLogin }: LoginPageProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -34,6 +35,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           <h1>CBOS</h1>
           <p>Sign in to view patient inquiries, follow-ups, reporting, and exports.</p>
         </div>
+        {notice && <div className="notice">{notice}</div>}
         {error && <div className="notice error">{error}</div>}
         <form className="inquiry-form public-form" onSubmit={submit}>
           <label className="full">

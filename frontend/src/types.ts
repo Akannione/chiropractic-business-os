@@ -93,6 +93,7 @@ export type MonthlySummary = Kpis & {
 
 export type AppConfig = {
   practiceName: string;
+  practiceTimeZone: string;
   statuses: InquiryStatus[];
   sources: InquirySource[];
   services: string[];
@@ -136,7 +137,7 @@ export type ImportPreviewRow = {
   email: string;
   service_needed: string;
   activity_context: string;
-  source: InquirySource;
+  source: string;
   estimated_value: number;
   appointment_status: AppointmentStatus;
   patient_type: PatientType;

@@ -51,7 +51,11 @@ Clearing it needs `Reset demo data`, which now requires logging in.
 
 Route protection itself was already correct: `requireStaffAuth` is mounted
 ahead of every staff route, with only config, auth, public intake, and the
-webhook above it.
+webhook above it. As of 2026-09-15, webhook intake has its own shared-secret
+gate: `WEBHOOK_SECRET` must be configured and requests must send the same value
+in the `x-cbos-webhook-secret` header. If the secret is not configured, the
+webhook endpoint returns a configuration error. Public patient intake remains
+open.
 
 ## How staff login was turned on
 
@@ -125,6 +129,10 @@ address, Atlas private endpoints, or at minimum a documented review.
   separately encrypted.
 * **CORS depends on `CORS_ORIGIN` being set correctly** in production; it is not
   verifiable from the repository.
+* **The public/webhook rate limiter is process-local.** It reduces accidental
+  spam in a single Node process, but serverless deployments can run multiple
+  instances. Use platform-level throttling or a shared-store limiter before
+  treating it as distributed abuse protection.
 
 None of these block a fake-data pilot. All of them matter before the
 application becomes a practice's system of record.

@@ -4,7 +4,7 @@ import {
   LOST_STATUS,
 } from '../config/constants.js';
 import { Inquiry, InquiryShape } from '../models/Inquiry.js';
-import { startOfToday, startOfWeek } from '../utils/date.js';
+import { startOfToday, startOfWeekInstant } from '../utils/date.js';
 
 type InquiryLike = Pick<
   InquiryShape,
@@ -13,7 +13,7 @@ type InquiryLike = Pick<
 
 export function calculateKpis(inquiries: InquiryLike[]) {
   const today = startOfToday();
-  const weekStart = startOfWeek(today);
+  const weekStart = startOfWeekInstant();
   const total = inquiries.length;
   const notLost = inquiries.filter((inquiry) => inquiry.status !== LOST_STATUS);
   const active = inquiries.filter((inquiry) => inquiry.status === ACTIVE_STATUS);
@@ -65,7 +65,7 @@ export type Kpis = ReturnType<typeof calculateKpis>;
  */
 export async function calculateKpisFromDatabase(): Promise<Kpis> {
   const today = startOfToday();
-  const weekStart = startOfWeek(today);
+  const weekStart = startOfWeekInstant();
   const notLost = { status: { $ne: LOST_STATUS } };
 
   const [facet] = await Inquiry.aggregate<{
@@ -128,4 +128,3 @@ export async function calculateKpisFromDatabase(): Promise<Kpis> {
     topInquirySource: facet?.topSource[0]?._id ?? 'None',
   };
 }
-

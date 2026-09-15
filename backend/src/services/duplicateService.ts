@@ -1,3 +1,4 @@
+import mongoose, { ClientSession } from 'mongoose';
 import { Activity } from '../models/Activity.js';
 import { Inquiry } from '../models/Inquiry.js';
 import { logActivity } from './activityService.js';
@@ -46,6 +47,44 @@ function identityKeys(row: ContactRow) {
   return keys;
 }
 
+function samePatientIdentity(left: ContactRow, right: ContactRow) {
+  const leftKeys = new Set(identityKeys(left));
+  return identityKeys(right).some((key) => leftKeys.has(key));
+}
+
+class UnionFind {
+  private parents = new Map<string, string>();
+
+  add(value: string) {
+    if (!this.parents.has(value)) this.parents.set(value, value);
+  }
+
+  find(value: string): string {
+    const parent = this.parents.get(value) || value;
+    if (parent === value) return value;
+    const root = this.find(parent);
+    this.parents.set(value, root);
+    return root;
+  }
+
+  union(left: string, right: string) {
+    this.add(left);
+    this.add(right);
+    const leftRoot = this.find(left);
+    const rightRoot = this.find(right);
+    if (leftRoot !== rightRoot) this.parents.set(rightRoot, leftRoot);
+  }
+
+  groups() {
+    const groups = new Map<string, string[]>();
+    for (const value of this.parents.keys()) {
+      const root = this.find(value);
+      groups.set(root, [...(groups.get(root) || []), value]);
+    }
+    return [...groups.values()].filter((group) => group.length > 1);
+  }
+}
+
 /**
  * Groups of inquiry ids that appear to be the same patient.
  *
@@ -56,12 +95,15 @@ function identityKeys(row: ContactRow) {
 export async function findDuplicateGroups() {
   const rows = await Inquiry.find({}, { name: 1, email: 1, phone: 1 }).lean<ContactRow[]>();
 
-  // A record can match on both email and phone, so track which group each id
-  // has already joined rather than emitting it twice.
+  // A record can match on email while another connects by phone. Use connected
+  // components so A-B and B-C becomes one A-B-C group rather than two
+  // overlapping merge prompts.
   const groupsByKey = new Map<string, Set<string>>();
+  const union = new UnionFind();
 
   for (const row of rows) {
     const id = String(row._id);
+    union.add(id);
     for (const key of identityKeys(row)) {
       const bucket = groupsByKey.get(key) || new Set<string>();
       bucket.add(id);
@@ -69,17 +111,13 @@ export async function findDuplicateGroups() {
     }
   }
 
-  const emitted = new Set<string>();
-  const groups: string[][] = [];
   for (const ids of groupsByKey.values()) {
     if (ids.size < 2) continue;
-    const signature = [...ids].sort().join(',');
-    if (emitted.has(signature)) continue;
-    emitted.add(signature);
-    groups.push([...ids]);
+    const [first, ...rest] = [...ids];
+    for (const id of rest) union.union(first, id);
   }
 
-  return groups;
+  return union.groups();
 }
 
 /** Candidate groups with the full records, newest record first within a group. */
@@ -163,18 +201,25 @@ function laterDate(left?: Date | null, right?: Date | null) {
  * The source's activity history is repointed rather than deleted, and the merge
  * itself is recorded, so the trail survives.
  */
-export async function mergeInquiries(targetId: string, sourceId: string) {
+async function runMerge(targetId: string, sourceId: string, session?: ClientSession) {
   if (targetId === sourceId) {
     throw new HttpError(400, 'Cannot merge a patient inquiry into itself.');
   }
 
   const [target, source] = await Promise.all([
-    Inquiry.findById(targetId),
-    Inquiry.findById(sourceId),
+    Inquiry.findById(targetId).session(session || null),
+    Inquiry.findById(sourceId).session(session || null),
   ]);
 
   if (!target) throw new HttpError(404, 'The inquiry to keep was not found.');
   if (!source) throw new HttpError(404, 'The inquiry to merge was not found.');
+
+  if (!samePatientIdentity(target, source)) {
+    throw new HttpError(
+      400,
+      'These records do not match CBOS duplicate rules, so they cannot be merged.',
+    );
+  }
 
   const targetRank = STATUS_RANK[target.status] ?? 0;
   const sourceRank = STATUS_RANK[source.status] ?? 0;
@@ -204,10 +249,14 @@ export async function mergeInquiries(targetId: string, sourceId: string) {
     created_at: earlierDate(target.created_at, source.created_at),
   });
 
-  await target.save();
+  await target.save({ session });
 
-  const moved = await Activity.updateMany({ inquiry_id: source._id }, { inquiry_id: target._id });
-  await Inquiry.deleteOne({ _id: source._id });
+  const moved = await Activity.updateMany(
+    { inquiry_id: source._id },
+    { inquiry_id: target._id },
+    { session },
+  );
+  await Inquiry.deleteOne({ _id: source._id }).session(session || null);
 
   await logActivity({
     inquiryId: String(target._id),
@@ -215,7 +264,30 @@ export async function mergeInquiries(targetId: string, sourceId: string) {
     action: 'Inquiries merged',
     detail: `Merged a duplicate record for ${source.name} (${source.email || 'no email'}, `
       + `${source.phone || 'no phone'}) into this inquiry.`,
-  });
+  }, session);
 
   return { merged: target, movedActivities: moved.modifiedCount ?? 0 };
+}
+
+function isTransactionUnsupported(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return /Transaction numbers are only allowed|replica set member|transactions are not supported/i.test(message);
+}
+
+export async function mergeInquiries(targetId: string, sourceId: string) {
+  const session = await mongoose.startSession();
+  try {
+    let result: Awaited<ReturnType<typeof runMerge>> | undefined;
+    await session.withTransaction(async () => {
+      result = await runMerge(targetId, sourceId, session);
+    });
+    return result as Awaited<ReturnType<typeof runMerge>>;
+  } catch (error) {
+    if (isTransactionUnsupported(error)) {
+      return runMerge(targetId, sourceId);
+    }
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 }

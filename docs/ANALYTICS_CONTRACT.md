@@ -4,6 +4,11 @@ Added: 2026-07-01
 
 This contract makes dashboard metrics reviewable by clinic operators, analysts, and future automation. It documents the grain, inclusion rules, calculations, and ownership already implemented in `backend/src/services/kpiService.ts` and `backend/src/services/reactivationService.ts`.
 
+Date-sensitive metrics use `PRACTICE_TIME_ZONE`, defaulting to `America/New_York`.
+Date-only operational fields such as follow-up dates and last visit dates are
+parsed and formatted as calendar dates so they do not shift when the API runs
+in a different server timezone.
+
 ## Data Products
 
 | Data product | Grain | Consumer | Source |

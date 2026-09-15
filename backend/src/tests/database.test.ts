@@ -25,7 +25,7 @@ import {
 import { calculateKpis, calculateKpisFromDatabase } from '../services/kpiService.js';
 import { buildReactivationQueue } from '../services/reactivationService.js';
 import { findDuplicateGroups, mergeInquiries } from '../services/duplicateService.js';
-import { addDays, startOfToday } from '../utils/date.js';
+import { addDays, formatDate, startOfToday } from '../utils/date.js';
 
 const TEST_URI = process.env.TEST_MONGODB_URI || 'mongodb://127.0.0.1:27017/cbos_integration_test';
 
@@ -64,19 +64,19 @@ async function seed() {
       name: 'Overdue Patient',
       email: 'overdue@example.com',
       phone: '404-555-0002',
-      next_follow_up_date: yesterday.toISOString().slice(0, 10),
+      next_follow_up_date: formatDate(yesterday),
     }),
     inquiry({
       name: 'Due Today Patient',
       email: 'duetoday@example.com',
       phone: '404-555-0003',
-      next_follow_up_date: today.toISOString().slice(0, 10),
+      next_follow_up_date: formatDate(today),
     }),
     inquiry({
       name: 'Future Patient',
       email: 'future@example.com',
       phone: '404-555-0004',
-      next_follow_up_date: tomorrow.toISOString().slice(0, 10),
+      next_follow_up_date: formatDate(tomorrow),
     }),
     // Lost, and overdue. Every follow-up view must exclude it.
     inquiry({
@@ -84,7 +84,7 @@ async function seed() {
       email: 'lost@example.com',
       phone: '404-555-0005',
       status: 'Lost',
-      next_follow_up_date: yesterday.toISOString().slice(0, 10),
+      next_follow_up_date: formatDate(yesterday),
     }),
     inquiry({
       name: 'Flagged Patient',
@@ -106,7 +106,7 @@ async function seed() {
       name: 'Recall Due',
       email: 'recall@example.com',
       phone: '404-555-0008',
-      last_visit_date: addDays(today, -45).toISOString().slice(0, 10),
+      last_visit_date: formatDate(addDays(today, -45)),
       expected_visit_frequency_days: 30,
     }),
     inquiry({
@@ -114,7 +114,7 @@ async function seed() {
       email: 'deadrecall@example.com',
       phone: '404-555-0009',
       patient_type: 'Dead Lead',
-      last_visit_date: addDays(today, -45).toISOString().slice(0, 10),
+      last_visit_date: formatDate(addDays(today, -45)),
       expected_visit_frequency_days: 30,
     }),
   ]);
@@ -240,12 +240,14 @@ async function testDuplicateGroupingAgainstRealData() {
   await Inquiry.insertMany([
     inquiry({ name: 'Repeat Patient', email: 'repeat@example.com', phone: '470-555-0700' }),
     inquiry({ name: 'repeat  patient', email: 'REPEAT@example.com', phone: '(470) 555 0700' }),
+    inquiry({ name: 'Repeat Patient', email: 'other@example.com', phone: '(470) 555 0700' }),
     inquiry({ name: 'Elena Household', email: 'house@example.com', phone: '470-555-0800' }),
     inquiry({ name: 'Marco Household', email: 'house@example.com', phone: '470-555-0800' }),
   ]);
 
   const groups = await findDuplicateGroups();
   assert.equal(groups.length, 1, 'only the repeated patient forms a group');
+  assert.equal(groups[0].length, 3, 'duplicate matches connected by email and phone form one group');
 
   const records = await Inquiry.find({ _id: { $in: groups[0] } }).lean();
   assert.ok(records.every((r) => /repeat/i.test(String(r.name))),
@@ -264,7 +266,7 @@ async function testMergeKeepsTheRicherRecord() {
       status: 'New Inquiry',
       estimated_value: 150,
       notes: 'First note.',
-      last_visit_date: addDays(today, -60).toISOString().slice(0, 10),
+      last_visit_date: formatDate(addDays(today, -60)),
       created_at: addDays(today, -10),
     }),
     inquiry({
@@ -275,7 +277,7 @@ async function testMergeKeepsTheRicherRecord() {
       estimated_value: 400,
       notes: 'Second note.',
       assigned_follow_up_owner: 'Doc',
-      last_visit_date: addDays(today, -5).toISOString().slice(0, 10),
+      last_visit_date: formatDate(addDays(today, -5)),
       created_at: today,
     }),
   ]);
@@ -290,13 +292,13 @@ async function testMergeKeepsTheRicherRecord() {
   assert.ok(merged.notes.includes('First note.') && merged.notes.includes('Second note.'),
     'notes from both records survive');
   assert.equal(
-    merged.last_visit_date?.toISOString().slice(0, 10),
-    addDays(today, -5).toISOString().slice(0, 10),
+    formatDate(merged.last_visit_date),
+    formatDate(addDays(today, -5)),
     'the later visit date wins',
   );
   assert.equal(
-    merged.created_at.toISOString().slice(0, 10),
-    addDays(today, -10).toISOString().slice(0, 10),
+    formatDate(merged.created_at),
+    formatDate(addDays(today, -10)),
     'the earlier created date wins',
   );
 
@@ -309,6 +311,17 @@ async function testMergeKeepsTheRicherRecord() {
     () => mergeInquiries(String(keep._id), String(keep._id)),
     /itself/i,
     'a record cannot be merged into itself',
+  );
+
+  const unrelated = await Inquiry.create(inquiry({
+    name: 'Unrelated Patient',
+    email: 'unrelated@example.com',
+    phone: '470-555-0999',
+  }));
+  await assert.rejects(
+    () => mergeInquiries(String(keep._id), String(unrelated._id)),
+    /do not match CBOS duplicate rules/i,
+    'the backend must refuse destructive merges for unrelated patients',
   );
 }
 

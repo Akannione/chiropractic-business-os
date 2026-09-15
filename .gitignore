@@ -15,6 +15,7 @@ exports/*.txt
 .DS_Store
 .agents/
 .codex/
+.serena/
 .vercel/
 AGENTS.md
 CLAUDE.md
