@@ -91,11 +91,11 @@ Major project stages:
 12. Added clinic-feedback-driven fields for activity and movement context.
 13. Redesigned the main interface around a Today Follow-Up Command Center, Pipeline Board, Weekly Owner Review, and improved CSV import preview.
 
-Current latest committed HEAD before the September 15 audit:
+Current latest committed HEAD after the September 15 audit:
 
-- `9c69a10 Add ChatGPT project context for CBOS`
+- `57604db Record CBOS validation rehearsal assets`
 
-September 15 audit work is documented in `docs/CBOS_AUDIT_2026-09-15.md`. It fixed staff-auth CSV import header merging, practice timezone/date-only logic, webhook shared-secret gating, PATCH validation parity, CSV import validation, CSV formula-injection mitigation, pipeline-limit truthfulness, expired-token UX, duplicate merge safety, and frontend regression coverage. The audit changes passed local validation but were not deployed when this context was updated.
+September 15 audit work is documented in `docs/CBOS_AUDIT_2026-09-15.md`. It fixed staff-auth CSV import header merging, practice timezone/date-only logic, webhook shared-secret gating, PATCH validation parity, CSV import validation, CSV formula-injection mitigation, pipeline-limit truthfulness, expired-token UX, duplicate merge safety, and frontend regression coverage. The audit changes passed local validation and were pushed to GitHub. Production smoke checks confirmed `/api/health` returns 200, `/api/config` exposes `practiceTimeZone:"America/New_York"`, `/api/reactivations` returns 401 without a staff token, and `/api/webhooks/inquiries` returns 404 until `WEBHOOK_SECRET` is configured.
 
 Recent UX roadmap completed:
 
@@ -1105,13 +1105,12 @@ Current competition positioning:
 - Compared with scheduling tools: CBOS tracks opportunities before and after booking, not just calendar events.
 
 Current next steps:
-1. Review, commit, and push the September 15 audit changes if approved.
-2. Configure `WEBHOOK_SECRET` before using machine webhook intake in production.
-3. Run a real fake-data clinic validation call.
-4. Demonstrate the Today dashboard, public intake, patient pipeline, reactivation list, weekly owner review, and CSV import/export.
-5. Ask whether the workflow matches how the clinic actually operates.
-6. Validate EHR/export sync and Schedule Intelligence with de-identified exports or more clinic feedback before building.
-7. Prepare a small paid pilot offer if the clinic sees value.
+1. Configure `WEBHOOK_SECRET` before using machine webhook intake in production.
+2. Run a real fake-data clinic validation call.
+3. Demonstrate the Today dashboard, public intake, patient pipeline, reactivation list, weekly owner review, and CSV import/export.
+4. Ask whether the workflow matches how the clinic actually operates.
+5. Validate EHR/export sync and Schedule Intelligence with de-identified exports or more clinic feedback before building.
+6. Prepare a small paid pilot offer if the clinic sees value.
 
 Operating rules:
 - Do not overbuild.

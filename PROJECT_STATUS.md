@@ -14,11 +14,11 @@ Pull Request #1 was merged into `main` at commit `b46add8`, so the public source
 
 ## Last Completed Task
 
-2026-09-15: Completed the CBOS reliability and product audit in `docs/CBOS_AUDIT_2026-09-15.md`. Fixed staff-auth CSV import headers, practice timezone/date-only handling, webhook shared-secret gating, PATCH validation parity, CSV import validation, CSV formula-injection mitigation, pipeline-limit copy, expired-token UX, duplicate merge safety, and frontend test coverage. Full local validation passed.
+2026-09-15: Committed and pushed the CBOS reliability audit/fix set. Production smoke checks confirmed `/api/health` returns 200, `/api/config` exposes `practiceTimeZone:"America/New_York"`, `/api/reactivations` returns 401 without a staff token, and `/api/webhooks/inquiries` returns 404 until `WEBHOOK_SECRET` is configured.
 
 ## Current Task
 
-Reliability audit complete. Tobi controls whether to commit/push the current audit changes, whether to configure `WEBHOOK_SECRET` in production, and when to resume external clinic follow-up.
+Reliability audit complete and pushed to `main`. Tobi controls whether to configure `WEBHOOK_SECRET` in production and when to resume external clinic follow-up.
 
 ## Validation Resume Gate
 
@@ -26,12 +26,11 @@ Outreach was paused on 2026-08-11. Tobi asked on 2026-09-07 what it looks like t
 
 ## Next Actions
 
-1. Review and commit/push the September 15 audit changes if Tobi approves the current diff.
-2. Set `WEBHOOK_SECRET` securely before using machine webhook intake in production.
-3. Keep `PRACTICE_TIME_ZONE` explicit for each clinic deployment.
-4. Validate EHR/export sync and Schedule Intelligence only with de-identified clinic exports or additional clinic feedback; do not build EHR replacement features.
-5. Tobi reviews the existing threaded Gmail follow-up draft and decides whether to send, edit, or hold it.
-6. When accepted, run the 20-minute fake-data walkthrough and record the clinic's Go / Revise / Stop decision.
+1. Set `WEBHOOK_SECRET` securely before using machine webhook intake in production.
+2. Keep `PRACTICE_TIME_ZONE` explicit for each clinic deployment.
+3. Validate EHR/export sync and Schedule Intelligence only with de-identified clinic exports or additional clinic feedback; do not build EHR replacement features.
+4. Tobi reviews the existing threaded Gmail follow-up draft and decides whether to send, edit, or hold it.
+5. When accepted, run the 20-minute fake-data walkthrough and record the clinic's Go / Revise / Stop decision.
 
 ## Completed This Cycle
 
@@ -45,6 +44,7 @@ Outreach was paused on 2026-08-11. Tobi asked on 2026-09-07 what it looks like t
 * 2026-09-08: Re-verified the validation lane end to end without credentials or real patient data. The remaining gate is Tobi's manual send/edit/hold decision on the existing draft.
 * 2026-09-08: Ran the internal 20-minute fake-data walkthrough rehearsal. Decision: `Go` to manual client follow-up and a real fake-data validation call; customer-level `Go / Revise / Stop` remains pending until the clinic participates.
 * 2026-09-15: Audited the full backend and frontend codebase. Fixed the confirmed reliability/security/data-integrity issues documented in `docs/CBOS_AUDIT_2026-09-15.md`, added lightweight frontend tests, and kept CBOS positioned as an operational action layer rather than an EHR.
+* 2026-09-15: Pushed commits `91bc657` and `57604db` to GitHub. Production smoke checks showed the audit code is live enough to expose `practiceTimeZone` and disable unconfigured machine webhook intake.
 
 ## Known Issues And Blockers
 
@@ -126,3 +126,5 @@ Re-verified on September 8, 2026 for resumed consulting validation: `npm run typ
 Internal fake-data walkthrough on September 8, 2026: `npm run demo:csv` regenerated `docs/NEW_PATIENT_IMPORT_DEMO.csv`, sample-data reactivation logic produced 2 overdue, 1 due-today, and 1 upcoming patient, and the CSV segment showed the intended 3 importable, 1 duplicate, and 1 invalid-date row. The Board decision is `Go` to manual client follow-up and a real fake-data validation call, with the customer decision still pending.
 
 Reliability audit verification on September 15, 2026: `npm run typecheck`, `npm run test`, `npm run build`, `npm run test:db`, `npm audit --prefix frontend --audit-level=high`, `npm audit --prefix backend --audit-level=moderate`, and `git diff --check` all passed locally. `npm run test` now includes backend service tests and lightweight frontend regression tests. `npm run test:db` passed against a local MongoDB process.
+
+Production smoke verification on September 15, 2026 after pushing the audit work: `https://cbos-api.vercel.app/api/health` returned 200, `https://cbos-api.vercel.app/api/config` returned `practiceTimeZone:"America/New_York"`, `https://cbos-api.vercel.app/api/reactivations` returned 401 without a staff token, `https://cbos-api.vercel.app/api/webhooks/inquiries` returned 404 because `WEBHOOK_SECRET` is not configured, and the frontend returned 200.
