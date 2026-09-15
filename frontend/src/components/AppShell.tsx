@@ -47,63 +47,78 @@ export function AppShell({
           <div className="brand-mark">CB</div>
           <div>
             <strong>CBOS</strong>
-            <span>Practice inquiry system</span>
+            <span>Practice action & intelligence</span>
           </div>
         </div>
-        <nav>
-          <NavButton icon={<LayoutDashboard />} active={view === 'dashboard'} onClick={() => onViewChange('dashboard')}>
-            Today
-          </NavButton>
-          <NavButton icon={<Users />} active={view === 'inquiries'} onClick={() => onViewChange('inquiries')}>
-            Patient Inquiries
-          </NavButton>
-          <NavButton icon={<Columns3 />} active={view === 'pipeline'} onClick={() => onViewChange('pipeline')}>
-            Pipeline
-          </NavButton>
-          <NavButton
-            icon={<RotateCcw />}
-            active={view === 'reactivations'}
-            onClick={() => onViewChange('reactivations')}
-          >
-            Reactivations
-          </NavButton>
-          <NavButton icon={<FileText />} active={view === 'summary'} onClick={() => onViewChange('summary')}>
-            Owner Review
-          </NavButton>
-          <NavButton icon={<BarChart3 />} active={view === 'monthly'} onClick={() => onViewChange('monthly')}>
-            Monthly Report
-          </NavButton>
-          <NavButton icon={<Activity />} active={view === 'activity'} onClick={() => onViewChange('activity')}>
-            Activity
-          </NavButton>
-          <NavButton icon={<Copy />} active={view === 'duplicates'} onClick={() => onViewChange('duplicates')}>
-            Duplicates
-          </NavButton>
-          <NavButton icon={<Download />} active={view === 'exports'} onClick={() => onViewChange('exports')}>
-            Exports
-          </NavButton>
-          <NavButton icon={<Settings />} active={view === 'settings'} onClick={() => onViewChange('settings')}>
-            Settings
-          </NavButton>
-          <NavButton icon={<Globe2 />} active={view === 'public-intake'} onClick={() => onViewChange('public-intake')}>
-            Public Intake
-          </NavButton>
+
+        <nav aria-label="CBOS navigation">
+          <div className="nav-group">
+            <span className="nav-group-label">Act</span>
+            <NavButton icon={<LayoutDashboard />} active={view === 'dashboard'} onClick={() => onViewChange('dashboard')}>
+              Today
+            </NavButton>
+            <NavButton icon={<Users />} active={view === 'inquiries'} onClick={() => onViewChange('inquiries')}>
+              Patient Inquiries
+            </NavButton>
+            <NavButton
+              icon={<RotateCcw />}
+              active={view === 'reactivations'}
+              onClick={() => onViewChange('reactivations')}
+            >
+              Reactivations
+            </NavButton>
+          </div>
+
+          <div className="nav-group">
+            <span className="nav-group-label">Review</span>
+            <NavButton icon={<Columns3 />} active={view === 'pipeline'} onClick={() => onViewChange('pipeline')}>
+              Pipeline
+            </NavButton>
+            <NavButton icon={<FileText />} active={view === 'summary'} onClick={() => onViewChange('summary')}>
+              Owner Review
+            </NavButton>
+            <NavButton icon={<BarChart3 />} active={view === 'monthly'} onClick={() => onViewChange('monthly')}>
+              Monthly Report
+            </NavButton>
+            <NavButton icon={<Activity />} active={view === 'activity'} onClick={() => onViewChange('activity')}>
+              Activity
+            </NavButton>
+          </div>
+
+          <div className="nav-group secondary-nav">
+            <span className="nav-group-label">Tools</span>
+            <NavButton icon={<Copy />} active={view === 'duplicates'} onClick={() => onViewChange('duplicates')}>
+              Duplicates
+            </NavButton>
+            <NavButton icon={<Download />} active={view === 'exports'} onClick={() => onViewChange('exports')}>
+              Import & Export
+            </NavButton>
+            <NavButton icon={<Globe2 />} active={view === 'public-intake'} onClick={() => onViewChange('public-intake')}>
+              Public Intake
+            </NavButton>
+            <NavButton icon={<Settings />} active={view === 'settings'} onClick={() => onViewChange('settings')}>
+              Settings
+            </NavButton>
+          </div>
         </nav>
-        {config?.demoMode && (
-          <button className="ghost-button" onClick={onDemoReset}>
-            <RefreshCw size={16} /> Reset demo data
+
+        <div className="sidebar-actions">
+          {config?.demoMode && (
+            <button className="ghost-button" onClick={onDemoReset}>
+              <RefreshCw size={16} /> Reset demo data
+            </button>
+          )}
+          <button className="ghost-button" onClick={onLogout}>
+            <LogOut size={16} /> Sign out
           </button>
-        )}
-        <button className="ghost-button" onClick={onLogout}>
-          <LogOut size={16} /> Sign out
-        </button>
+        </div>
       </aside>
 
       <main className="content">
         <header className="topbar">
           <div>
             <h1>CBOS</h1>
-            <p>Track patient inquiries, follow-ups, active patients, and estimated treatment value.</p>
+            <p className="product-positioning">See what needs attention, what is being missed, and what your team should do next.</p>
           </div>
           <button className="primary-button" onClick={() => onViewChange('inquiries')}>
             <Plus size={18} /> Add Inquiry
@@ -112,7 +127,7 @@ export function AppShell({
 
         {message && <div className="notice success">{message}</div>}
         {error && <div className="notice error">{error}</div>}
-        {loading ? <div className="empty-state">Loading practice dashboard...</div> : children}
+        {loading ? <div className="empty-state">Loading practice priorities...</div> : children}
       </main>
     </div>
   );
