@@ -24,10 +24,15 @@ function isCbosPreviewHostname(hostname: string) {
   return hostname.startsWith('businessos') && hostname.endsWith('-tobi-oniyide-s-projects.vercel.app');
 }
 
-const currentHostname = typeof window !== 'undefined' ? window.location.hostname : '';
-const API_BASE_URL = isCbosPreviewHostname(currentHostname)
-  ? '/api'
-  : viteEnv.VITE_API_BASE_URL || (viteEnv.DEV ? 'http://localhost:4000/api' : '/api');
+export function resolveApiBaseUrl(
+  environment: Record<string, string | boolean | undefined> = viteEnv,
+  hostname = typeof window !== 'undefined' && window.location ? window.location.hostname : '',
+) {
+  if (isCbosPreviewHostname(hostname)) return '/api';
+  return environment.VITE_API_BASE_URL || (environment.DEV ? 'http://localhost:4000/api' : '/api');
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 const authTokenKey = 'business-os-auth-token';
 const publicPaths = new Set(['/auth/status', '/auth/login', '/config', '/public/inquiries']);
 let unauthorizedHandler: (() => void) | null = null;
