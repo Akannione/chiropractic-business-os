@@ -1,6 +1,6 @@
 # CBOS ChatGPT Project Context
 
-Last updated: September 15, 2026
+Last updated: September 19, 2026
 
 Use this file as the starting context for managing CBOS in a new ChatGPT project.
 
@@ -25,7 +25,38 @@ Current production demo:
 - API health: https://cbos-api.vercel.app/api/health
 - Public intake form path: `/intake`
 
-As of the latest check, the production frontend returns HTTP 200, API health returns HTTP 200, and staff authentication is enabled.
+As of the latest check, the production frontend and API health endpoint return HTTP 200. Staff password authentication is temporarily disabled for fake-data demonstrations; do not enter real patient data while access is open.
+
+## September 19, 2026 Current State
+
+The active delivery branch is `chatgpt/pilot-readiness`, with pull request #6 open against `main`. The latest completed work on this branch includes:
+
+- Repaired Vercel preview API routing so frontend previews use same-origin `/api` requests.
+- Verified the preview health, authentication status, configuration, KPI, inquiry, and reactivation routes.
+- Temporarily removed the production `ADMIN_PASSWORD` environment variable at the user's request, which disables the staff login gate for demonstrations.
+- Kept `AUTH_TOKEN_SECRET` and MongoDB configuration separate; no credentials belong in source control or this context file.
+- Implemented an action-first Today dashboard, grouped navigation, a simple pipeline, inquiry details, improved public intake, CSV import preview, Owner Review, responsive styling, status chips, and empty states.
+- Implemented a responsive Add Patient Inquiry drawer. The header action now opens the existing inquiry form over the current screen, preserves context, supports Escape and keyboard focus trapping, restores focus after closing, closes after successful submission, and refreshes dashboard/inquiry data immediately. The full Patient Inquiries page remains available and uses the same reusable form, validation, and API.
+- Added focused frontend tests for inquiry form defaults and drawer focus wrapping.
+
+Current product boundary remains unchanged: CBOS is an operational inquiry, follow-up, reactivation, and owner-visibility layer. It is not an EHR, clinical record, billing, insurance, or appointment scheduling system.
+
+Current validation status for the Add Inquiry drawer:
+
+- TypeScript typecheck: passed
+- Backend and frontend tests: passed
+- Vercel routing regression test: passed
+- Production build: passed
+- Browser verification: required on the new branch preview after push
+
+Next intended sequence:
+
+1. Complete browser verification of the Add Inquiry drawer on desktop, tablet, and mobile.
+2. Push the verified branch update and allow pull request #6 checks to run.
+3. Run the fake-data clinic validation protocol in `docs/CLINIC_VALIDATION_PLAYBOOK.md`.
+4. Record the clinic's Go / Revise / Stop outcome and exact workflow feedback.
+5. Offer the controlled 30-day paid pilot only if workflow fit is demonstrated.
+6. Keep real patient data blocked until authentication, privacy, access, backup, retention, and hosting requirements in `docs/REAL_DATA_READINESS.md` are satisfied.
 
 ## Core Positioning
 

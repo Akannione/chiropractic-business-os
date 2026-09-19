@@ -44,6 +44,8 @@ installWindow();
 const apiModule = await import('../services/api');
 const formatModule = await import('../utils/format');
 const pipelineModule = await import('../pages/PipelinePage');
+const inquiryDrawerModule = await import('../components/InquiryDrawer');
+const inquiryFormModule = await import('../components/InquiryForm');
 
 const {
   api,
@@ -56,6 +58,8 @@ const {
 } = apiModule;
 const { addDaysIso, setPracticeTimeZone, todayIso } = formatModule;
 const { pipelineLimitMessage } = pipelineModule;
+const { nextDrawerFocusIndex } = inquiryDrawerModule;
+const { emptyInquiryForm } = inquiryFormModule;
 
 async function testCsvImportKeepsAuthHeader() {
   setAuthToken('staff-token');
@@ -153,11 +157,28 @@ function testApiBaseUrlResolution() {
   );
 }
 
+function testInquiryDrawerFocusWraps() {
+  assertEqual(nextDrawerFocusIndex(0, 4, true), 3);
+  assertEqual(nextDrawerFocusIndex(3, 4, false), 0);
+  assertEqual(nextDrawerFocusIndex(1, 4, false), 2);
+  assertEqual(nextDrawerFocusIndex(0, 0, false), -1);
+}
+
+function testInquiryFormDefaults() {
+  const form = emptyInquiryForm(null);
+  assertEqual(form.status, 'New Inquiry');
+  assertEqual(form.source, 'Google');
+  assertEqual(form.service_needed, 'Spinal Adjustment');
+  assertEqual(form.next_follow_up_date, todayIso());
+}
+
 await testCsvImportKeepsAuthHeader();
 await testExpiredStaffTokenClearsSession();
 await testPublic401DoesNotClearStaffToken();
 testPracticeTimezoneDateHelpers();
 testPipelineLimitMessage();
 testApiBaseUrlResolution();
+testInquiryDrawerFocusWraps();
+testInquiryFormDefaults();
 
 console.log('Frontend tests passed.');

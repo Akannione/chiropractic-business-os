@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AppShell } from './components/AppShell';
+import { InquiryDrawer } from './components/InquiryDrawer';
 import { useBusinessOsData } from './hooks/useBusinessOsData';
 import { DashboardPage } from './pages/DashboardPage';
 import { DuplicatesPage } from './pages/DuplicatesPage';
@@ -84,6 +85,7 @@ function StaffGate() {
 
 function StaffApp({ onLogout }: { onLogout: () => void }) {
   const [view, setView] = useState<View>('dashboard');
+  const [inquiryDrawerOpen, setInquiryDrawerOpen] = useState(false);
   const {
     activities,
     config,
@@ -114,6 +116,7 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
       error={error}
       loading={loading}
       onViewChange={setView}
+      onAddInquiry={() => setInquiryDrawerOpen(true)}
       onDemoReset={resetDemoData}
       onLogout={onLogout}
     >
@@ -150,6 +153,14 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
       {view === 'exports' && <ExportsPage inquiryTotal={inquiryTotal} onChanged={refreshWithMessage} setError={setError} />}
       {view === 'settings' && <SettingsPage config={config} onChanged={refreshWithMessage} setError={setError} />}
       {view === 'public-intake' && <PublicInquiryPage config={config} />}
+      {inquiryDrawerOpen && (
+        <InquiryDrawer
+          config={config}
+          setError={setError}
+          onClose={() => setInquiryDrawerOpen(false)}
+          onCreated={() => refreshWithMessage('Patient inquiry added.')}
+        />
+      )}
     </AppShell>
   );
 }

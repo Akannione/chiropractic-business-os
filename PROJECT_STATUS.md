@@ -57,7 +57,7 @@ Outreach was paused on 2026-08-11. Tobi asked on 2026-09-07 what it looks like t
 * Atlas permits public network access for Vercel's dynamic demo egress; the strong unique database credential limits access, but paid deployment should use stricter infrastructure.
 * Resolved on August 11, 2026: the recurring duplicate `@types` folders were caused by iCloud Desktop and Documents sync, which was syncing the repository including `node_modules`, `.git`, and `.mongo-data`. Its file provider raced with the atomic file replacement that npm, git, and Vite all rely on, and materialised the losing copy as `react 2`, `react 3`, and so on. The same mechanism produced stale `.git/index` copies. The workspace now lives at `/Users/tobiloba202/Developer/New project`, outside any synced location, and `brctl status` no longer tracks it. `npm ci --prefix frontend` remains the repair if duplicates are ever seen again.
 * Client outreach and real-data use remain manual gates; see the Validation Resume Gate above.
-* Production now requires a staff password. Anyone demonstrating the app needs it, and it is stored only in Vercel and Tobi's password manager. There is no recovery path other than setting a new one.
+* Staff password authentication is temporarily disabled for fake-data demonstrations because `ADMIN_PASSWORD` was removed from the production API environment. Do not use real patient data until access controls are restored and real-data readiness is approved.
 * Machine webhook intake now requires `WEBHOOK_SECRET`; production webhook intake should be treated as disabled until that secret is configured securely.
 
 ## Reusable Lessons

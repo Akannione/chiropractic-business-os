@@ -24,6 +24,7 @@ type AppShellProps = {
   error: string;
   loading: boolean;
   onViewChange: (view: View) => void;
+  onAddInquiry: () => void;
   onDemoReset: () => Promise<void>;
   onLogout: () => void;
   children: ReactNode;
@@ -36,6 +37,7 @@ export function AppShell({
   error,
   loading,
   onViewChange,
+  onAddInquiry,
   onDemoReset,
   onLogout,
   children,
@@ -120,7 +122,7 @@ export function AppShell({
             <h1>CBOS</h1>
             <p className="product-positioning">See what needs attention, what is being missed, and what your team should do next.</p>
           </div>
-          <button className="primary-button" onClick={() => onViewChange('inquiries')}>
+          <button className="primary-button" onClick={onAddInquiry}>
             <Plus size={18} /> Add Inquiry
           </button>
         </header>
