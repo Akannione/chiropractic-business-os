@@ -1012,15 +1012,17 @@ Then the product has to stay simple. That is why CBOS focuses on daily follow-up
 
 ## Open Questions For Tobi
 
-Answer these before the next serious sales push:
+The September 18 pilot-readiness phase converted the main unresolved assumptions into controlled experiments:
 
-1. Is CBOS being sold as a one-time setup, monthly service, or both?
-2. What is the smallest paid pilot offer you are comfortable presenting?
-3. Should the first pilot include only fake data, or a small approved CSV sample?
-4. Who is the ideal first buyer: solo chiropractor, small practice owner, or front-office manager?
-5. Do you want to rebuild a lightweight marketing website, or keep the repo focused only on the app?
-6. Should the old sales / PROJECT_OS folders stay out of the cleaned repo, or be recreated in a separate private operations repo?
-7. What privacy/security commitments will you make before importing real patient data?
+1. Pricing hypothesis: `$100` for a 30-day paid pilot, with `$99/month` as the continuation hypothesis.
+2. Pilot data mode: fake data by default. Approved de-identified data only after manual review. Real patient data remains blocked.
+3. ICP hypothesis: solo or small practices with 1-3 providers, a named workflow owner, inconsistent follow-up/reactivation, and an exportable data path.
+4. Reactivation behavior: keep current queue membership unchanged until two clinics agree or a paid pilot owner selects the post-outcome rule.
+5. Schedule Intelligence: validate a read-only operational signal with two clinics before building; do not build a scheduler.
+6. Data sync: inspect a de-identified export and prove stable identity, field authority, diff, and conflict behavior before implementing recurring sync.
+7. Analytics: use the manual pilot scorecard first; do not add patient-level third-party telemetry.
+
+These are hypotheses, not customer validation. See `docs/PILOT_READINESS.md` and `docs/VALIDATION_SYSTEM.md`.
 
 ## Suggested ChatGPT Project Instructions
 
@@ -1105,12 +1107,12 @@ Current competition positioning:
 - Compared with scheduling tools: CBOS tracks opportunities before and after booking, not just calendar events.
 
 Current next steps:
-1. Configure `WEBHOOK_SECRET` before using machine webhook intake in production.
-2. Run a real fake-data clinic validation call.
-3. Demonstrate the Today dashboard, public intake, patient pipeline, reactivation list, weekly owner review, and CSV import/export.
-4. Ask whether the workflow matches how the clinic actually operates.
-5. Validate EHR/export sync and Schedule Intelligence with de-identified exports or more clinic feedback before building.
-6. Prepare a small paid pilot offer if the clinic sees value.
+1. Run the task-based fake-data clinic protocol in `docs/CLINIC_VALIDATION_PLAYBOOK.md`.
+2. Record the exact 30-second product description and Go / Revise / Stop result.
+3. If fit is demonstrated, offer the `$100`, 30-day controlled paid pilot in `docs/PAID_PILOT_OFFER.md`.
+4. Keep real patient data blocked under `docs/REAL_DATA_READINESS.md`.
+5. Validate post-contact reactivation rules, a de-identified export, and Schedule Intelligence before changing those behaviors.
+6. Configure `WEBHOOK_SECRET` before using machine webhook intake in production.
 
 Operating rules:
 - Do not overbuild.
