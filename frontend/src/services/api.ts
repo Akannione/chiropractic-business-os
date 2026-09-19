@@ -20,7 +20,7 @@ import {
 
 const viteEnv = (import.meta as ImportMeta & { env?: Record<string, string | boolean | undefined> }).env || {};
 
-function isCbosPreviewHostname(hostname: string) {
+export function isCbosPreviewHostname(hostname: string) {
   return hostname.startsWith('businessos') && hostname.endsWith('-tobi-oniyide-s-projects.vercel.app');
 }
 
@@ -33,6 +33,9 @@ export function resolveApiBaseUrl(
 }
 
 const API_BASE_URL = resolveApiBaseUrl();
+const isPreviewRuntime = isCbosPreviewHostname(
+  typeof window !== 'undefined' && window.location ? window.location.hostname : '',
+);
 const authTokenKey = 'business-os-auth-token';
 const publicPaths = new Set(['/auth/status', '/auth/login', '/config', '/public/inquiries']);
 let unauthorizedHandler: (() => void) | null = null;
@@ -71,17 +74,34 @@ function mergeHeaders(path: string, options?: RequestInit) {
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const token = getAuthToken();
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: mergeHeaders(path, options),
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers: mergeHeaders(path, options),
+    });
+  } catch {
+    throw new Error(
+      isPreviewRuntime
+        ? 'Unable to reach CBOS API (network error).'
+        : 'CBOS is temporarily unavailable.',
+    );
+  }
   if (!response.ok) {
-    const body = await response.json().catch(() => ({ message: 'Request failed.' }));
+    const isJson = response.headers.get('content-type')?.includes('application/json');
+    const body = isJson
+      ? await response.json().catch(() => ({ message: '' })) as { message?: string }
+      : { message: '' };
     if (response.status === 401 && token && !publicPaths.has(path)) {
       clearAuthToken();
       unauthorizedHandler?.();
     }
-    throw new Error(body.message || 'Request failed.');
+    throw new Error(
+      body.message
+        || (isPreviewRuntime
+          ? `Unable to reach CBOS API (HTTP ${response.status}).`
+          : 'CBOS is temporarily unavailable.'),
+    );
   }
   return response.json() as Promise<T>;
 }

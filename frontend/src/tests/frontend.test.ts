@@ -45,7 +45,15 @@ const apiModule = await import('../services/api');
 const formatModule = await import('../utils/format');
 const pipelineModule = await import('../pages/PipelinePage');
 
-const { api, clearAuthToken, getAuthToken, resolveApiBaseUrl, setAuthToken, setUnauthorizedHandler } = apiModule;
+const {
+  api,
+  clearAuthToken,
+  getAuthToken,
+  isCbosPreviewHostname,
+  resolveApiBaseUrl,
+  setAuthToken,
+  setUnauthorizedHandler,
+} = apiModule;
 const { addDaysIso, setPracticeTimeZone, todayIso } = formatModule;
 const { pipelineLimitMessage } = pipelineModule;
 
@@ -127,6 +135,10 @@ function testPipelineLimitMessage() {
 }
 
 function testApiBaseUrlResolution() {
+  assertEqual(
+    isCbosPreviewHostname('businessosmvp-git-chatgpt-pilot-1aeab7-tobi-oniyide-s-projects.vercel.app'),
+    true,
+  );
   assertEqual(
     resolveApiBaseUrl(
       { VITE_API_BASE_URL: 'https://cbos-api.vercel.app/api' },
