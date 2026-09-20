@@ -50,7 +50,10 @@ export function InquiryDrawer({ config, onClose, onCreated, setError }: InquiryD
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = previousOverflow;
-      previousFocusRef.current?.focus();
+      const returnTarget = previousFocusRef.current?.isConnected
+        ? previousFocusRef.current
+        : document.getElementById('add-inquiry-button');
+      window.requestAnimationFrame(() => returnTarget?.focus());
     };
   }, [onClose]);
 
