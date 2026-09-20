@@ -47,16 +47,18 @@ Current validation status for the Add Inquiry drawer:
 - Backend and frontend tests: passed
 - Vercel routing regression test: passed
 - Production build: passed
-- Browser verification: required on the new branch preview after push
+- Deployed desktop browser verification: passed on the branch preview
+- Keyboard verification: initial focus, Escape close, and trigger focus restoration passed
+- Browser console check: no warnings or errors
+- Responsive implementation: one-column form, full-width actions, scrollable full-height drawer, and mobile spacing are covered by the existing 640px breakpoint; a physical-device check remains appropriate before a clinic pilot
 
 Next intended sequence:
 
-1. Complete browser verification of the Add Inquiry drawer on desktop, tablet, and mobile.
-2. Push the verified branch update and allow pull request #6 checks to run.
-3. Run the fake-data clinic validation protocol in `docs/CLINIC_VALIDATION_PLAYBOOK.md`.
-4. Record the clinic's Go / Revise / Stop outcome and exact workflow feedback.
-5. Offer the controlled 30-day paid pilot only if workflow fit is demonstrated.
-6. Keep real patient data blocked until authentication, privacy, access, backup, retention, and hosting requirements in `docs/REAL_DATA_READINESS.md` are satisfied.
+1. Perform a final physical tablet/mobile check of the Add Inquiry drawer before a clinic pilot.
+2. Run the fake-data clinic validation protocol in `docs/CLINIC_VALIDATION_PLAYBOOK.md`.
+3. Record the clinic's Go / Revise / Stop outcome and exact workflow feedback.
+4. Offer the controlled 30-day paid pilot only if workflow fit is demonstrated.
+5. Keep real patient data blocked until authentication, privacy, access, backup, retention, and hosting requirements in `docs/REAL_DATA_READINESS.md` are satisfied.
 
 ## Core Positioning
 
