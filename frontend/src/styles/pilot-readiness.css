@@ -1,0 +1,90 @@
+/* Pilot-readiness UX refinements from September 2026 validation.
+   Loaded after global.css so these changes stay isolated and reversible. */
+
+/* Daniel's review identified low-contrast secondary text. Keep secondary copy
+   visibly secondary without making it difficult to read. */
+.brand span,
+.topbar p,
+.section-heading p,
+.panel-heading p,
+td span,
+.kpi-card small,
+.command-panel p,
+.mini-metric span,
+.empty-inline,
+.form-section-label span,
+.input-with-suffix span,
+.public-footnote {
+  color: #4b596b;
+}
+
+.sidebar .brand span {
+  color: #c7d2dd;
+}
+
+.product-positioning {
+  max-width: 760px;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+.sidebar nav {
+  display: grid;
+  gap: 20px;
+}
+
+.nav-group {
+  display: grid;
+  gap: 6px;
+}
+
+.nav-group-label {
+  color: #9fb0c1;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  padding: 0 12px 4px;
+  text-transform: uppercase;
+}
+
+.secondary-nav {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 18px;
+}
+
+.sidebar-actions {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: grid;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.nav-button.active {
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 3px 0 0 #38a169;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.nav-button:focus-visible,
+.ghost-button:focus-visible,
+.primary-button:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #72d49c;
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .sidebar nav {
+    gap: 12px;
+  }
+
+  .nav-group-label {
+    padding-left: 8px;
+  }
+}

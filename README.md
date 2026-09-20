@@ -228,6 +228,23 @@ More details:
 - `docs/PRODUCTION_DEPLOYMENT.md`
 - `docs/WORKFLOW_AUTOMATION.md`
 - `docs/INTAKE_EMBED_SNIPPETS.md`
+- `docs/PILOT_READINESS.md`
+- `docs/PRODUCT_DIFFERENTIATION.md`
+- `docs/CLINIC_VALIDATION_PLAYBOOK.md`
+- `docs/DATA_SYNC_ARCHITECTURE.md`
+- `docs/SCHEDULE_INTELLIGENCE_HYPOTHESIS.md`
+- `docs/REACTIVATION_POLICY.md`
+- `docs/ICP_HYPOTHESIS.md`
+- `docs/PRICING_HYPOTHESIS.md`
+- `docs/PAID_PILOT_OFFER.md`
+- `docs/PILOT_FAQ.md`
+- `docs/CLINIC_ONBOARDING.md`
+- `docs/PILOT_SUCCESS_SCORECARD.md`
+- `docs/REAL_DATA_READINESS.md`
+- `docs/SALES_PROCESS.md`
+- `docs/DEMO_DISCOVERY_SCRIPT.md`
+- `docs/PRODUCT_ANALYTICS.md`
+- `docs/VALIDATION_SYSTEM.md`
 - `docs/CSV_IMPORT_EXAMPLE.csv`
 - `docs/METASOFT_REACTIVATION_DEMO.csv`
 - `docs/NEW_PATIENT_IMPORT_DEMO.csv`
@@ -338,6 +355,12 @@ validation error.
 ## Scope
 
 This app intentionally does not include payments, EHR features, insurance workflows, appointment scheduling, or AI patient replies. Optional staff access protection is available, but the product remains focused on inquiry capture, follow-up and reactivation visibility, lightweight reporting, and demo-ready automation.
+
+## Controlled Paid Pilot
+
+CBOS is ready to be offered as a controlled 30-day paid pilot using fake data. The current pricing hypothesis is `$100` for the pilot and `$99/month` if the practice chooses to continue. These prices are validation hypotheses, not proven market pricing.
+
+Real patient data remains blocked. CBOS does not claim HIPAA compliance, and no real patient data or PHI should be used until the legal/compliance and technical gate in `docs/REAL_DATA_READINESS.md` is independently completed. Start with `docs/PILOT_READINESS.md` for the full readiness decision and evidence still required.
 
 ## Clinic Workflow Boundary
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Panel } from '../components/Panel';
+import { InquiryForm } from '../components/InquiryForm';
 import { StatusChip } from '../components/StatusChip';
 import { api } from '../services/api';
 import type {
@@ -48,27 +49,6 @@ const PAGE_SIZE = 25;
 /** Delay before a keystroke turns into a request. */
 const SEARCH_DEBOUNCE_MS = 300;
 
-const emptyForm = (config: AppConfig | null): InquiryFormState => ({
-  name: '',
-  phone: '',
-  email: '',
-  service_needed: config?.services[0] || 'Spinal Adjustment',
-  activity_context: '',
-  source: 'Google',
-  status: 'New Inquiry',
-  estimated_value: 200,
-  notes: '',
-  next_follow_up_date: todayIso(),
-  appointment_status: 'Not Scheduled',
-  patient_type: 'New Patient',
-  appointment_request: '',
-  offer_type: 'None',
-  last_visit_date: '',
-  expected_visit_frequency_days: null,
-  assigned_follow_up_owner: '',
-  follow_up_outcome: 'Not Contacted',
-});
-
 const formFromInquiry = (inquiry: Inquiry): InquiryFormState => ({
   name: inquiry.name,
   phone: inquiry.phone,
@@ -108,7 +88,6 @@ function needsAttention(inquiry: Inquiry) {
 }
 
 export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProps) {
-  const [form, setForm] = useState<InquiryFormState>(() => emptyForm(config));
   const [selectedId, setSelectedId] = useState('');
   const [detailForm, setDetailForm] = useState<InquiryFormState | null>(null);
   const [search, setSearch] = useState('');
@@ -190,19 +169,6 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
     await onChanged(message);
   }
 
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    setError('');
-    try {
-      const created = await api.createInquiry(form);
-      setSelectedId(created.id);
-      setForm(emptyForm(config));
-      await reloadList('Patient inquiry added.');
-    } catch (nextError) {
-      setError((nextError as Error).message);
-    }
-  }
-
   async function saveDetails(event: FormEvent) {
     event.preventDefault();
     if (!selectedInquiry || !detailForm) return;
@@ -267,186 +233,20 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
       </div>
 
       <Panel title="Add Patient Inquiry" description="Use this for phone calls, walk-ins, or staff-entered inquiries.">
-        <form className="inquiry-form" onSubmit={submit}>
-          <label>
-            Patient Name
-            <input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
-          </label>
-          <label>
-            Phone
-            <input value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} required />
-          </label>
-          <label>
-            Email
-            <input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required />
-          </label>
-          <label>
-            Requested Service
-            <input
-              value={form.service_needed}
-              onChange={(event) => setForm({ ...form, service_needed: event.target.value })}
-              list="services"
-              required
-            />
-            <datalist id="services">
-              {config?.services.map((service) => <option value={service} key={service} />)}
-            </datalist>
-          </label>
-          <label className="full">
-            Activity / Movement Context
-            <input
-              value={form.activity_context}
-              onChange={(event) => setForm({ ...form, activity_context: event.target.value })}
-              placeholder="Example: Athlete; runner; return-to-sport goal"
-              maxLength={500}
-            />
-          </label>
-          <label>
-            Inquiry Source
-            <select value={form.source} onChange={(event) => setForm({ ...form, source: event.target.value as InquirySource })}>
-              {config?.sources.map((source) => <option key={source}>{source}</option>)}
-            </select>
-          </label>
-          <label>
-            Status
-            <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as InquiryStatus })}>
-              {config?.statuses.map((status) => <option key={status}>{status}</option>)}
-            </select>
-          </label>
-          <label>
-            Estimated Treatment Value
-            <input
-              type="number"
-              min="0"
-              value={form.estimated_value}
-              onChange={(event) => setForm({ ...form, estimated_value: Number(event.target.value) })}
-            />
-          </label>
-          <label>
-            Next Follow-Up
-            <input
-              type="date"
-              value={form.next_follow_up_date}
-              onChange={(event) => setForm({ ...form, next_follow_up_date: event.target.value })}
-            />
-          </label>
-          <div className="form-section-label full">
-            <strong>Clinic Workflow</strong>
-            <span>Optional details used for appointment tracking and patient reactivation.</span>
-          </div>
-          <label>
-            Patient Type
-            <select
-              value={form.patient_type}
-              onChange={(event) =>
-                setForm({ ...form, patient_type: event.target.value as PatientType })
-              }
-            >
-              {(config?.patientTypes || ['New Patient']).map((patientType) => (
-                <option key={patientType}>{patientType}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Appointment Status
-            <select
-              value={form.appointment_status}
-              onChange={(event) =>
-                setForm({
-                  ...form,
-                  appointment_status: event.target.value as AppointmentStatus,
-                })
-              }
-            >
-              {(config?.appointmentStatuses || ['Not Scheduled']).map((appointmentStatus) => (
-                <option key={appointmentStatus}>{appointmentStatus}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Requested Appointment
-            <input
-              value={form.appointment_request}
-              onChange={(event) =>
-                setForm({ ...form, appointment_request: event.target.value })
-              }
-              placeholder="Example: Friday around 10 AM"
-            />
-          </label>
-          <label>
-            Offer Type
-            <select
-              value={form.offer_type}
-              onChange={(event) =>
-                setForm({ ...form, offer_type: event.target.value as OfferType })
-              }
-            >
-              {(config?.offerTypes || ['None']).map((offerType) => (
-                <option key={offerType}>{offerType}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Last Visit Date
-            <input
-              type="date"
-              value={form.last_visit_date}
-              onChange={(event) => setForm({ ...form, last_visit_date: event.target.value })}
-            />
-          </label>
-          <label>
-            Expected Visit Frequency
-            <div className="input-with-suffix">
-              <input
-                min="1"
-                type="number"
-                value={form.expected_visit_frequency_days || ''}
-                onChange={(event) =>
-                  setForm({
-                    ...form,
-                    expected_visit_frequency_days: event.target.value
-                      ? Number(event.target.value)
-                      : null,
-                  })
-                }
-              />
-              <span>days</span>
-            </div>
-          </label>
-          <label>
-            Follow-Up Owner
-            <input
-              value={form.assigned_follow_up_owner}
-              onChange={(event) =>
-                setForm({ ...form, assigned_follow_up_owner: event.target.value })
-              }
-              placeholder="Front Desk, Doctor, or staff name"
-            />
-          </label>
-          <label>
-            Follow-Up Outcome
-            <select
-              value={form.follow_up_outcome}
-              onChange={(event) =>
-                setForm({
-                  ...form,
-                  follow_up_outcome: event.target.value as FollowUpOutcome,
-                })
-              }
-            >
-              {(config?.followUpOutcomes || ['Not Contacted']).map((outcome) => (
-                <option key={outcome}>{outcome}</option>
-              ))}
-            </select>
-          </label>
-          <label className="full">
-            Notes
-            <textarea value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} />
-          </label>
-          <button className="primary-button full" type="submit">
-            Add Inquiry
-          </button>
-        </form>
+        <InquiryForm
+          config={config}
+          onSubmit={async (form) => {
+            setError('');
+            try {
+              const created = await api.createInquiry(form);
+              setSelectedId(created.id);
+              await reloadList('Patient inquiry added.');
+            } catch (nextError) {
+              setError((nextError as Error).message);
+              throw nextError;
+            }
+          }}
+        />
       </Panel>
 
       <Panel title="Find Patient Inquiry" description="Search or filter before opening the inquiry details.">

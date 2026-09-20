@@ -128,6 +128,18 @@ gh pr checks 1
 
 ## Clinic Validation
 
+Start with the controlled validation and pilot-readiness decisions:
+
+```bash
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
+sed -n '1,260p' docs/PILOT_READINESS.md
+sed -n '1,260p' docs/CLINIC_VALIDATION_PLAYBOOK.md
+sed -n '1,220p' docs/PAID_PILOT_OFFER.md
+sed -n '1,220p' docs/REAL_DATA_READINESS.md
+```
+
+CBOS may be offered as a `$100`, 30-day controlled paid pilot using fake data. Do not use real patient data or claim HIPAA compliance. External outreach, payment, and clinic participation remain Tobi-controlled actions.
+
 Review the production walkthrough, decision measures, and ready-to-send invite:
 
 ```bash
@@ -227,10 +239,11 @@ Do not pull `MONGODB_URI` into a tracked file. If the Atlas credential is expose
 ```text
 Read AGENTS.md, PROJECT_STATUS.md, and CONTINUE_COMMANDS.md in
 /Users/tobiloba202/Developer/New project/business_os_mvp.
-Continue from the production-proven CBOS state.
+Continue from the pilot-readiness branch and read docs/PILOT_READINESS.md first.
 Do not repeat the completed reactivation prototype.
 Uncommitted Dr. McIntyre Canva collateral is preserved in a Git stash named preserve-dr-mcintyre-canva-assets-before-cbos-deploy.
 Pull Request #1 is merged and production proof is complete. The measured clinic-validation invite was sent June 29. The thread was reconciled July 13 and a concise threaded follow-up draft exists in Gmail but is unsent. The validation lane is active again for preparation and review, but external send remains manual. Review the existing draft; do not recreate it or resend the invite automatically. When accepted, run the measured 20-minute fake-data walkthrough in docs/DEMO_WALKTHROUGH.md and record the clinic's workflow evidence and Go / Revise / Stop decision. Use private tracking for contact identifiers.
 The internal 2026-09-08 fake-data rehearsal is recorded in docs/VALIDATION_RUNS.md as Go to manual client follow-up and a real fake-data validation call. Do not treat that as a customer paid-pilot approval; the customer-level Go / Revise / Stop remains pending.
+The controlled offer is documented as a $100, 30-day founding clinic pilot using fake data. Real patient data remains blocked by docs/REAL_DATA_READINESS.md, and no HIPAA compliance claim is authorized.
 Before ending, update the root continuity files, TOBI_OS state, portfolio pipeline, and resume system.
 ```

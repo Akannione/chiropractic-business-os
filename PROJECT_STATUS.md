@@ -14,11 +14,11 @@ Pull Request #1 was merged into `main` at commit `b46add8`, so the public source
 
 ## Last Completed Task
 
-2026-09-15: Committed and pushed the CBOS reliability audit/fix set. Production smoke checks confirmed `/api/health` returns 200, `/api/config` exposes `practiceTimeZone:"America/New_York"`, `/api/reactivations` returns 401 without a staff token, and `/api/webhooks/inquiries` returns 404 until `WEBHOOK_SECRET` is configured.
+2026-09-18: Completed the CBOS pilot-readiness system on `chatgpt/pilot-readiness`: action-first UX refinements plus controlled validation, differentiation, data-sync, reactivation, ICP, pricing, pilot offer, onboarding, success, real-data, sales, analytics, and feedback-loop documentation.
 
 ## Current Task
 
-Reliability audit complete and pushed to `main`. Tobi controls whether to configure `WEBHOOK_SECRET` in production and when to resume external clinic follow-up.
+Pilot-readiness package verified. Commit and push the final documentation set, then run a Tobi-controlled fake-data clinic validation session; real patient data remains blocked.
 
 ## Validation Resume Gate
 
@@ -26,13 +26,13 @@ Outreach was paused on 2026-08-11. Tobi asked on 2026-09-07 what it looks like t
 
 ## Next Actions
 
-1. Configure production `WEBHOOK_SECRET` before using machine webhook intake: https://github.com/Akannione/chiropractic-business-os/issues/2
-2. Validate EHR/export sync with a de-identified clinic export before building upsert/sync: https://github.com/Akannione/chiropractic-business-os/issues/3
-3. Validate Schedule Intelligence before building calendar features: https://github.com/Akannione/chiropractic-business-os/issues/4
-4. Decide reactivation queue behavior after follow-up outcomes: https://github.com/Akannione/chiropractic-business-os/issues/5
-5. Keep `PRACTICE_TIME_ZONE` explicit for each clinic deployment.
-6. Tobi reviews the existing threaded Gmail follow-up draft and decides whether to send, edit, or hold it.
-7. When accepted, run the 20-minute fake-data walkthrough and record the clinic's Go / Revise / Stop decision.
+1. Run the clinic protocol in `docs/CLINIC_VALIDATION_PLAYBOOK.md` with fake data and record the result in `docs/VALIDATION_RUNS.md`.
+2. Decide reactivation queue behavior after follow-up outcomes: https://github.com/Akannione/chiropractic-business-os/issues/3
+3. Validate EHR/export sync with an approved de-identified clinic export before building sync: https://github.com/Akannione/chiropractic-business-os/issues/4
+4. Validate Schedule Intelligence before building calendar features: https://github.com/Akannione/chiropractic-business-os/issues/5
+5. Configure production `WEBHOOK_SECRET` before using machine webhook intake: https://github.com/Akannione/chiropractic-business-os/issues/2
+6. Keep `PRACTICE_TIME_ZONE` explicit for each clinic deployment.
+7. Tobi controls any real outreach send and decides whether to present the `$100`, 30-day pilot.
 
 ## Completed This Cycle
 
@@ -48,6 +48,8 @@ Outreach was paused on 2026-08-11. Tobi asked on 2026-09-07 what it looks like t
 * 2026-09-15: Audited the full backend and frontend codebase. Fixed the confirmed reliability/security/data-integrity issues documented in `docs/CBOS_AUDIT_2026-09-15.md`, added lightweight frontend tests, and kept CBOS positioned as an operational action layer rather than an EHR.
 * 2026-09-15: Pushed commits `91bc657` and `57604db` to GitHub. Production smoke checks showed the audit code is live enough to expose `practiceTimeZone` and disable unconfigured machine webhook intake.
 * 2026-09-15: Created GitHub issues #2-#5 for the next validation and production-readiness decisions: webhook secret setup, EHR/export sync validation, Schedule Intelligence validation, and reactivation queue outcome behavior.
+* 2026-09-18: Reframed the first-screen experience around work needing attention and documented the Daniel UX review without expanding into clinical records, prescriptions, care plans, or scheduling.
+* 2026-09-18: Created `docs/PILOT_READINESS.md` and the complete supporting pilot-validation package. The decision is Go for a controlled paid fake-data pilot; real patient data remains a RED gate.
 
 ## Known Issues And Blockers
 
@@ -55,7 +57,7 @@ Outreach was paused on 2026-08-11. Tobi asked on 2026-09-07 what it looks like t
 * Atlas permits public network access for Vercel's dynamic demo egress; the strong unique database credential limits access, but paid deployment should use stricter infrastructure.
 * Resolved on August 11, 2026: the recurring duplicate `@types` folders were caused by iCloud Desktop and Documents sync, which was syncing the repository including `node_modules`, `.git`, and `.mongo-data`. Its file provider raced with the atomic file replacement that npm, git, and Vite all rely on, and materialised the losing copy as `react 2`, `react 3`, and so on. The same mechanism produced stale `.git/index` copies. The workspace now lives at `/Users/tobiloba202/Developer/New project`, outside any synced location, and `brctl status` no longer tracks it. `npm ci --prefix frontend` remains the repair if duplicates are ever seen again.
 * Client outreach and real-data use remain manual gates; see the Validation Resume Gate above.
-* Production now requires a staff password. Anyone demonstrating the app needs it, and it is stored only in Vercel and Tobi's password manager. There is no recovery path other than setting a new one.
+* Staff password authentication is temporarily disabled for fake-data demonstrations because `ADMIN_PASSWORD` was removed from the production API environment. Do not use real patient data until access controls are restored and real-data readiness is approved.
 * Machine webhook intake now requires `WEBHOOK_SECRET`; production webhook intake should be treated as disabled until that secret is configured securely.
 
 ## Reusable Lessons
@@ -81,9 +83,11 @@ Rather than a file list that goes stale between cycles, the durable references:
 
 ## Current Branch
 
-`main`
+`chatgpt/pilot-readiness`
 
 ## Verification Status
+
+Pilot-readiness verification on September 18, 2026: `npm run typecheck`, `npm run test`, `npm run build`, `npm run test:db`, `npm audit --prefix frontend --audit-level=high`, `npm audit --prefix backend --audit-level=moderate`, and `git diff --check` all passed after the final documentation and continuity updates. Both audits reported zero vulnerabilities.
 
 Passed again on July 1, 2026 after the governed analytics documentation update:
 

@@ -1,6 +1,6 @@
 # CBOS ChatGPT Project Context
 
-Last updated: September 15, 2026
+Last updated: September 19, 2026
 
 Use this file as the starting context for managing CBOS in a new ChatGPT project.
 
@@ -25,7 +25,40 @@ Current production demo:
 - API health: https://cbos-api.vercel.app/api/health
 - Public intake form path: `/intake`
 
-As of the latest check, the production frontend returns HTTP 200, API health returns HTTP 200, and staff authentication is enabled.
+As of the latest check, the production frontend and API health endpoint return HTTP 200. Staff password authentication is temporarily disabled for fake-data demonstrations; do not enter real patient data while access is open.
+
+## September 19, 2026 Current State
+
+The active delivery branch is `chatgpt/pilot-readiness`, with pull request #6 open against `main`. The latest completed work on this branch includes:
+
+- Repaired Vercel preview API routing so frontend previews use same-origin `/api` requests.
+- Verified the preview health, authentication status, configuration, KPI, inquiry, and reactivation routes.
+- Temporarily removed the production `ADMIN_PASSWORD` environment variable at the user's request, which disables the staff login gate for demonstrations.
+- Kept `AUTH_TOKEN_SECRET` and MongoDB configuration separate; no credentials belong in source control or this context file.
+- Implemented an action-first Today dashboard, grouped navigation, a simple pipeline, inquiry details, improved public intake, CSV import preview, Owner Review, responsive styling, status chips, and empty states.
+- Implemented a responsive Add Patient Inquiry drawer. The header action now opens the existing inquiry form over the current screen, preserves context, supports Escape and keyboard focus trapping, restores focus after closing, closes after successful submission, and refreshes dashboard/inquiry data immediately. The full Patient Inquiries page remains available and uses the same reusable form, validation, and API.
+- Added focused frontend tests for inquiry form defaults and drawer focus wrapping.
+
+Current product boundary remains unchanged: CBOS is an operational inquiry, follow-up, reactivation, and owner-visibility layer. It is not an EHR, clinical record, billing, insurance, or appointment scheduling system.
+
+Current validation status for the Add Inquiry drawer:
+
+- TypeScript typecheck: passed
+- Backend and frontend tests: passed
+- Vercel routing regression test: passed
+- Production build: passed
+- Deployed desktop browser verification: passed on the branch preview
+- Keyboard verification: initial focus, Escape close, and trigger focus restoration passed
+- Browser console check: no warnings or errors
+- Responsive implementation: one-column form, full-width actions, scrollable full-height drawer, and mobile spacing are covered by the existing 640px breakpoint; a physical-device check remains appropriate before a clinic pilot
+
+Next intended sequence:
+
+1. Perform a final physical tablet/mobile check of the Add Inquiry drawer before a clinic pilot.
+2. Run the fake-data clinic validation protocol in `docs/CLINIC_VALIDATION_PLAYBOOK.md`.
+3. Record the clinic's Go / Revise / Stop outcome and exact workflow feedback.
+4. Offer the controlled 30-day paid pilot only if workflow fit is demonstrated.
+5. Keep real patient data blocked until authentication, privacy, access, backup, retention, and hosting requirements in `docs/REAL_DATA_READINESS.md` are satisfied.
 
 ## Core Positioning
 
@@ -1012,15 +1045,17 @@ Then the product has to stay simple. That is why CBOS focuses on daily follow-up
 
 ## Open Questions For Tobi
 
-Answer these before the next serious sales push:
+The September 18 pilot-readiness phase converted the main unresolved assumptions into controlled experiments:
 
-1. Is CBOS being sold as a one-time setup, monthly service, or both?
-2. What is the smallest paid pilot offer you are comfortable presenting?
-3. Should the first pilot include only fake data, or a small approved CSV sample?
-4. Who is the ideal first buyer: solo chiropractor, small practice owner, or front-office manager?
-5. Do you want to rebuild a lightweight marketing website, or keep the repo focused only on the app?
-6. Should the old sales / PROJECT_OS folders stay out of the cleaned repo, or be recreated in a separate private operations repo?
-7. What privacy/security commitments will you make before importing real patient data?
+1. Pricing hypothesis: `$100` for a 30-day paid pilot, with `$99/month` as the continuation hypothesis.
+2. Pilot data mode: fake data by default. Approved de-identified data only after manual review. Real patient data remains blocked.
+3. ICP hypothesis: solo or small practices with 1-3 providers, a named workflow owner, inconsistent follow-up/reactivation, and an exportable data path.
+4. Reactivation behavior: keep current queue membership unchanged until two clinics agree or a paid pilot owner selects the post-outcome rule.
+5. Schedule Intelligence: validate a read-only operational signal with two clinics before building; do not build a scheduler.
+6. Data sync: inspect a de-identified export and prove stable identity, field authority, diff, and conflict behavior before implementing recurring sync.
+7. Analytics: use the manual pilot scorecard first; do not add patient-level third-party telemetry.
+
+These are hypotheses, not customer validation. See `docs/PILOT_READINESS.md` and `docs/VALIDATION_SYSTEM.md`.
 
 ## Suggested ChatGPT Project Instructions
 
@@ -1105,12 +1140,12 @@ Current competition positioning:
 - Compared with scheduling tools: CBOS tracks opportunities before and after booking, not just calendar events.
 
 Current next steps:
-1. Configure `WEBHOOK_SECRET` before using machine webhook intake in production.
-2. Run a real fake-data clinic validation call.
-3. Demonstrate the Today dashboard, public intake, patient pipeline, reactivation list, weekly owner review, and CSV import/export.
-4. Ask whether the workflow matches how the clinic actually operates.
-5. Validate EHR/export sync and Schedule Intelligence with de-identified exports or more clinic feedback before building.
-6. Prepare a small paid pilot offer if the clinic sees value.
+1. Run the task-based fake-data clinic protocol in `docs/CLINIC_VALIDATION_PLAYBOOK.md`.
+2. Record the exact 30-second product description and Go / Revise / Stop result.
+3. If fit is demonstrated, offer the `$100`, 30-day controlled paid pilot in `docs/PAID_PILOT_OFFER.md`.
+4. Keep real patient data blocked under `docs/REAL_DATA_READINESS.md`.
+5. Validate post-contact reactivation rules, a de-identified export, and Schedule Intelligence before changing those behaviors.
+6. Configure `WEBHOOK_SECRET` before using machine webhook intake in production.
 
 Operating rules:
 - Do not overbuild.
