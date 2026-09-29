@@ -18,7 +18,7 @@ Pull Request #1 was merged into `main` at commit `b46add8`, so the public source
 
 ## Current Task
 
-Build and validate the bounded CBOS Intelligence Foundation v1 on `chatgpt/intelligence-foundation-v1` without disturbing PR #6. The implementation recognizes multiple operational CSV report families, surfaces a small set of evidence-backed review signals, and includes a synthetic demo. Real patient data remains blocked.
+Local implementation and validation of the bounded CBOS Intelligence Foundation v1 are complete on `chatgpt/intelligence-foundation-v1`. The next unresolved work is clinic-owner validation of the synthetic Review -> Intelligence workflow. Real patient data, client outreach, production merge, and deployment remain blocked behind their existing manual gates.
 
 ## Validation Resume Gate
 
@@ -83,7 +83,7 @@ Rather than a file list that goes stale between cycles, the durable references:
 
 ## Current Branch
 
-`chatgpt/pilot-readiness`
+`chatgpt/intelligence-foundation-v1`
 
 ## Verification Status
 
