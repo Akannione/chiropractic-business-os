@@ -208,3 +208,241 @@ textarea:focus-visible {
     width: 100%;
   }
 }
+
+
+/* Intelligence UX refinement — Figma-informed progressive disclosure. */
+.intelligence-preview-badge {
+  align-items: center;
+  background: #eaf4fb;
+  border-radius: 999px;
+  color: #1f5d88;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 800;
+  gap: 6px;
+  letter-spacing: .04em;
+  padding: 8px 10px;
+  text-transform: uppercase;
+}
+
+.intelligence-start-card {
+  align-items: stretch;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.intelligence-start-copy {
+  align-items: flex-start;
+  display: flex;
+  gap: 14px;
+  max-width: 720px;
+}
+
+.intelligence-start-copy h3,
+.intelligence-start-copy p {
+  margin-top: 0;
+}
+
+.intelligence-start-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.intelligence-steps {
+  display: grid;
+  gap: 8px;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+}
+
+.intelligence-steps > div {
+  align-items: center;
+  background: #f4f7fa;
+  border-radius: 10px;
+  color: #526173;
+  display: flex;
+  font-size: 12px;
+  font-weight: 700;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.intelligence-steps b {
+  align-items: center;
+  background: #fff;
+  border-radius: 999px;
+  color: #1f5d88;
+  display: inline-flex;
+  height: 24px;
+  justify-content: center;
+  width: 24px;
+}
+
+.intelligence-results-layout {
+  align-items: start;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, .8fr);
+}
+
+.intelligence-report-list,
+.intelligence-signal-list {
+  display: grid;
+  gap: 10px;
+}
+
+.intelligence-report-row {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e0e6ec;
+  border-left: 4px solid #38a169;
+  border-radius: 11px;
+  display: grid;
+  gap: 10px 14px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 13px 14px;
+}
+
+.intelligence-report-row.unknown {
+  border-left-color: #d69e2e;
+}
+
+.intelligence-report-name {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.intelligence-report-name strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.intelligence-report-name small,
+.intelligence-report-row details {
+  color: #526173;
+}
+
+.intelligence-report-row details {
+  grid-column: 1 / -1;
+  font-size: 12px;
+}
+
+.intelligence-report-row summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.intelligence-match-chip {
+  align-items: center;
+  background: #eaf8f0;
+  border-radius: 999px;
+  color: #287a4b;
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 800;
+  gap: 5px;
+  padding: 7px 9px;
+}
+
+.intelligence-report-row.unknown .intelligence-match-chip {
+  background: #fff7df;
+  color: #996515;
+}
+
+.intelligence-attention-panel {
+  position: sticky;
+  top: 20px;
+}
+
+.intelligence-signal-card {
+  background: #fff8e8;
+  border: 0;
+  border-left: 4px solid #d69e2e;
+  border-radius: 11px;
+  padding: 14px;
+}
+
+.intelligence-signal-card.info {
+  background: #edf8f2;
+  border-left-color: #38a169;
+}
+
+.intelligence-signal-card > span {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.intelligence-signal-card > strong {
+  font-size: 13px;
+}
+
+.intelligence-signal-card b {
+  display: block;
+  font-size: 24px;
+  margin: 2px 0;
+}
+
+.intelligence-signal-card p {
+  color: #526173;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.intelligence-safety-note {
+  align-items: flex-start;
+  display: flex;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .intelligence-start-card,
+  .intelligence-results-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .intelligence-start-actions {
+    justify-content: flex-start;
+  }
+
+  .intelligence-attention-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .intelligence-preview-badge {
+    align-self: flex-start;
+  }
+
+  .intelligence-start-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .intelligence-start-actions > *,
+  .intelligence-file-label {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .intelligence-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .intelligence-report-row {
+    grid-template-columns: 1fr;
+  }
+
+  .intelligence-report-row details {
+    grid-column: 1;
+  }
+
+  .intelligence-match-chip {
+    justify-self: start;
+  }
+}
