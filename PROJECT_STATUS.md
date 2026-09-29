@@ -35,7 +35,7 @@ Outreach was paused on 2026-08-11. Tobi asked on 2026-09-07 what it looks like t
 
 ## Completed This Cycle
 
-* 2026-09-29: Built the bounded Intelligence Foundation v1 on a separate branch: multi-file CSV report recognition, supported operational signals, synthetic demo, Review -> Intelligence workspace, and regression tests. No source-system writeback or real-data path was added.
+* 2026-09-29: Built the bounded Intelligence Foundation v1 on a separate branch: multi-file CSV report recognition, semantic evidence mapping, repeated-row detection, supported operational signals, a nine-report synthetic demo, Review -> Intelligence workspace, connector architecture, and regression tests. No source-system writeback or real-data path was added.
 * 2026-08-11: Moved the workspace out of iCloud, which was the cause of the recurring duplicate `@types` folders and stale `.git/index` copies.
 * 2026-08-11 to 08-14: Indexed both collections, narrowed every read path, moved the KPI calculation into an aggregation with a parity check, paginated and filtered the inquiry list in the database, and replaced the row-by-row CSV import with a bulk write.
 * 2026-08-14: Hardened authentication, seeding, and rate limiting. See `docs/SECURITY.md`.

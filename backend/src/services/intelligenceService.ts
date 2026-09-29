@@ -2,6 +2,7 @@ import { parseInquiryCsv } from './importService.js';
 
 export type IntelligenceReportType =
   | 'appointments'
+  | 'adjustments'
   | 'patient-list'
   | 'provider-hours'
   | 'referral-sources'
@@ -25,6 +26,12 @@ type ReportRule = {
 };
 
 const reportRules: ReportRule[] = [
+  {
+    type: 'adjustments',
+    label: 'Adjustments',
+    filenameHints: ['adjustment'],
+    headerGroups: [['adjustment', 'reason'], ['amount', 'value'], ['date']],
+  },
   {
     type: 'appointments',
     label: 'Appointments',
@@ -137,6 +144,14 @@ function classifyFile(file: IntelligenceFileInput) {
   const best = candidates[0];
   const recognized = Boolean(best && best.score >= 4 && best.matchedGroups >= 1);
   const confidence = recognized ? Math.min(0.99, 0.45 + best.score * 0.07) : 0;
+  const fingerprints = rows.map((row) =>
+    JSON.stringify(Object.entries(row).map(([key, value]) => [normalize(key), normalize(String(value || ''))])),
+  );
+  const duplicateRows = fingerprints.length - new Set(fingerprints).size;
+  const semanticClues = ['patient', 'date', 'status', 'provider', 'source', 'amount', 'balance', 'hours', 'referral'];
+  const mappedEvidence = semanticClues.filter((clue) =>
+    headers.some((header) => headerMatches(header, clue)),
+  );
 
   return {
     fileName: file.name,
@@ -145,9 +160,15 @@ function classifyFile(file: IntelligenceFileInput) {
     confidence: Math.round(confidence * 100),
     recognized,
     rowCount: rows.length,
+    duplicateRows,
     headers,
+    mappedEvidence,
+    evidenceCoverage: recognized ? `${best.matchedGroups}/${best.rule.headerGroups.length}` : '0/0',
     rows,
-    warnings: rows.length ? [] as string[] : ['No data rows were found.'],
+    warnings: [
+      ...(rows.length ? [] : ['No data rows were found.']),
+      ...(duplicateRows ? [`${duplicateRows} repeated row${duplicateRows === 1 ? '' : 's'} detected.`] : []),
+    ] as string[],
   };
 }
 

@@ -34,7 +34,7 @@ A focused full-stack web app for chiropractic practices to capture patient inqui
 
 CBOS now includes a bounded **Review -> Intelligence** workspace for fake-data validation. It can preview multiple CSV exports, recognize known operational report families, and surface a small set of review signals when the required columns are present.
 
-This preview does not write back to an EHR, does not persist the uploaded export contents, and does not make clinical recommendations. Use synthetic or manually reviewed de-identified samples only. See `docs/INTELLIGENCE_FOUNDATION_V1.md`.
+This preview does not write back to an EHR, does not persist the uploaded export contents, and does not make clinical recommendations. Use synthetic or manually reviewed de-identified samples only. See `docs/INTELLIGENCE_FOUNDATION_V1.md` and `docs/CONNECTOR_ARCHITECTURE.md`.
 
 ## Project Structure
 

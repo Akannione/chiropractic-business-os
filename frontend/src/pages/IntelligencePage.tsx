@@ -35,7 +35,53 @@ const syntheticFiles = [
       'Dr. Sample,32,28',
     ].join('\n'),
   },
+  {
+    name: 'Referral Sources Export.csv',
+    csvText: [
+      'Referral Source,Patient Count',
+      'Google,12',
+      'Referral,8',
+      'Website,6',
+    ].join('\n'),
+  },
+  {
+    name: 'Sales Export.csv',
+    csvText: [
+      'Date,Transaction,Amount',
+      '2026-09-01,Synthetic Sale 1,240',
+      '2026-09-02,Synthetic Sale 2,180',
+    ].join('\n'),
+  },
+  {
+    name: 'Adjustments Export.csv',
+    csvText: [
+      'Date,Adjustment Reason,Amount',
+      '2026-09-03,Synthetic adjustment,-25',
+    ].join('\n'),
+  },
+  {
+    name: 'Jane Payments Payouts Report.csv',
+    csvText: [
+      'Date,Payout,Amount',
+      '2026-09-04,Synthetic payout,375',
+    ].join('\n'),
+  },
+  {
+    name: 'Packages Care Plans Export.csv',
+    csvText: [
+      'Patient,Care Plan,Remaining Visits',
+      'Demo Patient A,Wellness 12,4',
+    ].join('\n'),
+  },
+  {
+    name: 'Bank transactions export.csv',
+    csvText: [
+      'Date,Description,Amount',
+      '2026-09-05,Synthetic rent,-1200',
+    ].join('\n'),
+  },
 ];
+
 
 function displaySignalValue(signal: IntelligenceSignal) {
   if (signal.unit === 'currency') {
@@ -65,6 +111,16 @@ export function IntelligencePage({ setError }: IntelligencePageProps) {
   async function handleFiles(fileList: FileList | null) {
     if (!fileList?.length) return;
     const files = Array.from(fileList).slice(0, 12);
+    const oversized = files.find((file) => file.size > 500_000);
+    const totalBytes = files.reduce((sum, file) => sum + file.size, 0);
+    if (oversized) {
+      setError(`${oversized.name} is larger than the 500 KB preview limit.`);
+      return;
+    }
+    if (totalBytes > 900_000) {
+      setError('The selected files exceed the 900 KB combined preview limit. Analyze a smaller batch.');
+      return;
+    }
     const payload = await Promise.all(files.map(async (file) => ({
       name: file.name,
       csvText: await file.text(),
@@ -143,6 +199,10 @@ export function IntelligencePage({ setError }: IntelligencePageProps) {
                     <span>{file.recognized ? `${file.confidence}% match` : 'Needs mapping'}</span>
                   </div>
                   <small>{file.headers.slice(0, 6).join(' · ') || 'No headers detected'}</small>
+                  <small>
+                    Evidence: {file.mappedEvidence.length ? file.mappedEvidence.join(', ') : 'none'} · coverage {file.evidenceCoverage}
+                    {file.duplicateRows ? ` · ${file.duplicateRows} repeated row(s)` : ''}
+                  </small>
                   {file.warnings.map((warning) => <small key={warning}>{warning}</small>)}
                 </article>
               ))}

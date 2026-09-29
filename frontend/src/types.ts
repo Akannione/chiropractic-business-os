@@ -234,7 +234,10 @@ export type IntelligenceFileResult = {
   confidence: number;
   recognized: boolean;
   rowCount: number;
+  duplicateRows: number;
   headers: string[];
+  mappedEvidence: string[];
+  evidenceCoverage: string;
   warnings: string[];
 };
 

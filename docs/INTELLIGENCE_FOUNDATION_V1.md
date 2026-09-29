@@ -25,6 +25,7 @@ Nothing in this flow writes back to an EHR or imports the analyzed rows into CBO
 The classifier can recognize these report families when filenames and headers provide enough evidence:
 
 - Appointments
+- Adjustments
 - Patient List
 - Provider Hours
 - Referral Sources
@@ -55,9 +56,9 @@ The workspace supports:
 
 1. selecting multiple CSV files;
 2. previewing recognized report types and confidence;
-3. reviewing detected headers and row counts;
+3. reviewing detected headers, semantic evidence mapping, row counts, and repeated-row warnings;
 4. seeing supported operational signals;
-5. running a fully synthetic demonstration without uploading any file.
+5. running a nine-report synthetic demonstration without uploading any file.
 
 The synthetic demo exists so product validation can happen without real patient data.
 

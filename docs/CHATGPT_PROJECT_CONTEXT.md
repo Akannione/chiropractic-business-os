@@ -67,8 +67,8 @@ A separate development branch, `chatgpt/intelligence-foundation-v1`, now contain
 Implemented on that branch:
 
 - Review -> Intelligence workspace.
-- Multi-CSV preview with report-type recognition from filename/header evidence.
-- Known report families for appointments, patient lists, provider hours, referral sources, sales, accounts receivable, payments/payouts, packages/care plans, and bank transactions.
+- Multi-CSV preview with report-type recognition from filename/header evidence, semantic evidence mapping, and repeated-row detection.
+- Known report families for appointments, adjustments, patient lists, provider hours, referral sources, sales, accounts receivable, payments/payouts, packages/care plans, and bank transactions.
 - Unknown reports remain unmapped.
 - Evidence-backed preview signals for missed/cancelled appointments, positive accounts-receivable exposure, and provider schedule utilization when required columns exist.
 - Fully synthetic demo data built into the UI.
@@ -77,7 +77,7 @@ Implemented on that branch:
 
 This is a validation foundation, not approval to build recurring EHR sync, FHIR/HL7 integrations, a full EHR, or a production healthcare data platform. Source-specific adapters still require a manually reviewed de-identified sample and workflow evidence.
 
-See `docs/INTELLIGENCE_FOUNDATION_V1.md`.
+See `docs/INTELLIGENCE_FOUNDATION_V1.md` and `docs/CONNECTOR_ARCHITECTURE.md`.
 
 ## Core Positioning
 

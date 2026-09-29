@@ -21,7 +21,10 @@
 - Configure approved sources, services, practice timezone, and staff access.
 - Load fake data or preview the approved de-identified CSV.
 - Review duplicates, rejected rows, and field mappings before import.
-- Confirm no clinical notes, balances, insurance, diagnosis, or treatment details are present.
+- If testing Practice Intelligence, run the synthetic demo first, then preview only the manually approved de-identified export set.
+- Record which report types CBOS recognizes, which evidence columns are missing, and which signals the owner actually uses.
+- Do not persist or import intelligence-preview rows unless a separate approved workflow exists.
+- Confirm no clinical notes, balances, insurance, diagnosis, or treatment details are present in the normal inquiry import path.
 
 ## Day 3 - 30-minute staff training
 

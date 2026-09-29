@@ -705,6 +705,10 @@ function testIntelligencePreview() {
   assert.equal(result.summary.unrecognizedReports, 1);
   assert.ok(result.signals.some((signal) => signal.title.includes('Appointments needing recovery')));
   assert.ok(result.signals.some((signal) => signal.title.includes('Outstanding balance exposure')));
+  const appointmentFile = result.files.find((file) => file.fileName === 'Appointments Export.csv');
+  assert.ok(appointmentFile?.mappedEvidence.includes('status'));
+  assert.equal(appointmentFile?.evidenceCoverage, '3/3');
+  assert.equal(appointmentFile?.duplicateRows, 0);
   assert.equal(result.files.find((file) => file.fileName === 'mystery.csv')?.reportType, 'unknown');
 }
 
