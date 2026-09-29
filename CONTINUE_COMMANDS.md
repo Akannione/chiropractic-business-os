@@ -168,6 +168,29 @@ cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
 git stash apply stash@{0}
 ```
 
+## Intelligence Foundation v1
+
+Work on the separate branch:
+
+```bash
+cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
+git switch chatgpt/intelligence-foundation-v1
+npm run typecheck
+npm run test
+npm run build
+git diff --check
+```
+
+Open the local app and select **Review -> Intelligence**. Use **Run Synthetic Demo** first. Do not upload real patient data. The preview is non-persistent and does not write to an EHR.
+
+Architecture and validation notes:
+
+```bash
+sed -n '1,260p' docs/INTELLIGENCE_FOUNDATION_V1.md
+sed -n '1,220p' docs/DATA_SYNC_ARCHITECTURE.md
+sed -n '1,220p' docs/REAL_DATA_READINESS.md
+```
+
 ## Production Verification
 
 Current production endpoints:

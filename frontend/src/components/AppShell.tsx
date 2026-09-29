@@ -8,6 +8,7 @@ import {
   FileText,
   Globe2,
   LayoutDashboard,
+  Lightbulb,
   LogOut,
   Plus,
   RefreshCw,
@@ -81,6 +82,9 @@ export function AppShell({
             </NavButton>
             <NavButton icon={<BarChart3 />} active={view === 'monthly'} onClick={() => onViewChange('monthly')}>
               Monthly Report
+            </NavButton>
+            <NavButton icon={<Lightbulb />} active={view === 'intelligence'} onClick={() => onViewChange('intelligence')}>
+              Intelligence
             </NavButton>
             <NavButton icon={<Activity />} active={view === 'activity'} onClick={() => onViewChange('activity')}>
               Activity

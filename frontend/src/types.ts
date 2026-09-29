@@ -5,6 +5,7 @@ export type View =
   | 'reactivations'
   | 'summary'
   | 'monthly'
+  | 'intelligence'
   | 'activity'
   | 'duplicates'
   | 'exports'
@@ -223,4 +224,39 @@ export type DuplicateGroups = {
 export type MergeResult = {
   inquiry: Inquiry;
   movedActivities: number;
+};
+
+
+export type IntelligenceFileResult = {
+  fileName: string;
+  reportType: string;
+  reportLabel: string;
+  confidence: number;
+  recognized: boolean;
+  rowCount: number;
+  headers: string[];
+  warnings: string[];
+};
+
+export type IntelligenceSignal = {
+  key: string;
+  title: string;
+  detail: string;
+  value: number;
+  unit: 'count' | 'currency' | 'percent';
+  source: string;
+  severity: 'info' | 'attention';
+};
+
+export type IntelligencePreview = {
+  files: IntelligenceFileResult[];
+  signals: IntelligenceSignal[];
+  summary: {
+    filesReceived: number;
+    recognizedReports: number;
+    unrecognizedReports: number;
+    totalRows: number;
+    signalsFound: number;
+  };
+  boundary: string;
 };

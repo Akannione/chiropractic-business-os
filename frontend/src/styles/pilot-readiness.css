@@ -88,3 +88,123 @@ textarea:focus-visible {
     padding-left: 8px;
   }
 }
+
+
+/* Intelligence foundation: bounded multi-export preview workspace. */
+.intelligence-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.intelligence-upload {
+  align-items: center;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+}
+
+.intelligence-upload > div {
+  max-width: 720px;
+}
+
+.intelligence-file-label {
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.intelligence-file-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.intelligence-file-list span {
+  background: #eef3f8;
+  border-radius: 999px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 10px;
+}
+
+
+.intelligence-report-grid,
+.intelligence-signal-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.intelligence-report-card,
+.intelligence-signal-card {
+  border: 1px solid #d8e0e8;
+  border-radius: 14px;
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.intelligence-report-card.recognized {
+  border-left: 4px solid #38a169;
+}
+
+.intelligence-report-card.unknown {
+  border-left: 4px solid #d69e2e;
+}
+
+.intelligence-report-card > div:first-child,
+.intelligence-signal-card > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.intelligence-report-card span,
+.intelligence-signal-card span,
+.intelligence-report-card small {
+  color: #526173;
+}
+
+.intelligence-report-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.intelligence-report-meta span {
+  background: #f4f7fa;
+  border-radius: 999px;
+  font-size: 12px;
+  padding: 5px 8px;
+}
+
+
+.intelligence-signal-card.attention {
+  border-left: 4px solid #d69e2e;
+}
+
+.intelligence-signal-card.info {
+  border-left: 4px solid #3182ce;
+}
+
+.intelligence-signal-card b {
+  font-size: 24px;
+}
+
+.intelligence-signal-card p {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .intelligence-heading,
+  .intelligence-upload {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .intelligence-file-label {
+    justify-content: center;
+    width: 100%;
+  }
+}

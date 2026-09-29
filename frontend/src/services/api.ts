@@ -5,6 +5,7 @@ import {
   DuplicateGroups,
   ImportPreview,
   ImportResult,
+  IntelligencePreview,
   Inquiry,
   InquiryPage,
   InquiryQuery,
@@ -151,6 +152,11 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'text/csv' },
       body: csvText,
+    }),
+  previewIntelligence: (files: Array<{ name: string; csvText: string }>) =>
+    request<IntelligencePreview>('/intelligence/preview', {
+      method: 'POST',
+      body: JSON.stringify({ files }),
     }),
   sendDailySummary: () => request<ReminderResult>('/reminders/daily-summary', { method: 'POST' }),
   resetDemo: () => request<{ inserted: number }>('/demo/reset', { method: 'POST' }),

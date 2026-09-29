@@ -81,6 +81,29 @@ async function testCsvImportKeepsAuthHeader() {
   assertEqual(capturedHeaders.get('content-type'), 'text/csv');
 }
 
+async function testIntelligencePreviewKeepsStaffAuth() {
+  setAuthToken('staff-token');
+  let capturedHeaders = new Headers();
+  let capturedBody = '';
+
+  globalThis.fetch = (async (_input: string | URL | Request, init?: RequestInit) => {
+    capturedHeaders = new Headers(init?.headers);
+    capturedBody = String(init?.body || '');
+    return new Response(JSON.stringify({
+      files: [],
+      signals: [],
+      summary: { filesReceived: 1, recognizedReports: 0, unrecognizedReports: 1, totalRows: 1, signalsFound: 0 },
+      boundary: 'Preview only.',
+    }), { status: 200, headers: { 'content-type': 'application/json' } });
+  }) as typeof fetch;
+
+  await api.previewIntelligence([{ name: 'demo.csv', csvText: 'a,b\n1,2' }]);
+  assertEqual(capturedHeaders.get('authorization'), 'Bearer staff-token');
+  assertEqual(capturedHeaders.get('content-type'), 'application/json');
+  assertIncludes(capturedBody, /demo\.csv/);
+  clearAuthToken();
+}
+
 async function testExpiredStaffTokenClearsSession() {
   setAuthToken('expired-token');
   let unauthorized = false;
@@ -173,6 +196,7 @@ function testInquiryFormDefaults() {
 }
 
 await testCsvImportKeepsAuthHeader();
+await testIntelligencePreviewKeepsStaffAuth();
 await testExpiredStaffTokenClearsSession();
 await testPublic401DoesNotClearStaffToken();
 testPracticeTimezoneDateHelpers();

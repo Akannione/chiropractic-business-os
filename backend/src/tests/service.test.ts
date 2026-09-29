@@ -6,6 +6,7 @@ import { Inquiry } from '../models/Inquiry.js';
 import { inquiryRouter } from '../routes/inquiryRoutes.js';
 import { runReactivationSmoke } from '../scripts/reactivationSmoke.js';
 import { calculateKpis } from '../services/kpiService.js';
+import { analyzeIntelligenceFiles } from '../services/intelligenceService.js';
 import {
   mapExternalRow,
   parseInquiryCsv,
@@ -675,6 +676,38 @@ function testPracticeTimezoneDateBoundaries() {
   assert.equal(parseDateOnly('2026-02-31'), null);
 }
 
+function testIntelligencePreview() {
+  const result = analyzeIntelligenceFiles([
+    {
+      name: 'Appointments Export.csv',
+      csvText: [
+        'Patient,Appointment Date,Status,Provider',
+        'Demo A,2026-09-10,Completed,Dr. Demo',
+        'Demo B,2026-09-11,No Show,Dr. Demo',
+      ].join('\n'),
+    },
+    {
+      name: 'Accounts Receivable Export.csv',
+      csvText: [
+        'Account,Patient,Outstanding Balance,Aging Days',
+        'A-1,Demo A,0,0',
+        'A-2,Demo B,250,31',
+      ].join('\n'),
+    },
+    {
+      name: 'mystery.csv',
+      csvText: 'Alpha,Beta\nOne,Two',
+    },
+  ]);
+
+  assert.equal(result.summary.filesReceived, 3);
+  assert.equal(result.summary.recognizedReports, 2);
+  assert.equal(result.summary.unrecognizedReports, 1);
+  assert.ok(result.signals.some((signal) => signal.title.includes('Appointments needing recovery')));
+  assert.ok(result.signals.some((signal) => signal.title.includes('Outstanding balance exposure')));
+  assert.equal(result.files.find((file) => file.fileName === 'mystery.csv')?.reportType, 'unknown');
+}
+
 function testCsvFormulaInjectionMitigation() {
   const csv = toCsv([{
     name: '=HYPERLINK("https://example.com")',
@@ -774,6 +807,7 @@ async function runTests() {
   await testReactivationApiContract();
   testAuthConfigGuard();
   testPracticeTimezoneDateBoundaries();
+  testIntelligencePreview();
   testCsvFormulaInjectionMitigation();
   testWebhookAuthorization();
   testPatchValidationMatchesCreate();

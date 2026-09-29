@@ -7,6 +7,7 @@ import { getDuplicates, postMergeInquiries } from '../controllers/duplicateContr
 import { exportInquiriesCsv } from '../controllers/exportController.js';
 import { postDailySummary } from '../controllers/reminderController.js';
 import { getReactivations } from '../controllers/reactivationController.js';
+import { postIntelligencePreview } from '../controllers/intelligenceController.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { requireStaffAuth } from '../middleware/authMiddleware.js';
 import { rateLimit } from '../middleware/rateLimiter.js';
@@ -38,6 +39,7 @@ inquiryRouter.get('/inquiries', asyncHandler(getInquiries));
 inquiryRouter.get('/duplicates', asyncHandler(getDuplicates));
 inquiryRouter.post('/inquiries/:id/merge', asyncHandler(postMergeInquiries));
 inquiryRouter.get('/reactivations', asyncHandler(getReactivations));
+inquiryRouter.post('/intelligence/preview', asyncHandler(postIntelligencePreview));
 inquiryRouter.post('/inquiries', asyncHandler(postInquiry));
 inquiryRouter.patch('/inquiries/:id', asyncHandler(patchInquiry));
 inquiryRouter.get('/activities', asyncHandler(getActivities));

@@ -6,6 +6,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { DuplicatesPage } from './pages/DuplicatesPage';
 import { ExportsPage } from './pages/ExportsPage';
 import { InquiriesPage } from './pages/InquiriesPage';
+import { IntelligencePage } from './pages/IntelligencePage';
 import { LoginPage } from './pages/LoginPage';
 import { ActivityPage } from './pages/ActivityPage';
 import { MonthlySummaryPage } from './pages/MonthlySummaryPage';
@@ -146,6 +147,7 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
       )}
       {view === 'summary' && <WeeklySummaryPage summary={summary} />}
       {view === 'monthly' && <MonthlySummaryPage summary={monthlySummary} />}
+      {view === 'intelligence' && <IntelligencePage setError={setError} />}
       {view === 'activity' && <ActivityPage activities={activities} />}
       {view === 'duplicates' && (
         <DuplicatesPage onChanged={refreshWithMessage} setError={setError} />

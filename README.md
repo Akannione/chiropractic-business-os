@@ -30,6 +30,12 @@ A focused full-stack web app for chiropractic practices to capture patient inqui
 - Optionally sends internal email notifications for new automated inquiries when SMTP is configured. Bulk CSV imports do not notify.
 - Supports optional staff login when `ADMIN_PASSWORD` is configured, which also requires a real `AUTH_TOKEN_SECRET`; see `docs/SECURITY.md`
 
+### Operational Intelligence Preview
+
+CBOS now includes a bounded **Review -> Intelligence** workspace for fake-data validation. It can preview multiple CSV exports, recognize known operational report families, and surface a small set of review signals when the required columns are present.
+
+This preview does not write back to an EHR, does not persist the uploaded export contents, and does not make clinical recommendations. Use synthetic or manually reviewed de-identified samples only. See `docs/INTELLIGENCE_FOUNDATION_V1.md`.
+
 ## Project Structure
 
 ```text

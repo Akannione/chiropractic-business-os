@@ -18,7 +18,7 @@ Pull Request #1 was merged into `main` at commit `b46add8`, so the public source
 
 ## Current Task
 
-Pilot-readiness package verified. Commit and push the final documentation set, then run a Tobi-controlled fake-data clinic validation session; real patient data remains blocked.
+Build and validate the bounded CBOS Intelligence Foundation v1 on `chatgpt/intelligence-foundation-v1` without disturbing PR #6. The implementation recognizes multiple operational CSV report families, surfaces a small set of evidence-backed review signals, and includes a synthetic demo. Real patient data remains blocked.
 
 ## Validation Resume Gate
 
@@ -26,16 +26,16 @@ Outreach was paused on 2026-08-11. Tobi asked on 2026-09-07 what it looks like t
 
 ## Next Actions
 
-1. Run the clinic protocol in `docs/CLINIC_VALIDATION_PLAYBOOK.md` with fake data and record the result in `docs/VALIDATION_RUNS.md`.
-2. Decide reactivation queue behavior after follow-up outcomes: https://github.com/Akannione/chiropractic-business-os/issues/3
-3. Validate EHR/export sync with an approved de-identified clinic export before building sync: https://github.com/Akannione/chiropractic-business-os/issues/4
-4. Validate Schedule Intelligence before building calendar features: https://github.com/Akannione/chiropractic-business-os/issues/5
-5. Configure production `WEBHOOK_SECRET` before using machine webhook intake: https://github.com/Akannione/chiropractic-business-os/issues/2
-6. Keep `PRACTICE_TIME_ZONE` explicit for each clinic deployment.
-7. Tobi controls any real outreach send and decides whether to present the `$100`, 30-day pilot.
+1. Validate the new Review -> Intelligence workspace with the synthetic demo and a clinic-owner walkthrough.
+2. Capture the exact report names, columns, and calculations the clinic owner already uses manually.
+3. Inspect only a manually approved de-identified export before adding any source-specific adapter.
+4. Keep recurring sync, API/FHIR/HL7 work, EHR writeback, and real patient data out of scope until evidence supports them.
+5. Run the existing fake-data clinic protocol and record Go / Revise / Stop.
+6. Keep production merge/deploy separate from this development branch.
 
 ## Completed This Cycle
 
+* 2026-09-29: Built the bounded Intelligence Foundation v1 on a separate branch: multi-file CSV report recognition, supported operational signals, synthetic demo, Review -> Intelligence workspace, and regression tests. No source-system writeback or real-data path was added.
 * 2026-08-11: Moved the workspace out of iCloud, which was the cause of the recurring duplicate `@types` folders and stale `.git/index` copies.
 * 2026-08-11 to 08-14: Indexed both collections, narrowed every read path, moved the KPI calculation into an aggregation with a parity check, paginated and filtered the inquiry list in the database, and replaced the row-by-row CSV import with a bulk write.
 * 2026-08-14: Hardened authentication, seeding, and rate limiting. See `docs/SECURITY.md`.
