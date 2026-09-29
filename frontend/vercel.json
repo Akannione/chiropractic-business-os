@@ -6,17 +6,6 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/api/intelligence/:path*",
-      "has": [
-        {
-          "type": "header",
-          "key": "host",
-          "value": "businessosmvp-git-chatgpt-intell-543bc2-tobi-oniyide-s-projects.vercel.app"
-        }
-      ],
-      "destination": "https://cbos-api-git-chatgpt-intelligenc-73ec4a-tobi-oniyide-s-projects.vercel.app/api/intelligence/:path*"
-    },
-    {
       "source": "/api/:path*",
       "destination": "https://cbos-api.vercel.app/api/:path*"
     },
