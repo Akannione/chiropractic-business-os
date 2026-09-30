@@ -41,6 +41,14 @@ app.use('/api', (_req, res, next) => {
   // browser/CDN caches. Static frontend assets keep their normal Vercel cache.
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Pragma', 'no-cache');
+  next();
+});
+app.use('/api', (req, _res, next) => {
+  const databaseFreePaths = new Set(['/config', '/auth/status', '/auth/login']);
+  if (databaseFreePaths.has(req.path)) {
+    next();
+    return;
+  }
   connectDatabase().then(() => next()).catch(next);
 });
 app.use('/api', inquiryRouter);
