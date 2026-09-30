@@ -15,7 +15,9 @@ Never send these values to product analytics:
 - CSV filenames, CSV contents, source rows, or imported field values
 - authentication tokens, passwords, IP addresses intentionally retained by CBOS, or raw error messages
 
-The browser client disables autocapture, automatic page views, automatic exception capture, session recording, persistent analytics storage, and person profiles. Localhost and automated browser sessions are excluded. Only allowlisted custom events are accepted by the client.
+The browser client disables autocapture, automatic page views, automatic exception capture, performance capture, surveys, remote external dependency loading, feature-flag evaluation, session recording, persistent analytics storage, and person profiles. Localhost and automated browser sessions are excluded.
+
+Telemetry is enforced twice: callers pass through a per-event property schema before events are queued, and the PostHog `before_send` boundary rebuilds outbound event properties from that same schema. Unknown events, unknown properties, free-text values, invalid counts, URL/referrer metadata, and arbitrary SDK super-properties are dropped. Only anonymous UUID-shaped SDK identity fields needed to submit the event are retained; identified user values fail closed.
 
 ## Event taxonomy
 

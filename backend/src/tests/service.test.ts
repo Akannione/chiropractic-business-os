@@ -805,6 +805,8 @@ async function testDuplicateGrouping() {
 }
 
 async function runTests() {
+  await testParserErrors();
+  testCsvCarriageReturnEscaping();
   await testCsvIngestionMatrix();
   await testDuplicateGrouping();
   await testReactivationSmokeWorkflow();
@@ -824,3 +826,26 @@ runTests()
     console.error(error);
     process.exitCode = 1;
   });
+
+// Request-parser failures are client errors and must never echo request bodies.
+async function testParserErrors() {
+  const parserApp = express();
+  parserApp.use(express.json({ limit: '100b' }));
+  parserApp.post('/parse', (_req, res) => { res.json({ ok: true }); });
+  parserApp.use(errorHandler);
+  const server = parserApp.listen(0);
+  try {
+    const url = `http://127.0.0.1:${(server.address() as AddressInfo).port}/parse`;
+    for (const [body, status] of [['{"PRIVATE_SENTINEL":', 400], [JSON.stringify({ text: 'PRIVATE_SENTINEL'.repeat(20) }), 413]] as const) {
+      const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+      assert.equal(response.status, status);
+      assert.ok(!(await response.text()).includes('PRIVATE_SENTINEL'));
+    }
+  } finally {
+    await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+  }
+}
+
+function testCsvCarriageReturnEscaping() {
+  assert.ok(toCsv([{ notes: 'first\rsecond' }]).includes('"first\rsecond"'));
+}

@@ -9,6 +9,7 @@
     "dev:frontend": "npm run dev --prefix frontend",
     "build": "npm run build --prefix backend && npm run build --prefix frontend",
     "build:vercel": "npm run build --prefix frontend",
+    "check:bundle": "node scripts/check-frontend-bundle.mjs",
     "typecheck": "npm run typecheck --prefix backend && npm run typecheck --prefix frontend",
     "test": "npm run test --prefix backend && npm run test --prefix frontend && node scripts/test-vercel-routing.mjs",
     "test:backend": "npm run test --prefix backend",
@@ -19,6 +20,7 @@
     "audit:duplicates": "npm --prefix backend run audit:duplicates --",
     "test:db": "npm --prefix backend run test:db",
     "test:e2e": "npm run test:e2e --prefix frontend",
+    "test:e2e:cross-browser": "npm run test:e2e:cross-browser --prefix frontend",
     "test:e2e:auth": "npm run test:e2e:auth --prefix frontend",
     "test:e2e:deployment": "npm run test:e2e:deployment --prefix frontend"
   }

@@ -1,16 +1,6 @@
-const DEFAULT_POSTHOG_KEY = 'phc_sN4egUctDKmLqLnvqm6HmJ8oPkdyFynAb7XfHWv2WqNC';
-const ALLOWED_EVENTS = new Set([
-  'workspace_viewed',
-  'inquiry_created',
-  'follow_up_action_completed',
-  'intelligence_preview_completed',
-  'csv_import_previewed',
-  'csv_import_completed',
-  'duplicate_merge_completed',
-  'public_intake_submitted',
-  'demo_data_reset',
-]);
+import { safeTelemetryProperties, safeOutboundProperties } from './telemetryPolicy';
 
+const DEFAULT_POSTHOG_KEY = 'phc_sN4egUctDKmLqLnvqm6HmJ8oPkdyFynAb7XfHWv2WqNC';
 type SafeProperties = Record<string, string | number | boolean | null | undefined>;
 type PendingEvent = { event: string; properties: SafeProperties };
 
@@ -40,12 +30,17 @@ export function initAnalytics() {
       capture_pageview: false,
       capture_pageleave: false,
       capture_exceptions: false,
+      capture_performance: false,
+      disable_surveys: true,
+      disable_external_dependency_loading: true,
+      advanced_disable_flags: true,
       disable_session_recording: true,
       person_profiles: 'never',
       persistence: 'memory',
       before_send: (event) => {
-        if (!event || !ALLOWED_EVENTS.has(event.event)) return null;
-        return event;
+        if (!event) return null;
+        const properties = safeOutboundProperties(event.event, event.properties, key);
+        return properties ? { ...event, properties } : null;
       },
     });
     pending.splice(0).forEach(({ event, properties }) => posthog.capture(event, properties));
@@ -56,12 +51,14 @@ export function initAnalytics() {
 }
 
 export function captureTelemetry(event: string, properties: SafeProperties = {}) {
-  if (!enabled || !ALLOWED_EVENTS.has(event)) return;
+  if (!enabled) return;
+  const safeProperties = safeTelemetryProperties(event, properties);
+  if (!safeProperties) return;
   // Callers may only send low-cardinality workflow metadata. Never pass names,
   // contact details, notes, free text, CSV contents, record IDs, or source rows.
   if (client) {
-    client.capture(event, properties);
+    client.capture(event, safeProperties);
     return;
   }
-  pending.push({ event, properties });
+  if (pending.length < 100) pending.push({ event, properties: safeProperties });
 }

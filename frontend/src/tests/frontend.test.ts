@@ -206,3 +206,26 @@ testInquiryDrawerFocusWraps();
 testInquiryFormDefaults();
 
 console.log('Frontend tests passed.');
+
+// Deliberately synthetic sentinel values: these must never leave telemetry.
+const { safeTelemetryProperties, safeOutboundProperties } = await import('../services/telemetryPolicy');
+assertEqual(safeTelemetryProperties('unknown'), null);
+assertEqual(safeTelemetryProperties('__proto__'), null);
+assertEqual(JSON.stringify(safeTelemetryProperties('workspace_viewed', { workspace: 'inquiries', name: 'PRIVATE_SENTINEL', notes: 'PRIVATE_SENTINEL' })), '{"workspace":"inquiries"}');
+assertEqual(JSON.stringify(safeTelemetryProperties('workspace_viewed', { workspace: 'PRIVATE_SENTINEL' })), '{}');
+for (const value of [-1, NaN, Infinity, 1.5, '12', null, {}, Number.MAX_SAFE_INTEGER + 1]) {
+  assertEqual(JSON.stringify(safeTelemetryProperties('csv_import_completed', { imported_rows: value })), '{}');
+}
+assertEqual(JSON.stringify(safeTelemetryProperties('csv_import_completed', { imported_rows: 0, skipped_duplicates: 2 })), '{"imported_rows":0,"skipped_duplicates":2}');
+const anonymousId = '019c6e27-e55b-73d1-87d8-4e01f1f75043';
+const outbound = safeOutboundProperties('workspace_viewed', {
+  workspace: 'dashboard', distinct_id: anonymousId, $session_id: anonymousId,
+  $current_url: 'https://example.test/?name=PRIVATE_SENTINEL', $referrer: 'PRIVATE_SENTINEL',
+  $set: { email: 'PRIVATE_SENTINEL' }, $initial_person_info: { name: 'PRIVATE_SENTINEL' },
+  $process_person_profile: true, arbitrary_future_sdk_property: 'PRIVATE_SENTINEL',
+}, 'test-project-token');
+assertEqual(JSON.stringify(outbound).includes('PRIVATE_SENTINEL'), false);
+assertEqual(outbound?.distinct_id, anonymousId);
+assertEqual(outbound?.$process_person_profile, false);
+assertEqual(safeOutboundProperties('workspace_viewed', { distinct_id: 'patient@example.test' }, 'test'), null);
+console.log('Telemetry privacy regression tests passed.');

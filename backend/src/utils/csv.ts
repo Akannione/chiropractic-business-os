@@ -23,7 +23,7 @@ export const exportColumns = Object.keys(friendlyHeaders);
 
 function escapeCsv(value: unknown): string {
   const text = sanitizeCsvValue(value);
-  if (!/[",\n]/.test(text)) return text;
+  if (!/[",\r\n]/.test(text)) return text;
   return `"${text.replaceAll('"', '""')}"`;
 }
 

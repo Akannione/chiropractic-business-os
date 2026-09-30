@@ -19,13 +19,26 @@ try {
     'x-content-type-options': 'nosniff',
     'x-frame-options': 'DENY',
     'referrer-policy': 'no-referrer',
+    'permissions-policy': 'camera=(), microphone=(), geolocation=()',
     'cross-origin-opener-policy': 'same-origin',
   };
   for (const [name, expected] of Object.entries(requiredHeaders)) {
     if (headers[name] !== expected) throw new Error(`Missing or invalid deployment header ${name}.`);
   }
-  if (!headers['content-security-policy']?.includes("frame-ancestors 'none'")) {
-    throw new Error('Deployment Content-Security-Policy is missing frame-ancestors none.');
+  const csp = headers['content-security-policy'] || '';
+  for (const directive of [
+    "base-uri 'self'",
+    "frame-ancestors 'none'",
+    "object-src 'none'",
+    "script-src 'self'",
+    "connect-src 'self' https://us.i.posthog.com",
+  ]) {
+    if (!csp.includes(directive)) throw new Error(`Deployment Content-Security-Policy is missing: ${directive}`);
+  }
+  const health = await page.request.get(`${new URL(baseUrl).origin}/api/health`);
+  if (!health.ok()) throw new Error(`Deployment API health returned HTTP ${health.status()}.`);
+  if (!health.headers()['cache-control']?.includes('no-store')) {
+    throw new Error('Deployment API responses must include Cache-Control: no-store.');
   }
   await page.getByText('Good to see you.').waitFor();
   for (const name of ['Patient Inquiries', 'Pipeline', 'Intelligence', 'Import & Export', 'Settings']) {
