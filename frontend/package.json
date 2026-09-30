@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx src/tests/frontend.test.ts",
     "test:e2e": "playwright test",
+    "test:e2e:auth": "node e2e/auth-smoke.mjs",
     "test:e2e:deployment": "node e2e/deployment-smoke.mjs"
   },
   "dependencies": {

@@ -36,7 +36,11 @@ app.get('/api/health', (_req, res) => {
   res.json({ ok: true, service: 'CBOS API' });
 });
 
-app.use('/api', (_req, _res, next) => {
+app.use('/api', (_req, res, next) => {
+  // Operational/patient-facing API responses must never be stored in shared
+  // browser/CDN caches. Static frontend assets keep their normal Vercel cache.
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Pragma', 'no-cache');
   connectDatabase().then(() => next()).catch(next);
 });
 app.use('/api', inquiryRouter);

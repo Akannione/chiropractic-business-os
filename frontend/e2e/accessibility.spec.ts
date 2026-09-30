@@ -43,3 +43,26 @@ test('public intake has no serious or critical automated accessibility violation
   const severe = results.violations.filter((v) => ['serious', 'critical'].includes(v.impact || ''));
   expect(severe, severe.map((v) => `${v.id}: ${v.help}`).join('; ')).toEqual([]);
 });
+
+test('visible interactive targets meet the WCAG 2.2 minimum target size', async ({ page }) => {
+  await page.goto('/');
+  for (const [nav] of workspaces) {
+    if (nav !== 'Today') await page.getByRole('button', { name: nav, exact: true }).click();
+    const undersized = await page.locator('button, a, input[type="checkbox"], input[type="radio"]').evaluateAll((nodes) =>
+      nodes
+        .filter((node) => {
+          const element = node as HTMLElement;
+          const rect = element.getBoundingClientRect();
+          const style = getComputedStyle(element);
+          return style.visibility !== 'hidden' && style.display !== 'none' && rect.width > 0 && rect.height > 0;
+        })
+        .map((node) => {
+          const element = node as HTMLElement;
+          const rect = element.getBoundingClientRect();
+          return { label: element.getAttribute('aria-label') || element.textContent?.trim() || element.tagName, width: rect.width, height: rect.height };
+        })
+        .filter(({ width, height }) => width < 24 || height < 24),
+    );
+    expect(undersized, nav + ': ' + JSON.stringify(undersized)).toEqual([]);
+  }
+});

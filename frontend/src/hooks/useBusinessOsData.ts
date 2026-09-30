@@ -88,10 +88,20 @@ export function useBusinessOsData() {
     setMonthlySummary(nextMonthlySummary);
   }
 
+  async function retryLoadData() {
+    setLoading(true);
+    setError('');
+    try {
+      await loadData();
+    } catch (nextError) {
+      setError((nextError as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
-    loadData()
-      .catch((nextError: Error) => setError(nextError.message))
-      .finally(() => setLoading(false));
+    void retryLoadData();
   }, []);
 
   async function refreshWithMessage(nextMessage: string) {
@@ -114,6 +124,7 @@ export function useBusinessOsData() {
     error,
     loading,
     setError,
+    retryLoadData,
     refreshWithMessage,
   };
 }

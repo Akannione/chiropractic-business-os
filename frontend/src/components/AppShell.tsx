@@ -21,6 +21,7 @@ import {
   X,
 } from 'lucide-react';
 import type { AppConfig, View } from '../types';
+import { WorkspaceSkeleton } from './WorkspaceSkeleton';
 
 type AppShellProps = {
   view: View;
@@ -31,6 +32,7 @@ type AppShellProps = {
   onViewChange: (view: View) => void;
   onAddInquiry: () => void;
   onDemoReset: () => Promise<void>;
+  onRetry: () => Promise<void>;
   onLogout: () => void;
   children: ReactNode;
 };
@@ -65,7 +67,7 @@ const navigation: Array<{ label: string; secondary?: boolean; items: Array<{ vie
   },
 ];
 export function AppShell(props: AppShellProps) {
-  const { view, config, message, error, loading, onViewChange, onAddInquiry, onDemoReset, onLogout, children } = props;
+  const { view, config, message, error, loading, onViewChange, onAddInquiry, onDemoReset, onRetry, onLogout, children } = props;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const activeItem = navigation.flatMap((group) => group.items).find((item) => item.view === view);
@@ -119,8 +121,8 @@ export function AppShell(props: AppShellProps) {
         </header>
 
         {message && <div className="notice success" role="status" aria-live="polite">{message}</div>}
-        {error && <div className="notice error" role="alert">{error}</div>}
-        {loading ? <div className="empty-state">Loading practice priorities...</div> : children}
+        {error && <div className="notice error error-with-action" role="alert"><span>{error}</span><button type="button" onClick={() => void onRetry()}>Try again</button></div>}
+        {loading ? <WorkspaceSkeleton /> : children}
       </main>
     </div>
   );

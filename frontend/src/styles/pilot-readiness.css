@@ -1178,3 +1178,85 @@ table tbody tr:hover {
 .nav-button[aria-current="page"] { position:relative; }
 .nav-button[aria-current="page"]::after { background:#6cc8a3; border-radius:999px; content:""; height:6px; position:absolute; right:10px; width:6px; }
 .content:focus { outline:none; }
+
+/* Release-candidate interaction and loading polish. */
+.nav-button,
+.ghost-button,
+.primary-button,
+.sidebar-icon-button,
+.mobile-menu-button {
+  min-height: 44px;
+}
+.sidebar-icon-button,
+.mobile-menu-button {
+  min-width: 44px;
+}
+.workspace-skeleton {
+  display: grid;
+  gap: 16px;
+}
+.skeleton-block {
+  background: linear-gradient(90deg, #edf2f0 25%, #f7f9f8 50%, #edf2f0 75%);
+  background-size: 200% 100%;
+  border: 1px solid #e4eae7;
+  border-radius: 18px;
+  min-height: 138px;
+  animation: cbos-skeleton 1.35s ease-in-out infinite;
+}
+.skeleton-header { min-height: 132px; }
+.skeleton-metrics {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.skeleton-metrics .skeleton-block { min-height: 92px; }
+.skeleton-content {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr);
+}
+.skeleton-content .skeleton-block { min-height: 360px; }
+.sr-only {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+@keyframes cbos-skeleton {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+@media (max-width: 720px) {
+  .skeleton-metrics { grid-template-columns: 1fr; }
+  .skeleton-metrics .skeleton-block { min-height: 68px; }
+  .skeleton-content { grid-template-columns: 1fr; }
+  .skeleton-content .skeleton-block { min-height: 220px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-block { animation: none; }
+}
+
+.error-with-action {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+.error-with-action button {
+  background: #fff;
+  border: 1px solid currentColor;
+  border-radius: 9px;
+  color: inherit;
+  cursor: pointer;
+  flex: 0 0 auto;
+  font-weight: 800;
+  min-height: 36px;
+  padding: 7px 12px;
+}
+@media (max-width: 560px) {
+  .error-with-action { align-items: stretch; flex-direction: column; }
+  .error-with-action button { min-height: 44px; width: 100%; }
+}

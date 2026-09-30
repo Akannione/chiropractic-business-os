@@ -60,6 +60,29 @@ jobs:
         env:
           E2E_API_URL: http://localhost:4010/api
         run: npm run test:e2e
+      - name: Start auth-enabled API
+        env:
+          BUSINESS_OS_DEMO_MODE: "true"
+          MONGODB_URI: mongodb://127.0.0.1:27017/cbos_auth_e2e
+          PORT: "4020"
+          CORS_ORIGIN: http://localhost:5174
+          ADMIN_PASSWORD: cbos-e2e-password
+          AUTH_TOKEN_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+        run: npm run dev:backend > /tmp/cbos-auth-api.log 2>&1 &
+      - name: Start auth-enabled frontend
+        env:
+          VITE_API_BASE_URL: http://localhost:4020/api
+        run: cd frontend && ./node_modules/.bin/vite --host localhost --port 5174 > /tmp/cbos-auth-ui.log 2>&1 &
+      - name: Wait for auth services
+        run: |
+          for i in {1..30}; do curl -fsS http://localhost:4020/api/health && break || sleep 1; done
+          for i in {1..30}; do curl -fsS http://localhost:5174 >/dev/null && break || sleep 1; done
+      - name: Auth browser smoke
+        env:
+          E2E_AUTH_FRONTEND_URL: http://localhost:5174
+          E2E_AUTH_API_URL: http://localhost:4020/api
+          E2E_AUTH_PASSWORD: cbos-e2e-password
+        run: npm run test:e2e:auth
       - name: Upload Playwright artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4

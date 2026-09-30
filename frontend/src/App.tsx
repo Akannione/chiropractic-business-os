@@ -17,6 +17,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { WeeklySummaryPage } from './pages/WeeklySummaryPage';
 import { api, clearAuthToken, getAuthToken, setUnauthorizedHandler } from './services/api';
 import type { View } from './types';
+import { pathForView, viewFromPath } from './routing';
 
 export function App() {
   if (window.location.pathname === '/intake') {
@@ -85,7 +86,7 @@ function StaffGate() {
 }
 
 function StaffApp({ onLogout }: { onLogout: () => void }) {
-  const [view, setView] = useState<View>('dashboard');
+  const [view, setView] = useState<View>(() => viewFromPath(window.location.pathname));
   const [inquiryDrawerOpen, setInquiryDrawerOpen] = useState(false);
   const {
     activities,
@@ -101,8 +102,27 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
     error,
     loading,
     setError,
+    retryLoadData,
     refreshWithMessage,
   } = useBusinessOsData();
+
+  useEffect(() => {
+    const onPopState = () => setView(viewFromPath(window.location.pathname));
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  useEffect(() => {
+    const label = view === 'dashboard' ? 'Today' : view.replace(/-/g, ' ');
+    document.title = `${label.replace(/\b\w/g, (letter) => letter.toUpperCase())} · CBOS`;
+  }, [view]);
+
+  function changeView(nextView: View) {
+    const nextPath = pathForView(nextView);
+    if (window.location.pathname !== nextPath) window.history.pushState({}, '', nextPath);
+    setView(nextView);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
 
   async function resetDemoData() {
     await api.resetDemo();
@@ -116,9 +136,10 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
       message={message}
       error={error}
       loading={loading}
-      onViewChange={setView}
+      onViewChange={changeView}
       onAddInquiry={() => setInquiryDrawerOpen(true)}
       onDemoReset={resetDemoData}
+      onRetry={retryLoadData}
       onLogout={onLogout}
     >
       {view === 'dashboard' && (

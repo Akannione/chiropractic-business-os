@@ -87,3 +87,15 @@ test('desktop front-desk viewport has no horizontal page overflow', async ({ pag
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   expect(overflow).toBe(false);
 });
+
+test('workspace URLs are deep-linkable and browser navigation restores context', async ({ page }) => {
+  await page.goto('/intelligence');
+  await expect(page.getByText('Practice Intelligence')).toBeVisible();
+  await expect(page).toHaveURL(/\/intelligence$/);
+  await page.getByRole('button', { name: 'Pipeline', exact: true }).click();
+  await expect(page).toHaveURL(/\/pipeline$/);
+  await expect(page.getByRole('heading', { name: 'Patient Pipeline', exact: true })).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(/\/intelligence$/);
+  await expect(page.getByText('Practice Intelligence')).toBeVisible();
+});
