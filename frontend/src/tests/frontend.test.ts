@@ -46,6 +46,8 @@ const formatModule = await import('../utils/format');
 const pipelineModule = await import('../pages/PipelinePage');
 const inquiryDrawerModule = await import('../components/InquiryDrawer');
 const inquiryFormModule = await import('../components/InquiryForm');
+const errorBoundaryModule = await import('../components/AppErrorBoundary');
+const { renderToStaticMarkup } = await import('react-dom/server');
 
 const {
   api,
@@ -60,6 +62,7 @@ const { addDaysIso, setPracticeTimeZone, todayIso } = formatModule;
 const { pipelineLimitMessage } = pipelineModule;
 const { nextDrawerFocusIndex } = inquiryDrawerModule;
 const { emptyInquiryForm } = inquiryFormModule;
+const { AppErrorBoundary } = errorBoundaryModule;
 
 async function testCsvImportKeepsAuthHeader() {
   setAuthToken('staff-token');
@@ -195,6 +198,15 @@ function testInquiryFormDefaults() {
   assertEqual(form.next_follow_up_date, todayIso());
 }
 
+function testFatalErrorRecoveryDoesNotRenderExceptionDetails() {
+  const boundary = new AppErrorBoundary({ children: null });
+  boundary.state = AppErrorBoundary.getDerivedStateFromError();
+  const html = renderToStaticMarkup(boundary.render());
+  assertIncludes(html, /This workspace could not finish loading/);
+  assertIncludes(html, /Reload CBOS/);
+  assertEqual(html.includes('PRIVATE_SENTINEL'), false);
+}
+
 await testCsvImportKeepsAuthHeader();
 await testIntelligencePreviewKeepsStaffAuth();
 await testExpiredStaffTokenClearsSession();
@@ -204,6 +216,7 @@ testPipelineLimitMessage();
 testApiBaseUrlResolution();
 testInquiryDrawerFocusWraps();
 testInquiryFormDefaults();
+testFatalErrorRecoveryDoesNotRenderExceptionDetails();
 
 console.log('Frontend tests passed.');
 
