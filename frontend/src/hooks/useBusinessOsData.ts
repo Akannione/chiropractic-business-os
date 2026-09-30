@@ -105,9 +105,12 @@ export function useBusinessOsData() {
   }, []);
 
   async function refreshWithMessage(nextMessage: string) {
-    await loadData();
+    // The write already succeeded before callers reach this helper. Surface that
+    // success immediately instead of making staff wait for every dashboard read
+    // to finish; a refresh failure can still propagate as a separate error.
     setMessage(nextMessage);
     window.setTimeout(() => setMessage(''), 2800);
+    await loadData();
   }
 
   return {
