@@ -99,3 +99,9 @@ test('workspace URLs are deep-linkable and browser navigation restores context',
   await expect(page).toHaveURL(/\/intelligence$/);
   await expect(page.getByText('Practice Intelligence')).toBeVisible();
 });
+
+test('unknown workspace URLs recover to Today instead of leaving a misleading path', async ({ page }) => {
+  await page.goto('/not-a-real-workspace');
+  await expect(page.getByText('Good to see you.')).toBeVisible();
+  await expect(page).toHaveURL(/\/$/);
+});

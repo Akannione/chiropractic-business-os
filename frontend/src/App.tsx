@@ -107,6 +107,9 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
   } = useBusinessOsData();
 
   useEffect(() => {
+    const currentView = viewFromPath(window.location.pathname);
+    const canonicalPath = pathForView(currentView);
+    if (window.location.pathname !== canonicalPath) window.history.replaceState({}, '', canonicalPath);
     const onPopState = () => setView(viewFromPath(window.location.pathname));
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
