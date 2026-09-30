@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { ArrowRight, CalendarClock, CheckCircle2, Sparkles, TrendingUp, UsersRound } from 'lucide-react';
 import { EmptyState } from '../components/EmptyState';
 import { InquiryTable } from '../components/InquiryTable';
-import { PageHeader } from '../components/PageHeader';
 import { DataFreshness } from '../components/DataFreshness';
 import { StatusChip } from '../components/StatusChip';
 import { api } from '../services/api';
@@ -49,7 +48,10 @@ export function DashboardPage({ kpis, config, recentInquiries, followUps, onChan
 
   return (
     <section className="stack today-workspace">
-      <PageHeader eyebrow="Today" title="Good to see you." description="Your practice, distilled into the few things worth your attention." action={<DataFreshness />} />
+      <div className="today-welcome">
+        <div><span className="eyebrow">Front desk command center</span><h2>Good to see you.</h2><p>Your practice, distilled into the few things worth your attention.</p></div>
+        <DataFreshness />
+      </div>
 
       <section className={`today-hero ${dashboardFocus.tone}`}>
         <div className="ambient-orb orb-one" aria-hidden="true" />

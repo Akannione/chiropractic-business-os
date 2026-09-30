@@ -1041,3 +1041,58 @@ table tbody tr:hover {
   .action-state { grid-column: 2; justify-items: start; }
   .action-buttons { flex-wrap: wrap; grid-column: 1 / -1; }
 }
+
+/* Desktop-first opening workspace refinements. */
+.today-welcome {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 2px 2px 0;
+}
+.today-welcome h2 {
+  font-size: clamp(25px, 2.2vw, 34px);
+  letter-spacing: -.035em;
+  line-height: 1.05;
+  margin: 5px 0 5px;
+}
+.today-welcome p {
+  color: #657386;
+  margin: 0;
+}
+.today-workspace .today-hero {
+  min-height: 270px;
+}
+.today-workspace .hero-action {
+  transition: background .15s ease, transform .15s ease;
+}
+.today-workspace .hero-action:hover {
+  background: rgba(255,255,255,.18);
+  transform: translateX(2px);
+}
+.today-workspace .glass-panel,
+.today-workspace .insight-strip article {
+  -webkit-backdrop-filter: blur(22px);
+}
+@media (min-width: 1280px) {
+  .today-workspace {
+    gap: 16px;
+  }
+  .today-layout {
+    grid-template-columns: minmax(620px, 1.55fr) minmax(330px, .55fr);
+  }
+  .action-queue-panel {
+    min-height: 430px;
+  }
+}
+@media (max-width: 720px) {
+  .today-welcome {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .today-welcome h2 { font-size: 27px; }
+  .today-workspace .today-hero { min-height: 0; }
+  .today-hero h3 { font-size: 32px; }
+  .today-hero p { font-size: 13px; }
+  .insight-strip article { min-height: 76px; }
+}
