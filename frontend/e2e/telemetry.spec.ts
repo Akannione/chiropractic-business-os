@@ -13,8 +13,19 @@ test('SDK outbound policy removes URL, referrer, super-properties and free text'
       await route.fulfill({ contentType: 'text/html', body: '<html><head><title>PRIVATE_SENTINEL</title></head><body>Isolated SDK test</body></html>' });
       return;
     }
+    // Re-serve Vite's transformed module bytes at the cbos.test origin instead of
+    // forwarding a Response object whose underlying URL is localhost. Firefox is
+    // stricter about module response origins than Chromium/WebKit.
     const response = await route.fetch({ url: `${baseURL}${url.pathname}${url.search}` });
-    await route.fulfill({ response });
+    const headers = response.headers();
+    delete headers['content-length'];
+    delete headers['content-encoding'];
+    delete headers['transfer-encoding'];
+    await route.fulfill({
+      status: response.status(),
+      headers,
+      body: await response.body(),
+    });
   });
   await page.addInitScript(() => Object.defineProperty(navigator, 'webdriver', { get: () => false }));
   await page.goto('http://cbos.test/?patient=PRIVATE_SENTINEL');
