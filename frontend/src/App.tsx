@@ -178,7 +178,7 @@ function StaffApp({ authRequired, onLogout }: { authRequired: boolean; onLogout:
       )}
       {view === 'summary' && <WeeklySummaryPage summary={summary} />}
       {view === 'monthly' && <MonthlySummaryPage summary={monthlySummary} />}
-      {view === 'intelligence' && <IntelligencePage setError={setError} />}
+      {view === 'intelligence' && <IntelligencePage config={config} setError={setError} />}
       {view === 'activity' && <ActivityPage activities={activities} />}
       {view === 'duplicates' && (
         <DuplicatesPage onChanged={refreshWithMessage} setError={setError} />

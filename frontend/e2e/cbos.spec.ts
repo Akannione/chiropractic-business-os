@@ -52,6 +52,8 @@ test('Add Inquiry drawer creates an inquiry and closes', async ({ page }) => {
 
 test('Intelligence synthetic demo produces report matches and signals', async ({ page }) => {
   await page.getByRole('button', { name: 'Intelligence', exact: true }).click();
+  await expect(page.getByLabel('Intelligence demo data safety notice')).toContainText(/no raw clinic exports/i);
+  await expect(page.getByRole('heading', { name: 'Start with synthetic or deidentified exports' })).toBeVisible();
   await page.getByRole('button', { name: /Try sample data/i }).click();
   await expect(page.getByText('Report matches')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'What needs attention', exact: true })).toBeVisible();
