@@ -1,6 +1,7 @@
-import { CheckCircle2, FileSearch, Lightbulb, ShieldCheck, Upload } from 'lucide-react';
+import { CheckCircle2, FileSearch, FolderSync, Lightbulb, PlugZap, ShieldCheck, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { KpiCard } from '../components/KpiCard';
+import { PageHeader } from '../components/PageHeader';
 import { api } from '../services/api';
 import type { IntelligencePreview, IntelligenceSignal } from '../types';
 
@@ -47,12 +48,12 @@ export function IntelligencePage({ setError }: IntelligencePageProps) {
 
   return (
     <section className="stack intelligence-workspace">
-      <div className="section-heading intelligence-heading">
-        <div>
-          <h2>Practice Intelligence</h2>
-          <p>Turn clinic exports into clear operational signals — without replacing your EHR.</p>
-        </div>
-        <span className="intelligence-preview-badge"><ShieldCheck size={14} /> Preview · no data saved</span>
+      <PageHeader eyebrow="Operational intelligence" title="Practice Intelligence" description="Turn clinic exports into clear operational signals — without replacing your EHR." action={<span className="intelligence-preview-badge"><ShieldCheck size={14} /> Preview · no data saved</span>} />
+
+      <div className="integration-path-strip" aria-label="CBOS connection options">
+        <div><PlugZap size={17} /><span><strong>API / FHIR</strong><small>When the source system supports it</small></span></div>
+        <div><FolderSync size={17} /><span><strong>Export folder</strong><small>For systems without an open API</small></span></div>
+        <div><Upload size={17} /><span><strong>CSV upload</strong><small>Universal fallback</small></span></div>
       </div>
 
       <div className="panel intelligence-upload intelligence-start-card">
@@ -60,7 +61,7 @@ export function IntelligencePage({ setError }: IntelligencePageProps) {
           <FileSearch size={30} />
           <div>
             <h3>Start with your clinic exports</h3>
-            <p>Choose the CSV reports you already download. CBOS identifies the reports first, then shows only signals supported by the data.</p>
+            <p>Choose the reports you already export. No API? That is okay — CBOS can use the existing export workflow and identifies reports before showing supported signals.</p>
           </div>
         </div>
         <div className="intelligence-start-actions">

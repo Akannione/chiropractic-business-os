@@ -1,12 +1,15 @@
+import { EmptyState } from '../components/EmptyState';
+import { PageHeader } from '../components/PageHeader';
 import type { Activity } from '../types';
 
 export function ActivityPage({ activities }: { activities: Activity[] }) {
   return (
     <section className="stack">
-      <div className="section-heading">
-        <h2>Activity History</h2>
-        <p>Review recent inquiry changes, imports, and follow-up updates without guessing what happened.</p>
-      </div>
+      <PageHeader
+        eyebrow="Audit trail"
+        title="Activity History"
+        description="Review recent inquiry changes, imports, and follow-up updates without guessing what happened."
+      />
       <div className="panel">
         {activities.length ? (
           <div className="activity-list">
@@ -22,7 +25,10 @@ export function ActivityPage({ activities }: { activities: Activity[] }) {
             ))}
           </div>
         ) : (
-          <div className="empty-state">No activity has been recorded yet.</div>
+          <EmptyState
+            title="No activity yet"
+            description="Changes, imports, and follow-up updates will appear here as your team uses CBOS."
+          />
         )}
       </div>
     </section>

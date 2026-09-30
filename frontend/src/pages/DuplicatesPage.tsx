@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Panel } from '../components/Panel';
+import { PageHeader } from '../components/PageHeader';
 import { StatusChip } from '../components/StatusChip';
 import { api } from '../services/api';
 import type { Inquiry } from '../types';
@@ -65,14 +66,7 @@ export function DuplicatesPage({ onChanged, setError }: DuplicatesPageProps) {
 
   return (
     <section className="stack">
-      <div className="section-heading">
-        <h2>Possible Duplicates</h2>
-        <p>
-          Patients who appear more than once, usually because the intake form was submitted twice.
-          People who share a phone number or email but have different names are treated as a
-          household, not a duplicate, and are not listed here.
-        </p>
-      </div>
+      <PageHeader eyebrow="Data quality" title="Possible Duplicates" description="Review records that appear to represent the same patient before merging anything. Shared household contact details alone are not treated as duplicates." />
 
       {loading ? (
         <div className="empty-state">Checking for duplicates...</div>

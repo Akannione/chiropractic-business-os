@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Panel } from '../components/Panel';
+import { PageHeader } from '../components/PageHeader';
 import { InquiryForm } from '../components/InquiryForm';
 import { StatusChip } from '../components/StatusChip';
 import { api } from '../services/api';
@@ -227,10 +228,7 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
 
   return (
     <section className="stack">
-      <div className="section-heading">
-        <h2>Patient Inquiries</h2>
-        <p>Add inquiries, find the right patient quickly, and manage follow-up details in one place.</p>
-      </div>
+      <PageHeader eyebrow="Front desk workflow" title="Patient Inquiries" description="Find the right inquiry quickly, manage follow-up details, and keep opportunities moving." />
 
       <Panel title="Add Patient Inquiry" description="Use this for phone calls, walk-ins, or staff-entered inquiries.">
         <InquiryForm

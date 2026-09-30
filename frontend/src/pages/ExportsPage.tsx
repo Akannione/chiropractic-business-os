@@ -1,6 +1,7 @@
 import { Download } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { KpiCard } from '../components/KpiCard';
+import { PageHeader } from '../components/PageHeader';
 import { api } from '../services/api';
 import type { ImportPreview } from '../types';
 import { todayIso } from '../utils/format';
@@ -66,10 +67,7 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
 
   return (
     <section className="stack">
-      <div className="section-heading">
-        <h2>Exports</h2>
-        <p>Download practice-facing CSV files or import an existing inquiry list without creating duplicates.</p>
-      </div>
+      <PageHeader eyebrow="Data tools" title="Import & Export" description="Move practice data in and out of CBOS with preview and duplicate protection." />
       <div className="export-card">
         <Download />
         <div>

@@ -68,6 +68,7 @@ export function AppShell(props: AppShellProps) {
   const { view, config, message, error, loading, onViewChange, onAddInquiry, onDemoReset, onLogout, children } = props;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const activeItem = navigation.flatMap((group) => group.items).find((item) => item.view === view);
 
   function changeView(nextView: View) {
     onViewChange(nextView);
@@ -111,7 +112,7 @@ export function AppShell(props: AppShellProps) {
         <header className="topbar">
           <div className="topbar-title">
             <button className="mobile-menu-button" aria-label="Open navigation" onClick={() => setMobileOpen(true)}><Menu size={20} /></button>
-            <div><h1>CBOS</h1><p className="product-positioning">See what needs attention, what is being missed, and what your team should do next.</p></div>
+            <div><span className="topbar-context">{config?.practiceName || 'CBOS'} · {activeItem?.label || 'Workspace'}</span><h1>CBOS</h1><p className="product-positioning">See what needs attention, what is being missed, and what your team should do next.</p></div>
           </div>
           <button id="add-inquiry-button" className="primary-button" onClick={onAddInquiry}><Plus size={18} /> Add Inquiry</button>
         </header>

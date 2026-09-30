@@ -3,6 +3,8 @@ import { FollowUpList } from '../components/FollowUpList';
 import { InquiryTable } from '../components/InquiryTable';
 import { KpiCard } from '../components/KpiCard';
 import { Panel } from '../components/Panel';
+import { PageHeader } from '../components/PageHeader';
+import { DataFreshness } from '../components/DataFreshness';
 import { StatusChip } from '../components/StatusChip';
 import { api } from '../services/api';
 import type { AppConfig, Inquiry, InquiryStatus, Kpis } from '../types';
@@ -77,11 +79,7 @@ export function DashboardPage({ kpis, config, recentInquiries, followUps, onChan
 
   return (
     <section className="stack">
-      <div className="section-heading">
-        <span className="eyebrow">Action Command Center</span>
-        <h2>What needs attention today</h2>
-        <p>CBOS surfaces missed follow-ups and opportunities so your team knows what to act on next.</p>
-      </div>
+      <PageHeader eyebrow="Action command center" title="What needs attention today" description="CBOS surfaces missed follow-ups and opportunities so your team knows what to act on next." action={<DataFreshness />} />
 
       <div className={`command-panel ${dashboardFocus.tone}`}>
         <div>

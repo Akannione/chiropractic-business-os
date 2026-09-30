@@ -1,5 +1,7 @@
 import { Activity } from 'lucide-react';
+import { EmptyState } from '../components/EmptyState';
 import { KpiCard } from '../components/KpiCard';
+import { PageHeader } from '../components/PageHeader';
 import type { WeeklySummary } from '../types';
 import { displayDate, money, percent } from '../utils/format';
 
@@ -25,11 +27,8 @@ export function WeeklySummaryPage({ summary }: { summary: WeeklySummary | null }
   if (!summary) {
     return (
       <section className="stack">
-        <div className="section-heading">
-          <h2>Weekly Owner Review</h2>
-          <p>A simple weekly rhythm for reviewing inquiries, follow-ups, and patient conversion.</p>
-        </div>
-        <div className="empty-state">No weekly data yet. Add patient inquiries to build the review.</div>
+        <PageHeader eyebrow="Owner review" title="Weekly Owner Review" description="A simple weekly rhythm for reviewing inquiries, follow-ups, and patient conversion." />
+        <EmptyState title="No weekly review yet" description="Add patient inquiries and CBOS will build the owner review as activity accumulates." />
       </section>
     );
   }
@@ -40,10 +39,7 @@ export function WeeklySummaryPage({ summary }: { summary: WeeklySummary | null }
 
   return (
     <section className="stack">
-      <div className="section-heading">
-        <h2>Weekly Owner Review</h2>
-        <p>Use this once a week to check inquiry activity, follow-up pressure, and treatment value.</p>
-      </div>
+      <PageHeader eyebrow="Owner review" title="Weekly Owner Review" description="Check inquiry activity, follow-up pressure, and estimated treatment value before the week ends." />
       <div className={`summary-card owner-review-card ${needsAttention ? 'attention' : 'clear'}`}>
         <Activity />
         <div>
