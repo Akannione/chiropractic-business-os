@@ -118,7 +118,7 @@ export function AppShell(props: AppShellProps) {
             <button className="mobile-menu-button" aria-label="Open navigation" onClick={() => setMobileOpen(true)}><Menu size={20} /></button>
             <div><span className="topbar-context">{config?.practiceName || 'CBOS'} · Front desk</span><h1>{activeItem?.label || 'Workspace'}</h1><p className="product-positioning">{view === 'dashboard' ? 'Your operational home for today.' : 'See what needs attention, what is being missed, and what your team should do next.'}</p></div>
           </div>
-          <button id="add-inquiry-button" className="primary-button" onClick={onAddInquiry}><Plus size={18} /> Add Inquiry</button>
+          <button id="add-inquiry-button" className="primary-button" disabled={!config || loading} onClick={onAddInquiry}><Plus size={18} /> Add Inquiry</button>
         </header>
 
         {config?.demoMode && (

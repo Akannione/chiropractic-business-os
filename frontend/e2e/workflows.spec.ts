@@ -1,3 +1,4 @@
+
 import { test, expect } from '@playwright/test';
 
 const API = process.env.E2E_API_URL || 'http://localhost:4010/api';
@@ -5,6 +6,30 @@ const API = process.env.E2E_API_URL || 'http://localhost:4010/api';
 test.beforeEach(async ({ request }) => {
   const reset = await request.post(`${API}/demo/reset`);
   expect(reset.ok()).toBeTruthy();
+});
+
+test('public intake stays non-interactive until practice configuration is known', async ({ page }) => {
+  let releaseConfig!: () => void;
+  const configGate = new Promise<void>((resolve) => {
+    releaseConfig = resolve;
+  });
+
+  await page.route('**/api/config', async (route) => {
+    await configGate;
+    await route.continue();
+  });
+
+  await page.goto('/intake');
+  const patientName = page.getByRole('textbox', { name: 'Patient Name', exact: true });
+  await expect(page.getByText('Loading practice settings...')).toBeVisible();
+  await expect(patientName).toBeDisabled();
+  await expect(patientName).toHaveAttribute('autocomplete', 'off');
+  await expect(page.getByRole('button', { name: 'Send Inquiry to Practice' })).toBeDisabled();
+
+  releaseConfig();
+  await expect(page.getByLabel('Demo data safety notice')).toBeVisible();
+  await expect(patientName).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Submit Demo Inquiry' })).toBeEnabled();
 });
 
 test('public intake submits a new inquiry end to end', async ({ page }) => {

@@ -75,6 +75,7 @@ export function InquiryForm({
   const [form, setForm] = useState<InquiryFormState>(() => emptyInquiryForm(config));
   const [submitting, setSubmitting] = useState(false);
   const servicesId = useId();
+  const safeAutocomplete = config?.demoMode !== false;
 
   useEffect(() => {
     if (config && !form.service_needed) setForm(emptyInquiryForm(config));
@@ -103,15 +104,15 @@ export function InquiryForm({
       )}
       <label>
         Patient Name
-        <input autoFocus={autoFocus} autoComplete={config?.demoMode ? 'off' : 'name'} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
+        <input autoFocus={autoFocus} autoComplete={safeAutocomplete ? 'off' : 'name'} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
       </label>
       <label>
         Phone
-        <input autoComplete={config?.demoMode ? 'off' : 'tel'} value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} required />
+        <input autoComplete={safeAutocomplete ? 'off' : 'tel'} value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} required />
       </label>
       <label>
         Email
-        <input autoComplete={config?.demoMode ? 'off' : 'email'} type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required />
+        <input autoComplete={safeAutocomplete ? 'off' : 'email'} type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required />
       </label>
       <label>
         Requested Service
