@@ -105,3 +105,17 @@ test('unknown workspace URLs recover to Today instead of leaving a misleading pa
   await expect(page.getByText('Good to see you.')).toBeVisible();
   await expect(page).toHaveURL(/\/$/);
 });
+
+test('key workspaces stay within the viewport across phone tablet and desktop widths', async ({ page }) => {
+  const widths = [320, 390, 768, 1024, 1440];
+  const paths = ['/', '/inquiries', '/intelligence', '/pipeline'];
+  for (const width of widths) {
+    await page.setViewportSize({ width, height: width < 700 ? 844 : 900 });
+    for (const path of paths) {
+      await page.goto(path);
+      await page.locator('#main-content').waitFor();
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+      expect(overflow, path + ' overflows at ' + width + 'px').toBe(false);
+    }
+  }
+});
