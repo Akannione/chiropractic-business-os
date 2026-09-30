@@ -14,6 +14,15 @@ type ExportsPageProps = {
   setError: (message: string) => void;
 };
 
+export const MAX_IMPORT_CSV_BYTES = 1_000_000;
+
+export function importFileError(file: Pick<File, 'name' | 'size'>) {
+  if (file.size > MAX_IMPORT_CSV_BYTES) {
+    return `${file.name} is larger than the 1 MB import limit. Choose a smaller CSV.`;
+  }
+  return '';
+}
+
 export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPageProps) {
   const [csvText, setCsvText] = useState('');
   const [preview, setPreview] = useState<ImportPreview | null>(null);
@@ -23,14 +32,23 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
   async function handleFile(file: File | null) {
     setError('');
     setPreview(null);
+    setCsvText('');
     if (!file) return;
-    const text = await file.text();
-    setCsvText(text);
+
+    const validationError = importFileError(file);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     try {
+      const text = await file.text();
+      setCsvText(text);
       const result = await api.previewImportCsv(text);
       setPreview(result);
       captureTelemetry('csv_import_previewed', { importable_rows: result.importableRows, error_count: result.errorRows });
     } catch (nextError) {
+      setCsvText('');
       setError((nextError as Error).message);
     }
   }

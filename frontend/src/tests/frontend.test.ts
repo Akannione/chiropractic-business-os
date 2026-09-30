@@ -52,6 +52,7 @@ const pipelineModule = await import('../pages/PipelinePage');
 const inquiryDrawerModule = await import('../components/InquiryDrawer');
 const inquiryFormModule = await import('../components/InquiryForm');
 const errorBoundaryModule = await import('../components/AppErrorBoundary');
+const exportsModule = await import('../pages/ExportsPage');
 const { renderToStaticMarkup } = await import('react-dom/server');
 
 const {
@@ -68,6 +69,7 @@ const { pipelineLimitMessage } = pipelineModule;
 const { nextDrawerFocusIndex } = inquiryDrawerModule;
 const { emptyInquiryForm } = inquiryFormModule;
 const { AppErrorBoundary } = errorBoundaryModule;
+const { importFileError, MAX_IMPORT_CSV_BYTES } = exportsModule;
 
 function testAuthTokenUsesTabSessionStorage() {
   window.localStorage.setItem('business-os-auth-token', 'legacy-persistent-token');
@@ -213,6 +215,14 @@ function testInquiryFormDefaults() {
   assertEqual(form.next_follow_up_date, todayIso());
 }
 
+function testImportFileSizeGuard() {
+  assertEqual(importFileError({ name: 'safe.csv', size: MAX_IMPORT_CSV_BYTES }), '');
+  assertEqual(
+    importFileError({ name: 'too-large.csv', size: MAX_IMPORT_CSV_BYTES + 1 }),
+    'too-large.csv is larger than the 1 MB import limit. Choose a smaller CSV.',
+  );
+}
+
 function testFatalErrorRecoveryDoesNotRenderExceptionDetails() {
   const boundary = new AppErrorBoundary({ children: null });
   boundary.state = AppErrorBoundary.getDerivedStateFromError();
@@ -232,6 +242,7 @@ testPipelineLimitMessage();
 testApiBaseUrlResolution();
 testInquiryDrawerFocusWraps();
 testInquiryFormDefaults();
+testImportFileSizeGuard();
 testFatalErrorRecoveryDoesNotRenderExceptionDetails();
 
 console.log('Frontend tests passed.');
