@@ -65,7 +65,7 @@ export function DuplicatesPage({ onChanged, setError }: DuplicatesPageProps) {
   }
 
   return (
-    <section className="stack">
+    <section className="stack workspace-page duplicates-workspace">
       <PageHeader eyebrow="Data quality" title="Possible Duplicates" description="Review records that appear to represent the same patient before merging anything. Shared household contact details alone are not treated as duplicates." />
 
       {loading ? (

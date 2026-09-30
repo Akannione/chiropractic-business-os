@@ -24,7 +24,7 @@ export function SettingsPage({ config, onChanged, setError }: SettingsPageProps)
   }
 
   return (
-    <section className="stack">
+    <section className="stack workspace-page settings-workspace">
       <PageHeader eyebrow="Configuration" title="Practice Settings" description="Review practice identity, demo mode, and staff notification behavior." />
       <div className="settings-grid">
         <div className="panel">

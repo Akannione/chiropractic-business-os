@@ -47,7 +47,7 @@ export function IntelligencePage({ setError }: IntelligencePageProps) {
   }
 
   return (
-    <section className="stack intelligence-workspace">
+    <section className="stack workspace-page intelligence-workspace">
       <PageHeader eyebrow="Operational intelligence" title="Practice Intelligence" description="Turn clinic exports into clear operational signals — without replacing your EHR." action={<span className="intelligence-preview-badge"><ShieldCheck size={14} /> Preview · no data saved</span>} />
 
       <div className="integration-path-strip" aria-label="CBOS connection options">

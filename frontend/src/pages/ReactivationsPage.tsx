@@ -114,7 +114,7 @@ export function ReactivationsPage({
   }
 
   return (
-    <section className="stack">
+    <section className="stack workspace-page reactivations-workspace">
       <PageHeader eyebrow="Recovery workflow" title="Patient Reactivations" description="Prioritize patients whose expected return date is overdue, due today, or coming up, then record the next action." />
 
       <div className="kpi-grid small">

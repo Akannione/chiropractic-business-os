@@ -4,7 +4,7 @@ import type { Activity } from '../types';
 
 export function ActivityPage({ activities }: { activities: Activity[] }) {
   return (
-    <section className="stack">
+    <section className="stack workspace-page activity-workspace">
       <PageHeader
         eyebrow="Audit trail"
         title="Activity History"

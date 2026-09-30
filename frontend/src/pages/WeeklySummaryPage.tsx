@@ -26,7 +26,7 @@ function buildSummaryText(summary: WeeklySummary) {
 export function WeeklySummaryPage({ summary }: { summary: WeeklySummary | null }) {
   if (!summary) {
     return (
-      <section className="stack">
+      <section className="stack workspace-page owner-workspace">
         <PageHeader eyebrow="Owner review" title="Weekly Owner Review" description="A simple weekly rhythm for reviewing inquiries, follow-ups, and patient conversion." />
         <EmptyState title="No weekly review yet" description="Add patient inquiries and CBOS will build the owner review as activity accumulates." />
       </section>
@@ -38,7 +38,7 @@ export function WeeklySummaryPage({ summary }: { summary: WeeklySummary | null }
   const needsAttention = summary.followUpsNeeded > 0 || summary.overdueFollowUps > 0;
 
   return (
-    <section className="stack">
+    <section className="stack workspace-page owner-workspace">
       <PageHeader eyebrow="Owner review" title="Weekly Owner Review" description="Check inquiry activity, follow-up pressure, and estimated treatment value before the week ends." />
       <div className={`summary-card owner-review-card ${needsAttention ? 'attention' : 'clear'}`}>
         <Activity />

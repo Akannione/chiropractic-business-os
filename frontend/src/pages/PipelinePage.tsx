@@ -91,7 +91,7 @@ export function PipelinePage({ config, onChanged, setError }: PipelinePageProps)
   }
 
   return (
-    <section className="stack">
+    <section className="stack workspace-page pipeline-workspace">
       <PageHeader eyebrow="Workflow" title="Patient Pipeline" description="Review patient inquiries by status and move them forward without digging through a table." action={<button className="primary-button secondary" type="button" onClick={loadBoard}><RefreshCw size={17} /> Refresh</button>} />
 
       <Panel

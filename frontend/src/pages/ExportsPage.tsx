@@ -66,7 +66,7 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
   }
 
   return (
-    <section className="stack">
+    <section className="stack workspace-page exports-workspace">
       <PageHeader eyebrow="Data tools" title="Import & Export" description="Move practice data in and out of CBOS with preview and duplicate protection." />
       <div className="export-card">
         <Download />
