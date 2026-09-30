@@ -72,7 +72,7 @@ cd "/Users/tobiloba202/Developer/New project/business_os_mvp" && npm run demo:cs
 
 Then, in order:
 
-1. Open `https://frontend-gold-alpha-31.vercel.app` and confirm Overdue, Due Today, and Upcoming are all non-zero. If Due Today is zero, reset the demo data and re-check. The queue drifts as records age.
+1. Open `https://businessosmvp.vercel.app` and confirm Overdue, Due Today, and Upcoming are all non-zero. If Due Today is zero, reset the demo data and re-check. The queue drifts as records age.
 2. Load the page once to warm the API. First request measured at 1.3 s cold, then about 0.15 s. Warm it so the first click of the call is not the slow one.
 3. Have `docs/NEW_PATIENT_IMPORT_DEMO.csv` already open in a Finder window.
 4. Have `docs/OBJECTION_ALREADY_CALLED.md` open on the second screen.

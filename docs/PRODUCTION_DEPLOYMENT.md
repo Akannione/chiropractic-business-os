@@ -13,7 +13,7 @@ This guide keeps the CBOS demo deployment costless: MongoDB Atlas M0 for data an
 
 If a credential is exposed, rotate the Atlas database-user password before continuing.
 
-Production proof was rechecked on September 7, 2026: the API and frontend Vercel projects use the correct root directories, `MONGODB_URI` is present as a sensitive production variable, `/api/health` returns HTTP 200, `/api/auth/status` reports staff login enabled, and protected staff routes return HTTP 401 without a token as intended.
+Production was promoted from the validated pilot-readiness branch on September 30, 2026. The canonical frontend is `https://businessosmvp.vercel.app` and the API is `https://cbos-api.vercel.app`. The current environment is intentionally an open fake-data demo (`authEnabled:false`, `demoMode:true`); do not use real patient data.
 
 ## 2. Vercel Express API
 
@@ -30,7 +30,7 @@ Required environment variables:
 
 ```bash
 MONGODB_URI=mongodb+srv://...
-CORS_ORIGIN=https://frontend-gold-alpha-31.vercel.app
+CORS_ORIGIN=https://businessosmvp.vercel.app
 PRACTICE_NAME=CBOS Demo Practice
 AUTH_TOKEN_SECRET=long-random-secret
 BUSINESS_OS_DEMO_MODE=true
@@ -96,28 +96,24 @@ If health succeeds but the authenticated route fails, the API is deployed but ca
 
 Use these settings:
 
-- Project name: `frontend`
+- Project name: `business_os_mvp`
 - Repository: `https://github.com/Akannione/chiropractic-business-os`
 - Root directory: `frontend`
 - Framework: Vite
 
 This root directory is configured on the Vercel project for Git deployments. Prefer Git-triggered deployments or Vercel's redeploy action so the project root stays consistent.
 
-Production environment variable:
-
-```bash
-VITE_API_BASE_URL=https://cbos-api.vercel.app/api
-```
+Production frontend uses same-origin API requests and Vercel rewrites `/api/:path*` to `https://cbos-api.vercel.app/api/:path*`. Leave `VITE_API_BASE_URL` unset in production unless a deliberate cross-origin architecture is being configured.
 
 Current frontend:
 
 ```text
-https://frontend-gold-alpha-31.vercel.app
+https://businessosmvp.vercel.app
 ```
 
 ## 4. Staff Login
 
-`ADMIN_PASSWORD` is the CBOS staff login password. It is not the MongoDB password, Vercel account password, or a clinic EHR password. Current production has staff login enabled, so staff dashboard APIs require login. The public `/intake` form remains open.
+`ADMIN_PASSWORD` is the CBOS staff login password. It is not the MongoDB password, Vercel account password, or a clinic EHR password. The current production demo intentionally has `ADMIN_PASSWORD` unset, so staff authentication is disabled for fake-data demonstrations. Do not enter real patient data. Re-enable appropriate access control before any real-data pilot.
 
 Do not reuse the demo password across clients.
 

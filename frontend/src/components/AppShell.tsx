@@ -34,6 +34,7 @@ type AppShellProps = {
   onDemoReset: () => Promise<void>;
   onRetry: () => Promise<void>;
   onLogout: () => void;
+  staffAuthEnabled: boolean;
   children: ReactNode;
 };
 const navigation: Array<{ label: string; secondary?: boolean; items: Array<{ view: View; label: string; icon: ReactNode }> }> = [
@@ -67,7 +68,7 @@ const navigation: Array<{ label: string; secondary?: boolean; items: Array<{ vie
   },
 ];
 export function AppShell(props: AppShellProps) {
-  const { view, config, message, error, loading, onViewChange, onAddInquiry, onDemoReset, onRetry, onLogout, children } = props;
+  const { view, config, message, error, loading, onViewChange, onAddInquiry, onDemoReset, onRetry, onLogout, staffAuthEnabled, children } = props;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const activeItem = navigation.flatMap((group) => group.items).find((item) => item.view === view);
@@ -103,8 +104,8 @@ export function AppShell(props: AppShellProps) {
           ))}
         </nav>
         <div className="sidebar-actions">
-          {config?.demoMode && <button className="ghost-button" onClick={onDemoReset}><RefreshCw size={16} /><span>Reset demo data</span></button>}
-          <button className="ghost-button" onClick={onLogout}><LogOut size={16} /><span>Sign out</span></button>
+          {config?.demoMode && staffAuthEnabled && <button className="ghost-button" onClick={onDemoReset}><RefreshCw size={16} /><span>Reset demo data</span></button>}
+          {staffAuthEnabled && <button className="ghost-button" onClick={onLogout}><LogOut size={16} /><span>Sign out</span></button>}
           <button className="ghost-button sidebar-collapse-button" onClick={() => setCollapsed((value) => !value)} aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}>
             {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}<span>{collapsed ? 'Expand menu' : 'Collapse menu'}</span>
           </button>

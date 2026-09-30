@@ -1,6 +1,6 @@
 # CBOS ChatGPT Project Context
 
-Last updated: September 29, 2026
+Last updated: September 30, 2026
 
 Use this file as the starting context for managing CBOS in a new ChatGPT project.
 
@@ -20,7 +20,7 @@ The current app is a full-stack web app:
 
 Current production demo:
 
-- Frontend: https://frontend-gold-alpha-31.vercel.app
+- Frontend: https://businessosmvp.vercel.app
 - API: https://cbos-api.vercel.app
 - API health: https://cbos-api.vercel.app/api/health
 - Public intake form path: `/intake`
@@ -845,12 +845,13 @@ curl https://cbos-api.vercel.app/api/health
 curl https://cbos-api.vercel.app/api/auth/status
 ```
 
-Expected production behavior:
+Expected current fake-data production behavior:
 
 - `/api/health` returns HTTP 200.
-- `/api/auth/status` returns `{"authEnabled":true}`.
-- Staff routes should return 401 without a bearer token.
-- Public intake should remain accessible without staff login.
+- `/api/auth/status` returns `{"authEnabled":false}`.
+- Demo staff routes are open while `ADMIN_PASSWORD` is intentionally unset; do not enter real patient data.
+- Remote demo reset/seed must fail closed without staff authentication.
+- Public intake remains accessible.
 
 ## Current Verified State
 
@@ -866,8 +867,9 @@ Most recent local verification:
 Most recent production spot check:
 
 - `https://cbos-api.vercel.app/api/health` returned 200.
-- `https://cbos-api.vercel.app/api/auth/status` returned `{"authEnabled":true}`.
-- `https://frontend-gold-alpha-31.vercel.app/` returned 200.
+- `https://cbos-api.vercel.app/api/auth/status` returned `{"authEnabled":false}`.
+- `https://cbos-api.vercel.app/api/config` returned `demoMode:true`.
+- `https://businessosmvp.vercel.app/` returned 200 with the current security headers.
 
 ## Known Issues And Boundaries
 
@@ -890,9 +892,9 @@ The current production demo uses Vercel and MongoDB Atlas. This is acceptable fo
 
 ### Staff Password
 
-Production has staff login enabled. The staff password is controlled through the Vercel `ADMIN_PASSWORD` environment variable.
+The current fake-data production demo intentionally has staff login disabled because `ADMIN_PASSWORD` is unset. Do not enter real patient data while access is open.
 
-If forgotten, reset it in Vercel by changing `ADMIN_PASSWORD` and redeploying.
+When staff login is enabled, the password is controlled through the Vercel `ADMIN_PASSWORD` environment variable. Re-enabling access controls is required before any real-data pilot.
 
 ### Real Patient Data
 
@@ -1095,7 +1097,7 @@ The current product is a full-stack app:
 - MongoDB Atlas production demo database
 
 Current production demo:
-- Frontend: https://frontend-gold-alpha-31.vercel.app
+- Frontend: https://businessosmvp.vercel.app
 - API: https://cbos-api.vercel.app
 - Public intake path: /intake
 

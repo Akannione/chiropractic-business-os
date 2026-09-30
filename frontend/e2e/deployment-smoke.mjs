@@ -43,9 +43,14 @@ try {
   // routing or weakening Vercel Deployment Protection.
   let apiOrigin = new URL(baseUrl).origin;
   if (apiDeploymentUrl) {
-    const apiBootstrap = await page.request.get(apiDeploymentUrl);
-    if (!apiBootstrap.ok()) throw new Error(`API preview access bootstrap returned HTTP ${apiBootstrap.status()}.`);
-    apiOrigin = new URL(apiDeploymentUrl).origin;
+    const apiDeployment = new URL(apiDeploymentUrl);
+    if (apiDeployment.searchParams.has('_vercel_share')) {
+      const apiBootstrap = await page.request.get(apiDeploymentUrl);
+      if (!apiBootstrap.ok()) {
+        throw new Error(`API preview access bootstrap returned HTTP ${apiBootstrap.status()}.`);
+      }
+    }
+    apiOrigin = apiDeployment.origin;
   }
 
   const health = await page.request.get(`${apiOrigin}/api/health`);
@@ -63,7 +68,10 @@ try {
       data: {
         files: [{
           name: 'Appointments Smoke.csv',
-          csvText: 'Patient,Appointment Date,Status,Provider\\nSynthetic Patient,2026-09-30,No Show,Dr. Demo',
+          csvText: [
+            'Patient,Appointment Date,Status,Provider',
+            'Synthetic Patient,2026-09-30,No Show,Dr. Demo',
+          ].join('\n'),
         }],
       },
     });

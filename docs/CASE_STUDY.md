@@ -32,7 +32,7 @@ On June 29, 2026:
 - the live React app loaded Atlas-backed data with no browser console errors
 - desktop and mobile WebKit checks passed without page-level horizontal overflow
 
-Live demo: [frontend-gold-alpha-31.vercel.app](https://frontend-gold-alpha-31.vercel.app)
+Live demo: [businessosmvp.vercel.app](https://businessosmvp.vercel.app)
 
 ## Business Value
 

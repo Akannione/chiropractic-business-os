@@ -145,7 +145,7 @@ Review the production walkthrough, decision measures, and ready-to-send invite:
 ```bash
 cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
 sed -n '1,320p' docs/DEMO_WALKTHROUGH.md
-open -a Safari https://frontend-gold-alpha-31.vercel.app
+open -a Safari https://businessosmvp.vercel.app
 ```
 
 The approved invite was sent June 29, 2026 to the clinic contact. The thread was reconciled on July 13 and still contained only that sent invite. A concise threaded follow-up draft now exists in Gmail and has not been sent. Tobi reactivated the CBOS validation lane on 2026-09-07, but the external send is still manual: review the existing draft without recreating it, and let Tobi decide whether to send or edit it. When accepted, use only the production demo's fake records and `docs/NEW_PATIENT_IMPORT_DEMO.csv` during the walkthrough. `docs/METASOFT_REACTIVATION_DEMO.csv` is retained for duplicate-protection discussion only. Keep private contact identifiers out of this public repository.
@@ -207,7 +207,7 @@ Expected:
 
 ```text
 /api/health returns 200.
-/api/auth/status returns {"authEnabled":true}.
+Current fake-data production demo returns {"authEnabled":false}. Do not use real patient data while staff auth is disabled.
 /api/reactivations returns 401 without a staff token, which is expected.
 With a staff token, /api/reactivations returns 200 with overdue, dueToday, upcoming, and rows fields.
 ```
