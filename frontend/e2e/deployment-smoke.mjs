@@ -2,7 +2,20 @@ import { chromium } from '@playwright/test';
 
 const baseUrl = process.env.E2E_DEPLOYMENT_URL;
 const apiDeploymentUrl = process.env.E2E_API_DEPLOYMENT_URL;
+const frontendBypassSecret =
+  process.env.E2E_VERCEL_FRONTEND_BYPASS_SECRET ||
+  process.env.VERCEL_AUTOMATION_BYPASS_SECRET ||
+  '';
+const apiBypassSecret = process.env.E2E_VERCEL_API_BYPASS_SECRET || '';
 if (!baseUrl) throw new Error('Set E2E_DEPLOYMENT_URL to the authorized frontend deployment URL.');
+
+function protectionHeaders(secret, { setCookie = false } = {}) {
+  if (!secret) return {};
+  return {
+    'x-vercel-protection-bypass': secret,
+    ...(setCookie ? { 'x-vercel-set-bypass-cookie': 'true' } : {}),
+  };
+}
 
 function assertNotVercelProtection(response, label) {
   const responseUrl = new URL(response.url());
@@ -12,7 +25,7 @@ function assertNotVercelProtection(response, label) {
     (responseUrl.pathname.startsWith('/login') || responseUrl.pathname.startsWith('/sso-api'))
   ) {
     throw new Error(
-      `${label} is still behind Vercel Deployment Protection. Provide an authorized preview URL or automation bypass instead of treating the Vercel login page as an application response.`,
+      `${label} is still behind Vercel Deployment Protection. Provide an authorized preview/share URL or the appropriate E2E_VERCEL_*_BYPASS_SECRET instead of treating the Vercel login page as an application response.`,
     );
   }
   if (contentType.includes('text/html') && responseUrl.hostname === 'vercel.com') {
@@ -23,7 +36,10 @@ function assertNotVercelProtection(response, label) {
 }
 
 const browser = await chromium.launch({ headless: true });
-const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+const page = await browser.newPage({
+  viewport: { width: 1440, height: 900 },
+  extraHTTPHeaders: protectionHeaders(frontendBypassSecret, { setCookie: true }),
+});
 const errors = [];
 page.on('pageerror', (error) => errors.push(error.message));
 page.on('response', (response) => {
@@ -64,7 +80,7 @@ try {
   if (apiDeploymentUrl) {
     const apiDeployment = new URL(apiDeploymentUrl);
     if (apiDeployment.searchParams.has('_vercel_share')) {
-      const apiBootstrap = await page.request.get(apiDeploymentUrl);
+      const apiBootstrap = await page.request.get(apiDeploymentUrl, { headers: protectionHeaders(apiBypassSecret, { setCookie: true }) });
       assertNotVercelProtection(apiBootstrap, 'API preview access bootstrap');
       if (!apiBootstrap.ok()) {
         throw new Error(`API preview access bootstrap returned HTTP ${apiBootstrap.status()}.`);
@@ -73,21 +89,23 @@ try {
     apiOrigin = apiDeployment.origin;
   }
 
-  const health = await page.request.get(`${apiOrigin}/api/health`);
+  const apiHeaders = apiDeploymentUrl ? protectionHeaders(apiBypassSecret) : {};
+  const health = await page.request.get(`${apiOrigin}/api/health`, { headers: apiHeaders });
   assertNotVercelProtection(health, 'Deployment API health');
   if (!health.ok()) throw new Error(`Deployment API health returned HTTP ${health.status()}.`);
   if (!health.headers()['cache-control']?.includes('no-store')) {
     throw new Error('Deployment API responses must include Cache-Control: no-store.');
   }
-  const authStatus = await page.request.get(`${apiOrigin}/api/auth/status`);
+  const authStatus = await page.request.get(`${apiOrigin}/api/auth/status`, { headers: apiHeaders });
   assertNotVercelProtection(authStatus, 'Deployment auth status');
   if (!authStatus.ok()) throw new Error(`Deployment auth status returned HTTP ${authStatus.status()}.`);
-  const config = await page.request.get(`${apiOrigin}/api/config`);
+  const config = await page.request.get(`${apiOrigin}/api/config`, { headers: apiHeaders });
   assertNotVercelProtection(config, 'Deployment config');
   if (!config.ok()) throw new Error(`Deployment config returned HTTP ${config.status()}.`);
 
   if (apiDeploymentUrl) {
     const intelligence = await page.request.post(`${apiOrigin}/api/intelligence/preview`, {
+      headers: apiHeaders,
       data: {
         files: [{
           name: 'Appointments Smoke.csv',

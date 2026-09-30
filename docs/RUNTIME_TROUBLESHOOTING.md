@@ -151,6 +151,27 @@ The repository should stay small and app-focused:
 
 The old Render deployment path has been removed. For the current deployment flow, use `docs/PRODUCTION_DEPLOYMENT.md`.
 
+### Protected preview smoke tests
+
+Preview deployments intentionally use Vercel Deployment Protection. Do not disable
+that protection merely to make automated smoke tests pass.
+
+The deployment smoke runner accepts Vercel's automation-bypass secrets without
+hardcoding them:
+
+```bash
+E2E_DEPLOYMENT_URL="https://<frontend-preview>.vercel.app" E2E_API_DEPLOYMENT_URL="https://<api-preview>.vercel.app" E2E_VERCEL_FRONTEND_BYPASS_SECRET="<frontend-project-bypass>" E2E_VERCEL_API_BYPASS_SECRET="<api-project-bypass>" npm run test:e2e:deployment
+```
+
+`VERCEL_AUTOMATION_BYPASS_SECRET` is also accepted for the frontend project.
+Because the frontend and API are separate Vercel projects, use separate
+`E2E_VERCEL_*_BYPASS_SECRET` values when each project has its own bypass.
+
+Never commit these secrets or paste them into documentation, source code, test
+artifacts, or chat logs. Without an authorized share URL or bypass secret, a
+Vercel login/SSO redirect is an access-control result, not a CBOS application
+failure.
+
 Before pushing:
 
 ```bash

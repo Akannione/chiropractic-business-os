@@ -1,6 +1,3 @@
-[Reading 143 lines from start (total: 143 lines, 0 remaining)]
-
-[Reading 139 lines from start (total: 139 lines, 0 remaining)]
 
 # Project Status
 
@@ -86,7 +83,6 @@ Rather than a file list that goes stale between cycles, the durable references:
 * `npm run bench`, `npm run test:db`, and `npm run audit:duplicates` for the
   measurements and checks behind the recent work
 
-
 ## Current Branch
 
 `chatgpt/demo-data-safety-ux`
@@ -141,7 +137,3 @@ Internal fake-data walkthrough on September 8, 2026: `npm run demo:csv` regenera
 Reliability audit verification on September 15, 2026: `npm run typecheck`, `npm run test`, `npm run build`, `npm run test:db`, `npm audit --prefix frontend --audit-level=high`, `npm audit --prefix backend --audit-level=moderate`, and `git diff --check` all passed locally. `npm run test` now includes backend service tests and lightweight frontend regression tests. `npm run test:db` passed against a local MongoDB process.
 
 Production smoke verification on September 15, 2026 after pushing the audit work: `https://cbos-api.vercel.app/api/health` returned 200, `https://cbos-api.vercel.app/api/config` returned `practiceTimeZone:"America/New_York"`, `https://cbos-api.vercel.app/api/reactivations` returned 401 without a staff token, `https://cbos-api.vercel.app/api/webhooks/inquiries` returned 404 because `WEBHOOK_SECRET` is not configured, and the frontend returned 200.
-
-[executed on device: Mac.DYN.kennesaw.edu (b857c58a-060b-4e45-97da-c5699c88338c)]
-
-[executed on device: Mac.DYN.kennesaw.edu (b857c58a-060b-4e45-97da-c5699c88338c)]
