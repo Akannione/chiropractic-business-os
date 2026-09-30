@@ -111,7 +111,7 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
             the patient name and a contact detail match an existing record.
           </p>
           {config?.demoMode && (
-            <div className="notice demo-safety-notice" role="note" aria-label="Demo import safety notice">
+            <div id="demo-import-safety" className="notice demo-safety-notice" role="note" aria-label="Demo import safety notice">
               <strong>Demo mode — do not upload a real clinic export.</strong>
               <span> Use fabricated or explicitly deidentified CSV data only.</span>
             </div>
@@ -119,6 +119,7 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
           <input
             accept=".csv,text/csv"
             aria-label="Choose patient inquiry CSV file"
+            aria-describedby={config?.demoMode ? 'demo-import-safety' : undefined}
             type="file"
             onChange={(event) => handleFile(event.target.files?.[0] || null)}
           />
