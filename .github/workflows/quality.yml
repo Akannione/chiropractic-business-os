@@ -1,0 +1,71 @@
+name: CBOS quality gate
+
+on:
+  pull_request:
+  push:
+    branches: [main, chatgpt/pilot-readiness, chatgpt/intelligence-foundation-v1]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+      - name: Install dependencies
+        run: npm run install:all
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit and routing tests
+        run: npm run test
+      - name: Production build
+        run: npm run build
+      - name: Install Playwright Chromium
+        run: npx --prefix frontend playwright install --with-deps chromium
+      - name: Start CBOS API
+        env:
+          BUSINESS_OS_DEMO_MODE: "true"
+          MONGODB_URI: mongodb://127.0.0.1:27017/cbos_e2e
+          PORT: "4010"
+        run: |
+          npm run dev:backend > /tmp/cbos-api.log 2>&1 &
+          echo $! > /tmp/cbos-api.pid
+      - name: Start CBOS frontend
+        env:
+          VITE_API_BASE_URL: http://localhost:4010/api
+        run: |
+          cd frontend
+          ./node_modules/.bin/vite --host localhost --port 5173 > /tmp/cbos-ui.log 2>&1 &
+          echo $! > /tmp/cbos-ui.pid
+      - name: Wait for services
+        run: |
+          for i in {1..30}; do curl -fsS http://localhost:4010/api/health && break || sleep 1; done
+          for i in {1..30}; do curl -fsS http://localhost:5173 >/dev/null && break || sleep 1; done
+      - name: Browser E2E
+        env:
+          E2E_API_URL: http://localhost:4010/api
+        run: npm run test:e2e
+      - name: Upload Playwright artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+          retention-days: 7

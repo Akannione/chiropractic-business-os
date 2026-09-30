@@ -57,7 +57,7 @@ test('Intelligence synthetic demo produces report matches and signals', async ({
 test('Pipeline loads and refreshes', async ({ page }) => {
   await page.getByRole('button', { name: 'Pipeline', exact: true }).click();
   await page.getByRole('button', { name: 'Refresh', exact: true }).click();
-  await expect(page.getByText('Patient Pipeline')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Patient Pipeline', exact: true })).toBeVisible();
 });
 
 test('Import & Export exposes CSV download and guarded import workflow', async ({ page }) => {
