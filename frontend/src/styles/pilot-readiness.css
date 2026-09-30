@@ -1171,3 +1171,10 @@ table tbody tr:hover {
   .workspace-page .page-header-action > * { width:100%; justify-content:center; }
   .pipeline-workspace .pipeline-board { padding:8px; }
 }
+
+/* Keyboard and assistive-technology affordances. */
+.skip-link { background:#172033; border-radius:0 0 10px 10px; color:#fff; font-size:13px; font-weight:800; left:18px; padding:10px 14px; position:fixed; top:0; transform:translateY(-130%); transition:transform .12s ease; z-index:1000; }
+.skip-link:focus { outline:3px solid rgba(255,255,255,.8); outline-offset:2px; transform:translateY(0); }
+.nav-button[aria-current="page"] { position:relative; }
+.nav-button[aria-current="page"]::after { background:#6cc8a3; border-radius:999px; content:""; height:6px; position:absolute; right:10px; width:6px; }
+.content:focus { outline:none; }

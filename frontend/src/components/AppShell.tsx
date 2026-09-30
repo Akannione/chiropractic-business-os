@@ -77,6 +77,7 @@ export function AppShell(props: AppShellProps) {
 
   return (
     <div className={`app-shell ${collapsed ? 'sidebar-collapsed' : ''}`}>
+      <a className="skip-link" href="#main-content">Skip to main content</a>
       {mobileOpen && <button className="sidebar-scrim" aria-label="Close navigation" onClick={() => setMobileOpen(false)} />}
       <aside className={`sidebar ${mobileOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
@@ -108,7 +109,7 @@ export function AppShell(props: AppShellProps) {
         </div>
       </aside>
 
-      <main className="content">
+      <main className="content" id="main-content" tabIndex={-1}>
         <header className="topbar">
           <div className="topbar-title">
             <button className="mobile-menu-button" aria-label="Open navigation" onClick={() => setMobileOpen(true)}><Menu size={20} /></button>
@@ -117,8 +118,8 @@ export function AppShell(props: AppShellProps) {
           <button id="add-inquiry-button" className="primary-button" onClick={onAddInquiry}><Plus size={18} /> Add Inquiry</button>
         </header>
 
-        {message && <div className="notice success">{message}</div>}
-        {error && <div className="notice error">{error}</div>}
+        {message && <div className="notice success" role="status" aria-live="polite">{message}</div>}
+        {error && <div className="notice error" role="alert">{error}</div>}
         {loading ? <div className="empty-state">Loading practice priorities...</div> : children}
       </main>
     </div>
@@ -128,5 +129,5 @@ export function AppShell(props: AppShellProps) {
 type NavButtonProps = { icon: ReactNode; active: boolean; children: ReactNode; onClick: () => void };
 
 function NavButton({ icon, active, children, onClick }: NavButtonProps) {
-  return <button className={`nav-button ${active ? 'active' : ''}`} onClick={onClick}>{icon}<span>{children}</span></button>;
+  return <button className={`nav-button ${active ? 'active' : ''}`} aria-current={active ? 'page' : undefined} onClick={onClick}>{icon}<span>{children}</span></button>;
 }

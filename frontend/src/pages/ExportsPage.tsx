@@ -89,6 +89,7 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
           </p>
           <input
             accept=".csv,text/csv"
+            aria-label="Choose patient inquiry CSV file"
             type="file"
             onChange={(event) => handleFile(event.target.files?.[0] || null)}
           />

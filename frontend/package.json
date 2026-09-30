@@ -21,6 +21,7 @@
     "vite": "^6.0.7"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
     "@types/react": "^19.0.4",
     "@types/react-dom": "^19.0.2",
