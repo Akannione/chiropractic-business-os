@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { api } from '../services/api';
+import { captureTelemetry } from '../services/analytics';
 import type { AppConfig, InquirySource, PublicInquiryInput } from '../types';
 
 type PublicInquiryPageProps = {
@@ -45,6 +46,7 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
     setSubmitting(true);
     try {
       await api.createPublicInquiry(form);
+      captureTelemetry('public_intake_submitted');
       setMessage('Your inquiry was received. The practice team will follow up soon.');
       setForm({
         name: '',

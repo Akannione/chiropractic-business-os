@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { AppShell } from './components/AppShell';
+import { InquiryDrawer } from './components/InquiryDrawer';
 import { useBusinessOsData } from './hooks/useBusinessOsData';
 import { DashboardPage } from './pages/DashboardPage';
 import { DuplicatesPage } from './pages/DuplicatesPage';
 import { ExportsPage } from './pages/ExportsPage';
 import { InquiriesPage } from './pages/InquiriesPage';
+import { IntelligencePage } from './pages/IntelligencePage';
 import { LoginPage } from './pages/LoginPage';
 import { ActivityPage } from './pages/ActivityPage';
 import { MonthlySummaryPage } from './pages/MonthlySummaryPage';
@@ -15,6 +17,8 @@ import { SettingsPage } from './pages/SettingsPage';
 import { WeeklySummaryPage } from './pages/WeeklySummaryPage';
 import { api, clearAuthToken, getAuthToken, setUnauthorizedHandler } from './services/api';
 import type { View } from './types';
+import { pathForView, viewFromPath } from './routing';
+import { captureTelemetry } from './services/analytics';
 
 export function App() {
   if (window.location.pathname === '/intake') {
@@ -83,7 +87,8 @@ function StaffGate() {
 }
 
 function StaffApp({ onLogout }: { onLogout: () => void }) {
-  const [view, setView] = useState<View>('dashboard');
+  const [view, setView] = useState<View>(() => viewFromPath(window.location.pathname));
+  const [inquiryDrawerOpen, setInquiryDrawerOpen] = useState(false);
   const {
     activities,
     config,
@@ -98,11 +103,35 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
     error,
     loading,
     setError,
+    retryLoadData,
     refreshWithMessage,
   } = useBusinessOsData();
 
+  useEffect(() => {
+    const currentView = viewFromPath(window.location.pathname);
+    const canonicalPath = pathForView(currentView);
+    if (window.location.pathname !== canonicalPath) window.history.replaceState({}, '', canonicalPath);
+    const onPopState = () => setView(viewFromPath(window.location.pathname));
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  useEffect(() => {
+    const label = view === 'dashboard' ? 'Today' : view.replace(/-/g, ' ');
+    document.title = `${label.replace(/\b\w/g, (letter) => letter.toUpperCase())} · CBOS`;
+    captureTelemetry('workspace_viewed', { workspace: view });
+  }, [view]);
+
+  function changeView(nextView: View) {
+    const nextPath = pathForView(nextView);
+    if (window.location.pathname !== nextPath) window.history.pushState({}, '', nextPath);
+    setView(nextView);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
   async function resetDemoData() {
     await api.resetDemo();
+    captureTelemetry('demo_data_reset');
     await refreshWithMessage('Demo data reset.');
   }
 
@@ -113,8 +142,10 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
       message={message}
       error={error}
       loading={loading}
-      onViewChange={setView}
+      onViewChange={changeView}
+      onAddInquiry={() => setInquiryDrawerOpen(true)}
       onDemoReset={resetDemoData}
+      onRetry={retryLoadData}
       onLogout={onLogout}
     >
       {view === 'dashboard' && (
@@ -143,6 +174,7 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
       )}
       {view === 'summary' && <WeeklySummaryPage summary={summary} />}
       {view === 'monthly' && <MonthlySummaryPage summary={monthlySummary} />}
+      {view === 'intelligence' && <IntelligencePage setError={setError} />}
       {view === 'activity' && <ActivityPage activities={activities} />}
       {view === 'duplicates' && (
         <DuplicatesPage onChanged={refreshWithMessage} setError={setError} />
@@ -150,6 +182,17 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
       {view === 'exports' && <ExportsPage inquiryTotal={inquiryTotal} onChanged={refreshWithMessage} setError={setError} />}
       {view === 'settings' && <SettingsPage config={config} onChanged={refreshWithMessage} setError={setError} />}
       {view === 'public-intake' && <PublicInquiryPage config={config} />}
+      {inquiryDrawerOpen && (
+        <InquiryDrawer
+          config={config}
+          setError={setError}
+          onClose={() => setInquiryDrawerOpen(false)}
+          onCreated={() => {
+            captureTelemetry('inquiry_created', { entry_point: 'staff_drawer' });
+            return refreshWithMessage('Patient inquiry added.');
+          }}
+        />
+      )}
     </AppShell>
   );
 }

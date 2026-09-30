@@ -1,0 +1,110 @@
+name: CBOS quality gate
+
+on:
+  pull_request:
+  push:
+    branches: [main, chatgpt/pilot-readiness, chatgpt/intelligence-foundation-v1]
+
+# Push + pull_request can target the same branch. Keep only the newest quality
+# run for that branch so rapid hardening commits do not consume duplicate CI.
+concurrency:
+  group: cbos-quality-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+      - name: Tracked-secret scan
+        run: npm run check:secrets
+      - name: Install dependencies
+        run: npm ci --prefix backend && npm ci --prefix frontend
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit and routing tests
+        run: npm run test
+      - name: Database integration tests
+        run: npm run test:db
+      - name: Production dependency audit
+        run: |
+          npm audit --prefix frontend --omit=dev --audit-level=high
+          npm audit --prefix backend --omit=dev --audit-level=moderate
+      - name: Production build
+        run: npm run build
+      - name: Frontend critical-bundle budget
+        run: npm run check:bundle
+      - name: Install Playwright browsers
+        run: npx --prefix frontend playwright install --with-deps chromium firefox webkit
+      - name: Start CBOS API
+        env:
+          BUSINESS_OS_DEMO_MODE: "true"
+          MONGODB_URI: mongodb://127.0.0.1:27017/cbos_e2e
+          PORT: "4010"
+        run: |
+          npm run dev:backend > /tmp/cbos-api.log 2>&1 &
+          echo $! > /tmp/cbos-api.pid
+      - name: Start CBOS frontend
+        env:
+          VITE_API_BASE_URL: http://localhost:4010/api
+        run: |
+          cd frontend
+          ./node_modules/.bin/vite --host localhost --port 5173 > /tmp/cbos-ui.log 2>&1 &
+          echo $! > /tmp/cbos-ui.pid
+      - name: Wait for services
+        run: |
+          for i in {1..30}; do curl -fsS http://localhost:4010/api/health && break || sleep 1; done
+          for i in {1..30}; do curl -fsS http://localhost:5173 >/dev/null && break || sleep 1; done
+      - name: Cross-browser E2E
+        env:
+          E2E_API_URL: http://localhost:4010/api
+        run: npm run test:e2e:cross-browser
+      - name: Start auth-enabled API
+        env:
+          BUSINESS_OS_DEMO_MODE: "true"
+          MONGODB_URI: mongodb://127.0.0.1:27017/cbos_auth_e2e
+          PORT: "4020"
+          CORS_ORIGIN: http://localhost:5174
+          ADMIN_PASSWORD: cbos-e2e-password
+          AUTH_TOKEN_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+        run: npm run dev:backend > /tmp/cbos-auth-api.log 2>&1 &
+      - name: Start auth-enabled frontend
+        env:
+          VITE_API_BASE_URL: http://localhost:4020/api
+        run: cd frontend && ./node_modules/.bin/vite --host localhost --port 5174 > /tmp/cbos-auth-ui.log 2>&1 &
+      - name: Wait for auth services
+        run: |
+          for i in {1..30}; do curl -fsS http://localhost:4020/api/health && break || sleep 1; done
+          for i in {1..30}; do curl -fsS http://localhost:5174 >/dev/null && break || sleep 1; done
+      - name: Auth browser smoke
+        env:
+          E2E_AUTH_FRONTEND_URL: http://localhost:5174
+          E2E_AUTH_API_URL: http://localhost:4020/api
+          E2E_AUTH_PASSWORD: cbos-e2e-password
+        run: npm run test:e2e:auth
+      - name: Upload Playwright artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+          retention-days: 7

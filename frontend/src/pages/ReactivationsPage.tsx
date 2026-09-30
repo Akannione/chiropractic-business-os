@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { KpiCard } from '../components/KpiCard';
 import { Panel } from '../components/Panel';
+import { PageHeader } from '../components/PageHeader';
 import { api } from '../services/api';
 import type {
   AppConfig,
@@ -113,14 +114,8 @@ export function ReactivationsPage({
   }
 
   return (
-    <section className="stack">
-      <div className="section-heading">
-        <h2>Patient Reactivations</h2>
-        <p>
-          See patients whose expected return date is overdue, due today, or coming up,
-          then record the follow-up result.
-        </p>
-      </div>
+    <section className="stack workspace-page reactivations-workspace">
+      <PageHeader eyebrow="Recovery workflow" title="Patient Reactivations" description="Prioritize patients whose expected return date is overdue, due today, or coming up, then record the next action." />
 
       <div className="kpi-grid small">
         <KpiCard

@@ -1,7 +1,9 @@
 import { Download } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { KpiCard } from '../components/KpiCard';
+import { PageHeader } from '../components/PageHeader';
 import { api } from '../services/api';
+import { captureTelemetry } from '../services/analytics';
 import type { ImportPreview } from '../types';
 import { todayIso } from '../utils/format';
 
@@ -12,6 +14,15 @@ type ExportsPageProps = {
   setError: (message: string) => void;
 };
 
+export const MAX_IMPORT_CSV_BYTES = 1_000_000;
+
+export function importFileError(file: Pick<File, 'name' | 'size'>) {
+  if (file.size > MAX_IMPORT_CSV_BYTES) {
+    return `${file.name} is larger than the 1 MB import limit. Choose a smaller CSV.`;
+  }
+  return '';
+}
+
 export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPageProps) {
   const [csvText, setCsvText] = useState('');
   const [preview, setPreview] = useState<ImportPreview | null>(null);
@@ -21,12 +32,23 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
   async function handleFile(file: File | null) {
     setError('');
     setPreview(null);
+    setCsvText('');
     if (!file) return;
-    const text = await file.text();
-    setCsvText(text);
+
+    const validationError = importFileError(file);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     try {
-      setPreview(await api.previewImportCsv(text));
+      const text = await file.text();
+      setCsvText(text);
+      const result = await api.previewImportCsv(text);
+      setPreview(result);
+      captureTelemetry('csv_import_previewed', { importable_rows: result.importableRows, error_count: result.errorRows });
     } catch (nextError) {
+      setCsvText('');
       setError((nextError as Error).message);
     }
   }
@@ -37,6 +59,7 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
     setError('');
     try {
       const result = await api.importCsv(csvText);
+      captureTelemetry('csv_import_completed', { imported_rows: result.imported, skipped_duplicates: result.skippedDuplicates });
       setCsvText('');
       setPreview(null);
       await onChanged(
@@ -65,11 +88,8 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
   }
 
   return (
-    <section className="stack">
-      <div className="section-heading">
-        <h2>Exports</h2>
-        <p>Download practice-facing CSV files or import an existing inquiry list without creating duplicates.</p>
-      </div>
+    <section className="stack workspace-page exports-workspace">
+      <PageHeader eyebrow="Data tools" title="Import & Export" description="Move practice data in and out of CBOS with preview and duplicate protection." />
       <div className="export-card">
         <Download />
         <div>
@@ -91,6 +111,7 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
           </p>
           <input
             accept=".csv,text/csv"
+            aria-label="Choose patient inquiry CSV file"
             type="file"
             onChange={(event) => handleFile(event.target.files?.[0] || null)}
           />

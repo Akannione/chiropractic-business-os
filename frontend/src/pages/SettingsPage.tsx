@@ -1,3 +1,4 @@
+import { PageHeader } from '../components/PageHeader';
 import { api } from '../services/api';
 import type { AppConfig } from '../types';
 
@@ -23,11 +24,8 @@ export function SettingsPage({ config, onChanged, setError }: SettingsPageProps)
   }
 
   return (
-    <section className="stack">
-      <div className="section-heading">
-        <h2>Practice Settings</h2>
-        <p>Review the simple deployment settings that control practice name, demo mode, and notification behavior.</p>
-      </div>
+    <section className="stack workspace-page settings-workspace">
+      <PageHeader eyebrow="Configuration" title="Practice Settings" description="Review practice identity, demo mode, and staff notification behavior." />
       <div className="settings-grid">
         <div className="panel">
           <div className="panel-heading">
