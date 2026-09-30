@@ -40,7 +40,10 @@ test('Today primary workflow updates a queued inquiry', async ({ page }) => {
 
 test('Add Inquiry drawer creates an inquiry and closes', async ({ page }) => {
   await page.getByRole('button', { name: 'Add Inquiry', exact: true }).click();
-  await page.getByLabel('Patient Name').fill('E2E Front Desk Test');
+  const dialog = page.getByRole('dialog', { name: 'Add Patient Inquiry' });
+  await expect(dialog.getByLabel('Demo data safety notice')).toContainText(/fabricated information only/i);
+  await expect(dialog.getByLabel('Patient Name')).toHaveAttribute('autocomplete', 'off');
+  await dialog.getByLabel('Patient Name').fill('E2E Front Desk Test');
   await page.getByRole('textbox', { name: 'Phone', exact: true }).fill('4045550199');
   await page.getByRole('textbox', { name: 'Email', exact: true }).fill('e2e@example.com');
   await page.getByRole('button', { name: 'Add Inquiry', exact: true }).last().click();

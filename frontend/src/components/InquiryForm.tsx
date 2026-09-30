@@ -95,17 +95,23 @@ export function InquiryForm({
 
   return (
     <form className="inquiry-form" onSubmit={submit}>
+      {config?.demoMode && (
+        <div className="notice demo-safety-notice full" role="note" aria-label="Demo data safety notice">
+          <strong>Demo mode — fabricated information only.</strong>
+          <span> Do not enter real patient names, contact details, health information, or other sensitive data.</span>
+        </div>
+      )}
       <label>
         Patient Name
-        <input autoFocus={autoFocus} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
+        <input autoFocus={autoFocus} autoComplete={config?.demoMode ? 'off' : 'name'} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
       </label>
       <label>
         Phone
-        <input value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} required />
+        <input autoComplete={config?.demoMode ? 'off' : 'tel'} value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} required />
       </label>
       <label>
         Email
-        <input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required />
+        <input autoComplete={config?.demoMode ? 'off' : 'email'} type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required />
       </label>
       <label>
         Requested Service
