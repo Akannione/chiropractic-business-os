@@ -1291,3 +1291,23 @@ table tbody tr:hover {
   line-height: 1.6;
   margin: 0 0 24px;
 }
+
+
+.demo-safety-notice {
+  align-items: flex-start;
+  background: #fff8e7;
+  border-color: #e8c66b;
+  color: #694d00;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.demo-safety-notice strong {
+  color: #4f3900;
+}
+
+.public-demo-safety {
+  margin: 18px 0 4px;
+}

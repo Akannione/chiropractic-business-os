@@ -9,12 +9,22 @@ test.beforeEach(async ({ request }) => {
 
 test('public intake submits a new inquiry end to end', async ({ page }) => {
   await page.goto('/intake?source=E2E');
+  await expect(page.getByLabel('Demo data safety notice')).toContainText('fabricated information only');
+  await expect(page.getByRole('textbox', { name: 'Patient Name', exact: true })).toHaveAttribute('autocomplete', 'off');
   await page.getByRole('textbox', { name: 'Patient Name', exact: true }).fill('Public E2E Patient');
   await page.getByRole('textbox', { name: 'Phone', exact: true }).fill('4045550188');
   await page.getByRole('textbox', { name: 'Email', exact: true }).fill('public-e2e@example.com');
   await page.getByLabel('Requested Service', { exact: true }).fill('Spinal Adjustment');
-  await page.getByRole('button', { name: 'Send Inquiry to Practice' }).click();
-  await expect(page.getByText(/thank|received|sent/i).first()).toBeVisible();
+  await page.getByRole('button', { name: 'Submit Demo Inquiry' }).click();
+  await expect(page.getByText(/demo inquiry received/i)).toBeVisible();
+});
+
+test('staff workspace makes fake-data-only demo status explicit', async ({ page }) => {
+  await page.goto('/');
+  const notice = page.getByLabel('Demo data safety notice');
+  await expect(notice).toBeVisible();
+  await expect(notice).toContainText(/fake data only/i);
+  await expect(notice).toContainText(/Do not enter real patient/i);
 });
 
 test('reactivation queue saves front-desk follow-up details', async ({ page }) => {

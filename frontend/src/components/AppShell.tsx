@@ -121,6 +121,12 @@ export function AppShell(props: AppShellProps) {
           <button id="add-inquiry-button" className="primary-button" onClick={onAddInquiry}><Plus size={18} /> Add Inquiry</button>
         </header>
 
+        {config?.demoMode && (
+          <div className="notice demo-safety-notice" role="note" aria-label="Demo data safety notice">
+            <strong>{staffAuthEnabled ? 'Demo mode — fake data only.' : 'Public demo — fake data only.'}</strong>
+            <span> Do not enter real patient names, contact details, health information, or other sensitive data.</span>
+          </div>
+        )}
         {message && <div className="notice success" role="status" aria-live="polite">{message}</div>}
         {error && <div className="notice error error-with-action" role="alert"><span>{error}</span><button type="button" onClick={() => void onRetry()}>Try again</button></div>}
         {loading ? <WorkspaceSkeleton /> : children}
