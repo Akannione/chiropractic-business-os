@@ -5,6 +5,7 @@ import {
   DuplicateGroups,
   ImportPreview,
   ImportResult,
+  IntelligencePreview,
   Inquiry,
   InquiryPage,
   InquiryQuery,
@@ -41,15 +42,19 @@ const publicPaths = new Set(['/auth/status', '/auth/login', '/config', '/public/
 let unauthorizedHandler: (() => void) | null = null;
 
 export function getAuthToken() {
-  return window.localStorage.getItem(authTokenKey) || '';
+  return window.sessionStorage.getItem(authTokenKey) || '';
 }
 
 export function setAuthToken(token: string) {
-  window.localStorage.setItem(authTokenKey, token);
+  // Keep the temporary shared-password session scoped to this browser tab.
+  // Clear the legacy persistent token if a user upgrades from an older build.
+  window.localStorage.removeItem(authTokenKey);
+  window.sessionStorage.setItem(authTokenKey, token);
 }
 
 export function clearAuthToken() {
   window.localStorage.removeItem(authTokenKey);
+  window.sessionStorage.removeItem(authTokenKey);
 }
 
 export function setUnauthorizedHandler(handler: (() => void) | null) {
@@ -151,6 +156,11 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'text/csv' },
       body: csvText,
+    }),
+  previewIntelligence: (files: Array<{ name: string; csvText: string }>) =>
+    request<IntelligencePreview>('/intelligence/preview', {
+      method: 'POST',
+      body: JSON.stringify({ files }),
     }),
   sendDailySummary: () => request<ReminderResult>('/reminders/daily-summary', { method: 'POST' }),
   resetDemo: () => request<{ inserted: number }>('/demo/reset', { method: 'POST' }),

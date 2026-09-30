@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Panel } from '../components/Panel';
+import { PageHeader } from '../components/PageHeader';
 import { StatusChip } from '../components/StatusChip';
 import { api } from '../services/api';
+import { captureTelemetry } from '../services/analytics';
 import type { Inquiry } from '../types';
 import { displayDate, money } from '../utils/format';
 
@@ -53,6 +55,7 @@ export function DuplicatesPage({ onChanged, setError }: DuplicatesPageProps) {
       for (const other of group.filter((inquiry) => inquiry.id !== keep.id)) {
         await api.mergeInquiries(keep.id, other.id);
       }
+      captureTelemetry('duplicate_merge_completed', { records_merged: Math.max(0, group.length - 1) });
       await load();
       await onChanged(`Merged into ${keep.name}.`);
     } catch (error) {
@@ -64,15 +67,8 @@ export function DuplicatesPage({ onChanged, setError }: DuplicatesPageProps) {
   }
 
   return (
-    <section className="stack">
-      <div className="section-heading">
-        <h2>Possible Duplicates</h2>
-        <p>
-          Patients who appear more than once, usually because the intake form was submitted twice.
-          People who share a phone number or email but have different names are treated as a
-          household, not a duplicate, and are not listed here.
-        </p>
-      </div>
+    <section className="stack workspace-page duplicates-workspace">
+      <PageHeader eyebrow="Data quality" title="Possible Duplicates" description="Review records that appear to represent the same patient before merging anything. Shared household contact details alone are not treated as duplicates." />
 
       {loading ? (
         <div className="empty-state">Checking for duplicates...</div>

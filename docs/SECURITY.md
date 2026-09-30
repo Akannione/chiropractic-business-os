@@ -122,7 +122,9 @@ address, Atlas private endpoints, or at minimum a documented review.
   one member of staff. Acceptable for a pilot; not for sustained real use.
 * **Sessions cannot be revoked.** Tokens are self-contained HMACs valid for 12
   hours. Changing `AUTH_TOKEN_SECRET` invalidates all of them at once, which is
-  the only revocation available.
+  the only revocation available. The browser keeps the token in tab-scoped
+  session storage rather than persistent local storage, which limits persistence
+  but does not replace individual identity or server-side revocation.
 * **No audit trail for reads.** The activity log records creation and updates,
   not who viewed which patient.
 * **No encryption beyond transport and Atlas at-rest defaults.** Fields are not

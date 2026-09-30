@@ -1,6 +1,7 @@
 import { ArrowRight, RefreshCw } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Panel } from '../components/Panel';
+import { PageHeader } from '../components/PageHeader';
 import { StatusChip } from '../components/StatusChip';
 import { api } from '../services/api';
 import type { AppConfig, Inquiry, InquiryStatus } from '../types';
@@ -90,19 +91,8 @@ export function PipelinePage({ config, onChanged, setError }: PipelinePageProps)
   }
 
   return (
-    <section className="stack">
-      <div className="section-heading section-heading-row">
-        <div>
-          <h2>Patient Pipeline Board</h2>
-          <p>
-            Review the newest patient inquiries by current status and move them forward without
-            digging through a table.
-          </p>
-        </div>
-        <button className="primary-button secondary" type="button" onClick={loadBoard}>
-          <RefreshCw size={17} /> Refresh
-        </button>
-      </div>
+    <section className="stack workspace-page pipeline-workspace">
+      <PageHeader eyebrow="Workflow" title="Patient Pipeline" description="Review patient inquiries by status and move them forward without digging through a table." action={<button className="primary-button secondary" type="button" onClick={loadBoard}><RefreshCw size={17} /> Refresh</button>} />
 
       <Panel
         title="Pipeline Overview"

@@ -20,6 +20,17 @@ export function asyncHandler(handler: (req: Request, res: Response, next: NextFu
 }
 
 export function errorHandler(error: Error, _req: Request, res: Response, _next: NextFunction) {
+  // Express/body-parser errors are not our HttpError class. Preserve their
+  // known client status without exposing parser messages or request contents.
+  const parserError = error as Error & { type?: string; status?: number };
+  if (parserError.type === 'entity.parse.failed' && parserError.status === 400) {
+    res.status(400).json({ message: 'Request body must contain valid JSON.' });
+    return;
+  }
+  if (parserError.type === 'entity.too.large' && parserError.status === 413) {
+    res.status(413).json({ message: 'Request body exceeds the allowed size.' });
+    return;
+  }
   const statusCode = error instanceof HttpError ? error.statusCode : 500;
   res.status(statusCode).json({
     message:

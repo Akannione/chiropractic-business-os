@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Panel } from '../components/Panel';
-import { InquiryForm } from '../components/InquiryForm';
+import { PageHeader } from '../components/PageHeader';
 import { StatusChip } from '../components/StatusChip';
 import { api } from '../services/api';
 import type {
@@ -226,28 +226,8 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
   }
 
   return (
-    <section className="stack">
-      <div className="section-heading">
-        <h2>Patient Inquiries</h2>
-        <p>Add inquiries, find the right patient quickly, and manage follow-up details in one place.</p>
-      </div>
-
-      <Panel title="Add Patient Inquiry" description="Use this for phone calls, walk-ins, or staff-entered inquiries.">
-        <InquiryForm
-          config={config}
-          onSubmit={async (form) => {
-            setError('');
-            try {
-              const created = await api.createInquiry(form);
-              setSelectedId(created.id);
-              await reloadList('Patient inquiry added.');
-            } catch (nextError) {
-              setError((nextError as Error).message);
-              throw nextError;
-            }
-          }}
-        />
-      </Panel>
+    <section className="stack workspace-page inquiries-workspace">
+      <PageHeader eyebrow="Front desk workflow" title="Patient Inquiries" description="Find the right inquiry quickly, manage follow-up details, and keep opportunities moving." />
 
       <Panel title="Find Patient Inquiry" description="Search or filter before opening the inquiry details.">
         <div className="filter-grid">

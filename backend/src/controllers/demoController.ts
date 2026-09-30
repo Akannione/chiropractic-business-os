@@ -10,6 +10,7 @@ export async function postDemoReset(_req: Request, res: Response) {
 }
 
 export async function postSeed(_req: Request, res: Response) {
+  if (!env.demoMode) throw new HttpError(403, 'Demo seed is disabled.');
   const inserted = await seedSampleDataIfEmpty();
   res.json({ inserted });
 }

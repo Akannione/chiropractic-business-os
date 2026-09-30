@@ -1,6 +1,6 @@
 # CBOS ChatGPT Project Context
 
-Last updated: September 19, 2026
+Last updated: September 29, 2026
 
 Use this file as the starting context for managing CBOS in a new ChatGPT project.
 
@@ -59,6 +59,25 @@ Next intended sequence:
 3. Record the clinic's Go / Revise / Stop outcome and exact workflow feedback.
 4. Offer the controlled 30-day paid pilot only if workflow fit is demonstrated.
 5. Keep real patient data blocked until authentication, privacy, access, backup, retention, and hosting requirements in `docs/REAL_DATA_READINESS.md` are satisfied.
+
+## September 29, 2026 Intelligence Foundation
+
+A separate development branch, `chatgpt/intelligence-foundation-v1`, now contains a bounded operational-intelligence preview. It does not replace or disturb PR #6.
+
+Implemented on that branch:
+
+- Review -> Intelligence workspace.
+- Multi-CSV preview with report-type recognition from filename/header evidence, semantic evidence mapping, and repeated-row detection.
+- Known report families for appointments, adjustments, patient lists, provider hours, referral sources, sales, accounts receivable, payments/payouts, packages/care plans, and bank transactions.
+- Unknown reports remain unmapped.
+- Evidence-backed preview signals for missed/cancelled appointments, positive accounts-receivable exposure, and provider schedule utilization when required columns exist.
+- Fully synthetic demo data built into the UI.
+- No persistence of analyzed export contents and no source-system writeback.
+- Real patient data / PHI remains blocked.
+
+This is a validation foundation, not approval to build recurring EHR sync, FHIR/HL7 integrations, a full EHR, or a production healthcare data platform. Source-specific adapters still require a manually reviewed de-identified sample and workflow evidence.
+
+See `docs/INTELLIGENCE_FOUNDATION_V1.md` and `docs/CONNECTOR_ARCHITECTURE.md`.
 
 ## Core Positioning
 

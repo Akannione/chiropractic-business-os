@@ -1,46 +1,49 @@
-# Product Analytics Plan
+# CBOS Product Analytics Contract
 
-## Principle
+## Objective
 
-Measure whether the workflow is used and completed without sending patient identities, contact information, free text, clinical content, or other PHI to third-party analytics.
+CBOS uses product analytics to answer whether the product helps clinic staff complete operational work. Analytics must not become a second patient-data store.
 
-## Pilot questions
+## Privacy boundary
 
-- Do staff open the Today queue on working days?
-- Can they identify and complete the first action quickly?
-- Are outcomes and owners recorded consistently?
-- Is the weekly review used?
-- Does CSV import reduce duplicate entry?
-- Which screen or task causes abandonment?
+Never send these values to product analytics:
 
-## Minimal event design
+- patient or staff names
+- phone numbers or email addresses
+- inquiry IDs, patient IDs, record IDs, or free-text identifiers
+- notes, activity context, requested-service free text, or clinical details
+- CSV filenames, CSV contents, source rows, or imported field values
+- authentication tokens, passwords, IP addresses intentionally retained by CBOS, or raw error messages
 
-If implemented, record first-party operational events with no patient payload:
+The browser client disables autocapture, automatic page views, automatic exception capture, performance capture, surveys, remote external dependency loading, feature-flag evaluation, session recording, persistent analytics storage, and person profiles. Localhost and automated browser sessions are excluded.
 
-| Event | Allowed properties |
-| --- | --- |
-| `today_viewed` | timestamp, pseudonymous workspace ID, role |
-| `action_opened` | timestamp, action category, urgency bucket |
-| `action_completed` | timestamp, outcome category, elapsed-time bucket |
-| `reactivation_viewed` | timestamp, queue-size bucket |
-| `weekly_review_viewed` | timestamp |
-| `import_previewed` | timestamp, row-count bucket, error-count bucket |
-| `import_applied` | timestamp, created/updated/rejected counts |
+Telemetry is enforced twice: callers pass through a per-event property schema before events are queued, and the PostHog `before_send` boundary rebuilds outbound event properties from that same schema. Unknown events, unknown properties, free-text values, invalid counts, URL/referrer metadata, and arbitrary SDK super-properties are dropped. Only anonymous UUID-shaped SDK identity fields needed to submit the event are retained; identified user values fail closed.
 
-Never include names, phone numbers, emails, notes, services tied to a person, record IDs from the EHR, dates of care, or raw URLs/query strings.
+## Event taxonomy
 
-## Current implementation decision
+| Event | Purpose | Allowed properties |
+| --- | --- | --- |
+| workspace_viewed | Understand which operational workspaces are actually used | workspace |
+| inquiry_created | Measure staff-side inquiry capture | entry_point |
+| follow_up_action_completed | Measure completion of Today-queue work | resulting_status |
+| intelligence_preview_completed | Validate Intelligence workflow adoption | source, files_received, recognized_reports, signals_found |
+| csv_import_previewed | Measure import preparation/friction | importable_rows, error_count |
+| csv_import_completed | Measure successful ingestion | imported_rows, skipped_duplicates |
+| duplicate_merge_completed | Measure data-quality workflow use | records_merged |
+| public_intake_submitted | Measure public intake completion | none |
+| demo_data_reset | Separate demo/reset behavior from normal use | none |
 
-Do not add analytics storage during this phase. The pilot can use the existing activity records, facilitator timing, and success scorecard. Adding a new event store before the data-retention and real-data architecture are approved would create avoidable privacy and schema decisions.
+## Product questions
 
-## Implementation threshold
+The initial instrumentation should answer:
 
-Implement first-party analytics only when:
+1. Does a staff session reach Today and then take an operational action?
+2. Which workspaces are used repeatedly versus ignored?
+3. Do staff complete follow-up actions from Today?
+4. Do clinics reach Intelligence and successfully recognize reports/signals?
+5. Does CSV ingestion progress from preview to successful import?
+6. Are data-quality tools used before pilots introduce more integrations?
 
-- a paid pilot needs measurement beyond the scorecard;
-- permitted events and retention are approved;
-- workspace identity and staff roles are defined;
-- deletion/export behavior is documented;
-- tests verify prohibited fields are never accepted.
+## Deliberate exclusions
 
-Status: **YELLOW**. Measurement is designed and can be performed manually; automated telemetry is intentionally deferred.
+No session replay, heatmaps, broad autocapture, person identification, user profiles, or clinical/patient segmentation should be enabled for the MVP. Any future expansion requires a separate privacy/security review before implementation.

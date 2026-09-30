@@ -74,3 +74,17 @@ Ask whether the export contains:
 - **Stop:** no reliable identity, essential dates are unavailable, or staff would still maintain the same fields twice.
 
 Status: **YELLOW**. Architecture is defined; a de-identified real-system export has not been inspected.
+
+## Implemented preview foundation — September 29, 2026
+
+A non-persistent intelligence preview now implements the first bounded portion of this architecture:
+
+- multiple CSV files can be submitted together;
+- files are classified by filename/header evidence into known operational report families;
+- unknown files remain unmapped;
+- supported operational metrics are derived only when required columns are detected;
+- the preview returns report metadata and review signals without importing rows or writing to a source system.
+
+See `docs/INTELLIGENCE_FOUNDATION_V1.md`.
+
+This does **not** change the recurring-sync gate above. Stable identity, field authority, diffs, conflict handling, persistence, source-specific adapters, and real-data use still require validation.
