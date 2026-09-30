@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { KpiCard } from '../components/KpiCard';
 import { PageHeader } from '../components/PageHeader';
 import { api } from '../services/api';
+import { captureTelemetry } from '../services/analytics';
 import type { ImportPreview } from '../types';
 import { todayIso } from '../utils/format';
 
@@ -26,7 +27,9 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
     const text = await file.text();
     setCsvText(text);
     try {
-      setPreview(await api.previewImportCsv(text));
+      const result = await api.previewImportCsv(text);
+      setPreview(result);
+      captureTelemetry('csv_import_previewed', { importable_rows: result.importableRows, error_count: result.errorRows });
     } catch (nextError) {
       setError((nextError as Error).message);
     }
@@ -38,6 +41,7 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
     setError('');
     try {
       const result = await api.importCsv(csvText);
+      captureTelemetry('csv_import_completed', { imported_rows: result.imported, skipped_duplicates: result.skippedDuplicates });
       setCsvText('');
       setPreview(null);
       await onChanged(

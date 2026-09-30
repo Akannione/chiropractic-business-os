@@ -5,6 +5,7 @@ import { InquiryTable } from '../components/InquiryTable';
 import { DataFreshness } from '../components/DataFreshness';
 import { StatusChip } from '../components/StatusChip';
 import { api } from '../services/api';
+import { captureTelemetry } from '../services/analytics';
 import type { AppConfig, Inquiry, InquiryStatus, Kpis } from '../types';
 import { addDaysIso, displayDate, money, percent, todayIso } from '../utils/format';
 
@@ -40,6 +41,7 @@ export function DashboardPage({ kpis, config, recentInquiries, followUps, onChan
     setError('');
     try {
       await api.updateInquiry(inquiry.id, { status, next_follow_up_date: nextFollowUpDate, notes: inquiry.notes });
+      captureTelemetry('follow_up_action_completed', { resulting_status: status });
       await onChanged(`${inquiry.name} moved to ${status}.`);
     } catch (nextError) {
       setError((nextError as Error).message);

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { KpiCard } from '../components/KpiCard';
 import { PageHeader } from '../components/PageHeader';
 import { api } from '../services/api';
+import { captureTelemetry } from '../services/analytics';
 import type { IntelligencePreview, IntelligenceSignal } from '../types';
 
 type IntelligencePageProps = { setError: (message: string) => void };
@@ -30,9 +31,19 @@ export function IntelligencePage({ setError }: IntelligencePageProps) {
   const [analyzing, setAnalyzing] = useState(false);
   const [selectedNames, setSelectedNames] = useState<string[]>([]);
 
-  async function analyze(files: Array<{ name: string; csvText: string }>) {
+  async function analyze(files: Array<{ name: string; csvText: string }>, source: 'sample' | 'upload') {
     setAnalyzing(true); setError('');
-    try { setPreview(await api.previewIntelligence(files)); setSelectedNames(files.map((file) => file.name)); }
+    try {
+      const result = await api.previewIntelligence(files);
+      setPreview(result);
+      setSelectedNames(files.map((file) => file.name));
+      captureTelemetry('intelligence_preview_completed', {
+        source,
+        files_received: result.summary.filesReceived,
+        recognized_reports: result.summary.recognizedReports,
+        signals_found: result.summary.signalsFound,
+      });
+    }
     catch (error) { setError((error as Error).message); }
     finally { setAnalyzing(false); }
   }
@@ -43,7 +54,7 @@ export function IntelligencePage({ setError }: IntelligencePageProps) {
     const oversized = files.find((file) => file.size > 500_000);
     if (oversized) { setError(`${oversized.name} is larger than the 500 KB preview limit.`); return; }
     if (files.reduce((sum, file) => sum + file.size, 0) > 900_000) { setError('The selected files exceed the 900 KB combined preview limit. Analyze a smaller batch.'); return; }
-    await analyze(await Promise.all(files.map(async (file) => ({ name: file.name, csvText: await file.text() }))));
+    await analyze(await Promise.all(files.map(async (file) => ({ name: file.name, csvText: await file.text() }))), 'upload');
   }
 
   return (
@@ -65,7 +76,7 @@ export function IntelligencePage({ setError }: IntelligencePageProps) {
           </div>
         </div>
         <div className="intelligence-start-actions">
-          <button className="ghost-action" type="button" disabled={analyzing} onClick={() => analyze(syntheticFiles)}>
+          <button className="ghost-action" type="button" disabled={analyzing} onClick={() => analyze(syntheticFiles, 'sample')}>
             <Lightbulb size={18} /> Try sample data
           </button>
           <label className="primary-button intelligence-file-label">

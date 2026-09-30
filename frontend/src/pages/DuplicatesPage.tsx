@@ -3,6 +3,7 @@ import { Panel } from '../components/Panel';
 import { PageHeader } from '../components/PageHeader';
 import { StatusChip } from '../components/StatusChip';
 import { api } from '../services/api';
+import { captureTelemetry } from '../services/analytics';
 import type { Inquiry } from '../types';
 import { displayDate, money } from '../utils/format';
 
@@ -54,6 +55,7 @@ export function DuplicatesPage({ onChanged, setError }: DuplicatesPageProps) {
       for (const other of group.filter((inquiry) => inquiry.id !== keep.id)) {
         await api.mergeInquiries(keep.id, other.id);
       }
+      captureTelemetry('duplicate_merge_completed', { records_merged: Math.max(0, group.length - 1) });
       await load();
       await onChanged(`Merged into ${keep.name}.`);
     } catch (error) {

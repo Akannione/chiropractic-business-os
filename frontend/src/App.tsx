@@ -18,6 +18,7 @@ import { WeeklySummaryPage } from './pages/WeeklySummaryPage';
 import { api, clearAuthToken, getAuthToken, setUnauthorizedHandler } from './services/api';
 import type { View } from './types';
 import { pathForView, viewFromPath } from './routing';
+import { captureTelemetry } from './services/analytics';
 
 export function App() {
   if (window.location.pathname === '/intake') {
@@ -118,6 +119,7 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
   useEffect(() => {
     const label = view === 'dashboard' ? 'Today' : view.replace(/-/g, ' ');
     document.title = `${label.replace(/\b\w/g, (letter) => letter.toUpperCase())} · CBOS`;
+    captureTelemetry('workspace_viewed', { workspace: view });
   }, [view]);
 
   function changeView(nextView: View) {
@@ -129,6 +131,7 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
 
   async function resetDemoData() {
     await api.resetDemo();
+    captureTelemetry('demo_data_reset');
     await refreshWithMessage('Demo data reset.');
   }
 
@@ -184,7 +187,10 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
           config={config}
           setError={setError}
           onClose={() => setInquiryDrawerOpen(false)}
-          onCreated={() => refreshWithMessage('Patient inquiry added.')}
+          onCreated={() => {
+            captureTelemetry('inquiry_created', { entry_point: 'staff_drawer' });
+            return refreshWithMessage('Patient inquiry added.');
+          }}
         />
       )}
     </AppShell>
