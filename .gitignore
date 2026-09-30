@@ -37,3 +37,4 @@ demo_recordings/cbos_walkthrough_demo.mp4
 
 frontend/playwright-report/
 frontend/test-results/
+/test-results/
