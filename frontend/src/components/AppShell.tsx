@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   Activity,
   BarChart3,
@@ -10,11 +10,15 @@ import {
   LayoutDashboard,
   Lightbulb,
   LogOut,
+  Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
   Plus,
   RefreshCw,
   RotateCcw,
   Settings,
   Users,
+  X,
 } from 'lucide-react';
 import type { AppConfig, View } from '../types';
 
@@ -30,105 +34,86 @@ type AppShellProps = {
   onLogout: () => void;
   children: ReactNode;
 };
+const navigation: Array<{ label: string; secondary?: boolean; items: Array<{ view: View; label: string; icon: ReactNode }> }> = [
+  {
+    label: 'Act',
+    items: [
+      { view: 'dashboard', label: 'Today', icon: <LayoutDashboard /> },
+      { view: 'inquiries', label: 'Patient Inquiries', icon: <Users /> },
+      { view: 'reactivations', label: 'Reactivations', icon: <RotateCcw /> },
+    ],
+  },
+  {
+    label: 'Review',
+    items: [
+      { view: 'pipeline', label: 'Pipeline', icon: <Columns3 /> },
+      { view: 'summary', label: 'Owner Review', icon: <FileText /> },
+      { view: 'intelligence', label: 'Intelligence', icon: <Lightbulb /> },
+      { view: 'monthly', label: 'Monthly Report', icon: <BarChart3 /> },
+      { view: 'activity', label: 'Activity', icon: <Activity /> },
+    ],
+  },
+  {
+    label: 'Tools',
+    secondary: true,
+    items: [
+      { view: 'duplicates', label: 'Duplicates', icon: <Copy /> },
+      { view: 'exports', label: 'Import & Export', icon: <Download /> },
+      { view: 'public-intake', label: 'Public Intake', icon: <Globe2 /> },
+      { view: 'settings', label: 'Settings', icon: <Settings /> },
+    ],
+  },
+];
+export function AppShell(props: AppShellProps) {
+  const { view, config, message, error, loading, onViewChange, onAddInquiry, onDemoReset, onLogout, children } = props;
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
-export function AppShell({
-  view,
-  config,
-  message,
-  error,
-  loading,
-  onViewChange,
-  onAddInquiry,
-  onDemoReset,
-  onLogout,
-  children,
-}: AppShellProps) {
+  function changeView(nextView: View) {
+    onViewChange(nextView);
+    setMobileOpen(false);
+  }
+
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-mark">CB</div>
-          <div>
-            <strong>CBOS</strong>
-            <span>Practice action & intelligence</span>
+    <div className={`app-shell ${collapsed ? 'sidebar-collapsed' : ''}`}>
+      {mobileOpen && <button className="sidebar-scrim" aria-label="Close navigation" onClick={() => setMobileOpen(false)} />}
+      <aside className={`sidebar ${mobileOpen ? 'mobile-open' : ''}`}>
+        <div className="sidebar-header">
+          <div className="brand">
+            <div className="brand-mark">CB</div>
+            <div className="brand-copy"><strong>CBOS</strong><span>Practice action & intelligence</span></div>
           </div>
+          <button className="sidebar-icon-button mobile-nav-close" aria-label="Close navigation" onClick={() => setMobileOpen(false)}><X /></button>
         </div>
 
         <nav aria-label="CBOS navigation">
-          <div className="nav-group">
-            <span className="nav-group-label">Act</span>
-            <NavButton icon={<LayoutDashboard />} active={view === 'dashboard'} onClick={() => onViewChange('dashboard')}>
-              Today
-            </NavButton>
-            <NavButton icon={<Users />} active={view === 'inquiries'} onClick={() => onViewChange('inquiries')}>
-              Patient Inquiries
-            </NavButton>
-            <NavButton
-              icon={<RotateCcw />}
-              active={view === 'reactivations'}
-              onClick={() => onViewChange('reactivations')}
-            >
-              Reactivations
-            </NavButton>
-          </div>
-
-          <div className="nav-group">
-            <span className="nav-group-label">Review</span>
-            <NavButton icon={<Columns3 />} active={view === 'pipeline'} onClick={() => onViewChange('pipeline')}>
-              Pipeline
-            </NavButton>
-            <NavButton icon={<FileText />} active={view === 'summary'} onClick={() => onViewChange('summary')}>
-              Owner Review
-            </NavButton>
-            <NavButton icon={<BarChart3 />} active={view === 'monthly'} onClick={() => onViewChange('monthly')}>
-              Monthly Report
-            </NavButton>
-            <NavButton icon={<Lightbulb />} active={view === 'intelligence'} onClick={() => onViewChange('intelligence')}>
-              Intelligence
-            </NavButton>
-            <NavButton icon={<Activity />} active={view === 'activity'} onClick={() => onViewChange('activity')}>
-              Activity
-            </NavButton>
-          </div>
-
-          <div className="nav-group secondary-nav">
-            <span className="nav-group-label">Tools</span>
-            <NavButton icon={<Copy />} active={view === 'duplicates'} onClick={() => onViewChange('duplicates')}>
-              Duplicates
-            </NavButton>
-            <NavButton icon={<Download />} active={view === 'exports'} onClick={() => onViewChange('exports')}>
-              Import & Export
-            </NavButton>
-            <NavButton icon={<Globe2 />} active={view === 'public-intake'} onClick={() => onViewChange('public-intake')}>
-              Public Intake
-            </NavButton>
-            <NavButton icon={<Settings />} active={view === 'settings'} onClick={() => onViewChange('settings')}>
-              Settings
-            </NavButton>
-          </div>
+          {navigation.map((group) => (
+            <div className={`nav-group ${group.secondary ? 'secondary-nav' : ''}`} key={group.label}>
+              <span className="nav-group-label">{group.label}</span>
+              {group.items.map((item) => (
+                <NavButton key={item.view} icon={item.icon} active={view === item.view} onClick={() => changeView(item.view)}>
+                  {item.label}
+                </NavButton>
+              ))}
+            </div>
+          ))}
         </nav>
-
         <div className="sidebar-actions">
-          {config?.demoMode && (
-            <button className="ghost-button" onClick={onDemoReset}>
-              <RefreshCw size={16} /> Reset demo data
-            </button>
-          )}
-          <button className="ghost-button" onClick={onLogout}>
-            <LogOut size={16} /> Sign out
+          {config?.demoMode && <button className="ghost-button" onClick={onDemoReset}><RefreshCw size={16} /><span>Reset demo data</span></button>}
+          <button className="ghost-button" onClick={onLogout}><LogOut size={16} /><span>Sign out</span></button>
+          <button className="ghost-button sidebar-collapse-button" onClick={() => setCollapsed((value) => !value)} aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}>
+            {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}<span>{collapsed ? 'Expand menu' : 'Collapse menu'}</span>
           </button>
         </div>
       </aside>
 
       <main className="content">
         <header className="topbar">
-          <div>
-            <h1>CBOS</h1>
-            <p className="product-positioning">See what needs attention, what is being missed, and what your team should do next.</p>
+          <div className="topbar-title">
+            <button className="mobile-menu-button" aria-label="Open navigation" onClick={() => setMobileOpen(true)}><Menu size={20} /></button>
+            <div><h1>CBOS</h1><p className="product-positioning">See what needs attention, what is being missed, and what your team should do next.</p></div>
           </div>
-          <button id="add-inquiry-button" className="primary-button" onClick={onAddInquiry}>
-            <Plus size={18} /> Add Inquiry
-          </button>
+          <button id="add-inquiry-button" className="primary-button" onClick={onAddInquiry}><Plus size={18} /> Add Inquiry</button>
         </header>
 
         {message && <div className="notice success">{message}</div>}
@@ -139,18 +124,8 @@ export function AppShell({
   );
 }
 
-type NavButtonProps = {
-  icon: ReactNode;
-  active: boolean;
-  children: ReactNode;
-  onClick: () => void;
-};
+type NavButtonProps = { icon: ReactNode; active: boolean; children: ReactNode; onClick: () => void };
 
 function NavButton({ icon, active, children, onClick }: NavButtonProps) {
-  return (
-    <button className={`nav-button ${active ? 'active' : ''}`} onClick={onClick}>
-      {icon}
-      {children}
-    </button>
-  );
+  return <button className={`nav-button ${active ? 'active' : ''}`} onClick={onClick}>{icon}<span>{children}</span></button>;
 }

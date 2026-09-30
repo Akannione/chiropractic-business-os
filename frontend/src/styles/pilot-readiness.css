@@ -446,3 +446,106 @@ textarea:focus-visible {
     justify-self: start;
   }
 }
+
+/* Responsive application navigation. Keep shell behavior here instead of page CSS. */
+.sidebar-header,
+.topbar-title {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+}
+
+.sidebar-header {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-icon-button,
+.mobile-menu-button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  padding: 8px;
+}
+
+.sidebar-icon-button { color: #d9e2ec; }
+.mobile-menu-button { color: #172033; display: none; }
+.mobile-nav-close { display: none; }
+.sidebar-scrim { display: none; }
+
+.sidebar-collapsed {
+  grid-template-columns: 78px 1fr;
+}
+
+.sidebar-collapsed .sidebar {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.sidebar-collapsed .brand-copy,
+.sidebar-collapsed .nav-group-label,
+.sidebar-collapsed .nav-button span,
+.sidebar-collapsed .ghost-button span {
+  display: none;
+}
+
+.sidebar-collapsed .brand,
+.sidebar-collapsed .nav-button,
+.sidebar-collapsed .ghost-button {
+  justify-content: center;
+}
+
+.sidebar-collapsed .secondary-nav {
+  padding-top: 12px;
+}
+
+.sidebar-collapsed .nav-button.active {
+  box-shadow: inset 3px 0 0 #38a169;
+}
+
+@media (max-width: 900px) {
+  .app-shell,
+  .sidebar-collapsed {
+    display: block;
+  }
+
+  .sidebar {
+    bottom: 0;
+    box-shadow: 18px 0 40px rgba(15, 31, 46, .22);
+    left: 0;
+    max-width: 320px;
+    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    transform: translateX(-105%);
+    transition: transform .2s ease;
+    width: min(86vw, 300px);
+    z-index: 40;
+  }
+
+  .sidebar.mobile-open { transform: translateX(0); }
+  .mobile-nav-close,
+  .mobile-menu-button { display: inline-flex; }
+  .sidebar-collapse-button { display: none; }
+
+  .sidebar-scrim {
+    background: rgba(15, 31, 46, .48);
+    border: 0;
+    display: block;
+    inset: 0;
+    position: fixed;
+    z-index: 30;
+  }
+
+  .content { padding: 20px; }
+}
+
+@media (max-width: 560px) {
+  .topbar { align-items: stretch; flex-direction: column; }
+  .topbar .primary-button { align-self: stretch; }
+  .product-positioning { font-size: 13px; }
+}
