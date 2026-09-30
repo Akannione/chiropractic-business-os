@@ -30,6 +30,7 @@ The current product is ready for fake-data validation and can evaluate approved 
 - public webhook intake requires a configured shared secret before it can be used;
 - inquiry changes create an operational activity trail;
 - production dependency audits currently report no known vulnerabilities;
+- CI scans tracked source files for high-confidence credential/private-key patterns before installing or building;
 - automated accessibility and release-candidate browser tests run in CI.
 
 These controls improve the engineering baseline. They do **not** satisfy the real-data gate by themselves.

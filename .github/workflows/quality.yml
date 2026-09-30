@@ -5,6 +5,12 @@ on:
   push:
     branches: [main, chatgpt/pilot-readiness, chatgpt/intelligence-foundation-v1]
 
+# Push + pull_request can target the same branch. Keep only the newest quality
+# run for that branch so rapid hardening commits do not consume duplicate CI.
+concurrency:
+  group: cbos-quality-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   quality:
     runs-on: ubuntu-latest
