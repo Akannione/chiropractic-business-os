@@ -12,9 +12,11 @@ Staff login was enabled earlier in production, but the current fake-data demo in
 
 Pull Request #1 was merged into `main` at commit `b46add8`, so the public source now matches the production deployment. Dr. McIntyre Canva collateral remains preserved separately from the deployment branch.
 
+The release-candidate chain is also complete: PR #7 merged into `chatgpt/pilot-readiness` at `76b168c`, and PR #8 merged the post-release hardening branch into `main` at `a32da16`. The active follow-up branch is `chatgpt/demo-data-safety-ux` at `7f015a2`; it adds explicit fake-data safety messaging and has no uncommitted source changes.
+
 ## Last Completed Task
 
-2026-09-30: Merged PR #7 into `chatgpt/pilot-readiness`, passed post-merge quality gate #50, then merged PR #6 into `main` at `3d3f3df8c3c910e3fca5681978e92677e16cc63f`. The production frontend and API deployments are READY.
+2026-09-30: Reconciled the release chain: PR #7 is merged at `76b168c`, PR #8 is merged into `main` at `a32da16`, and the active fake-data safety UX branch is clean at `7f015a2`. Local typecheck, unit/routing/telemetry tests, MongoDB integration tests, production build, bundle budget, dependency audits, tracked-secret scan, Chromium E2E, WebKit E2E, and auth smoke all pass. Firefox E2E is blocked by the local Playwright browser failing to create its temporary profile before test execution; Vercel deployment smoke is blocked by Deployment Protection on the supplied preview URL.
 
 ## Current Task
 
@@ -83,11 +85,11 @@ Rather than a file list that goes stale between cycles, the durable references:
 
 ## Current Branch
 
-`main`
+`chatgpt/demo-data-safety-ux`
 
 ## Verification Status
 
-Pilot-readiness verification on September 18, 2026: `npm run typecheck`, `npm run test`, `npm run build`, `npm run test:db`, `npm audit --prefix frontend --audit-level=high`, `npm audit --prefix backend --audit-level=moderate`, and `git diff --check` all passed after the final documentation and continuity updates. Both audits reported zero vulnerabilities.
+Release-candidate verification on September 30, 2026: `npm run typecheck`, `npm run test`, `npm run build`, `npm run check:bundle`, `npm run check:secrets`, `npm run test:db`, both production dependency audits, Chromium E2E (28/28), WebKit E2E (28/28), and auth smoke passed. The combined cross-browser run passed 56 cases and failed 28 Firefox cases at browser launch with `Could not find profile folder`; no Firefox test body executed. Deployment smoke was attempted against a Vercel preview but stopped at the expected Deployment Protection redirect, so it was not counted as a product failure.
 
 Passed again on July 1, 2026 after the governed analytics documentation update:
 
