@@ -24,6 +24,7 @@ The current product is ready for fake-data validation and can evaluate approved 
 - protected staff routes can fail closed behind authentication;
 - authentication secrets are rejected at startup when configured with known placeholders or insufficient length;
 - login and public-intake abuse controls exist, with deterministic auth-enabled browser smoke coverage;
+- the temporary staff bearer token is scoped to browser session storage rather than persistent local storage;
 - API responses carrying operational data are marked `Cache-Control: no-store`;
 - frontend and API responses set anti-framing, MIME-sniffing, referrer, permissions, and Content Security Policy headers;
 - public webhook intake requires a configured shared secret before it can be used;

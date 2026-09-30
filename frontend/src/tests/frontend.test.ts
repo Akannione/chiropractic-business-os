@@ -23,19 +23,24 @@ async function assertRejects(action: () => Promise<unknown>, pattern: RegExp) {
 }
 
 function installWindow() {
-  const stored: Stored = {};
-  const localStorage = {
-    getItem: (key: string) => stored[key] ?? null,
-    setItem: (key: string, value: string) => {
-      stored[key] = value;
-    },
-    removeItem: (key: string) => {
-      delete stored[key];
-    },
+  const makeStorage = () => {
+    const stored: Stored = {};
+    return {
+      getItem: (key: string) => stored[key] ?? null,
+      setItem: (key: string, value: string) => {
+        stored[key] = value;
+      },
+      removeItem: (key: string) => {
+        delete stored[key];
+      },
+    };
   };
+  const localStorage = makeStorage();
+  const sessionStorage = makeStorage();
 
-  (globalThis as unknown as { window: { localStorage: typeof localStorage } }).window = {
+  (globalThis as unknown as { window: { localStorage: typeof localStorage; sessionStorage: typeof sessionStorage } }).window = {
     localStorage,
+    sessionStorage,
   };
 }
 
@@ -63,6 +68,16 @@ const { pipelineLimitMessage } = pipelineModule;
 const { nextDrawerFocusIndex } = inquiryDrawerModule;
 const { emptyInquiryForm } = inquiryFormModule;
 const { AppErrorBoundary } = errorBoundaryModule;
+
+function testAuthTokenUsesTabSessionStorage() {
+  window.localStorage.setItem('business-os-auth-token', 'legacy-persistent-token');
+  assertEqual(getAuthToken(), '', 'Persistent legacy tokens must not authenticate a new tab session.');
+  setAuthToken('tab-session-token');
+  assertEqual(getAuthToken(), 'tab-session-token');
+  assertEqual(window.localStorage.getItem('business-os-auth-token'), null);
+  clearAuthToken();
+  assertEqual(getAuthToken(), '');
+}
 
 async function testCsvImportKeepsAuthHeader() {
   setAuthToken('staff-token');
@@ -207,6 +222,7 @@ function testFatalErrorRecoveryDoesNotRenderExceptionDetails() {
   assertEqual(html.includes('PRIVATE_SENTINEL'), false);
 }
 
+testAuthTokenUsesTabSessionStorage();
 await testCsvImportKeepsAuthHeader();
 await testIntelligencePreviewKeepsStaffAuth();
 await testExpiredStaffTokenClearsSession();
