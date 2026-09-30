@@ -34,7 +34,7 @@ export class AppErrorBoundary extends Component<Props, State> {
           <p>
             Your current screen hit an unexpected application error. Reload CBOS to start a fresh session.
           </p>
-          <button type="button" className="primary-action" onClick={this.reload}>
+          <button type="button" className="primary-button" onClick={this.reload}>
             Reload CBOS
           </button>
         </section>
