@@ -44,6 +44,24 @@ test('public intake submits a new inquiry end to end', async ({ page }) => {
   await expect(page.getByText(/demo inquiry received/i)).toBeVisible();
 });
 
+test('staff workspace fails closed when practice configuration cannot load', async ({ page }) => {
+  await page.route('**/api/config', async (route) => {
+    await route.fulfill({
+      status: 503,
+      contentType: 'application/json',
+      body: JSON.stringify({ error: 'Config unavailable' }),
+    });
+  });
+
+  await page.goto('/');
+  await expect(page.getByRole('alert')).toBeVisible();
+  await expect(
+    page.getByText('Practice settings are unavailable. Retry before entering or changing any data.'),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add Inquiry' })).toBeDisabled();
+  await expect(page.getByText('Good to see you.')).toHaveCount(0);
+});
+
 test('staff workspace makes fake-data-only demo status explicit', async ({ page }) => {
   await page.goto('/');
   const notice = page.getByLabel('Demo data safety notice');

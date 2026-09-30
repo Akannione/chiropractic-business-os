@@ -129,7 +129,15 @@ export function AppShell(props: AppShellProps) {
         )}
         {message && <div className="notice success" role="status" aria-live="polite">{message}</div>}
         {error && <div className="notice error error-with-action" role="alert"><span>{error}</span><button type="button" onClick={() => void onRetry()}>Try again</button></div>}
-        {loading ? <WorkspaceSkeleton /> : children}
+        {loading ? (
+          <WorkspaceSkeleton />
+        ) : config ? (
+          children
+        ) : (
+          <div className="empty-state" role="status">
+            Practice settings are unavailable. Retry before entering or changing any data.
+          </div>
+        )}
       </main>
     </div>
   );
