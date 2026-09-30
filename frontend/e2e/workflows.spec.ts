@@ -57,6 +57,19 @@ test('CSV import previews valid rows then imports them', async ({ page }) => {
   await expect(page.locator('.notice.success')).toContainText(/imported/i);
 });
 
+test('CSV import rejects oversized files before reading or previewing them', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Import & Export', exact: true }).click();
+  await page.locator('input[type=file]').setInputFiles({
+    name: 'oversized.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.alloc(1_000_001, 65),
+  });
+  await expect(page.getByText('oversized.csv is larger than the 1 MB import limit. Choose a smaller CSV.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Import Previewed Rows' })).toBeDisabled();
+  await expect(page.getByRole('heading', { name: 'Import Preview' })).toHaveCount(0);
+});
+
 test('CSV import blocks malformed rows instead of importing them', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Import & Export', exact: true }).click();
