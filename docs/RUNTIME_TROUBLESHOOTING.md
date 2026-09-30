@@ -172,6 +172,22 @@ artifacts, or chat logs. Without an authorized share URL or bypass secret, a
 Vercel login/SSO redirect is an access-control result, not a CBOS application
 failure.
 
+For read-only verification from a developer machine already authenticated with
+the Vercel CLI, `vercel curl` can inspect a protected preview without weakening
+Deployment Protection:
+
+```bash
+vercel curl / --deployment https://<frontend-preview>.vercel.app -- --head
+cd backend
+vercel curl /api/health --deployment https://<api-preview>.vercel.app -- --include --silent
+```
+
+This is useful for response headers and API-route checks. It is not a replacement
+for browser E2E because it does not execute the deployed JavaScript application.
+A full Playwright preview smoke still needs a working share/bypass path. In this
+team, generated share URLs may still be redirected through Vercel SSO, so treat
+that as deployment-protection behavior rather than a CBOS failure.
+
 Before pushing:
 
 ```bash

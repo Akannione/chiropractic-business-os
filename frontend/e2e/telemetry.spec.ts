@@ -30,6 +30,7 @@ test('SDK outbound policy removes URL, referrer, super-properties and free text'
   expect(result.captured.properties.workspace).toBe('inquiries');
   expect(result.captured.properties.distinct_id).toMatch(/^[0-9a-f-]{36}$/i);
   expect(result.captured.properties.$process_person_profile).toBe(false);
+  expect(result.captured.properties.$geoip_disable).toBe(true);
   expect(JSON.stringify(result.captured)).not.toContain('PRIVATE_SENTINEL');
   expect(result.rejected).toBeNull();
 });

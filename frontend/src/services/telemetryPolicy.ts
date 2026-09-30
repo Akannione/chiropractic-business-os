@@ -41,5 +41,8 @@ export function safeOutboundProperties(event: string, properties: Record<string,
   if (!result.distinct_id) return null;
   result.token = token;
   result.$process_person_profile = false;
+  // Explicitly disable server-side GeoIP enrichment for every CBOS analytics event.
+  // Approximate location is not needed to measure front-desk workflow adoption.
+  result.$geoip_disable = true;
   return result;
 }
