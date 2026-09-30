@@ -39,7 +39,7 @@ Then state the value:
 Production demo:
 
 ```text
-https://frontend-gold-alpha-31.vercel.app
+https://businessosmvp.vercel.app
 ```
 
 Production case study:
@@ -156,7 +156,7 @@ I used the clinic feedback to finish a focused follow-up and patient reactivatio
 
 Could we do a 20-minute walkthrough using only fake data? I want to confirm whether the queue matches the way the office actually works and identify anything that would block a small pilot.
 
-Live demo: https://frontend-gold-alpha-31.vercel.app
+Live demo: https://businessosmvp.vercel.app
 
 Best,
 Tobi

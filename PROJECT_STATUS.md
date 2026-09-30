@@ -6,19 +6,19 @@ Full-stack CBOS for small chiropractic practices to capture patient inquiries, t
 
 ## Current State
 
-Production proven. The React frontend is live at `https://frontend-gold-alpha-31.vercel.app`, the API is live at `https://cbos-api.vercel.app`, and MongoDB Atlas-backed routes are working. The clinic-feedback reactivation workflow is deployed with overdue, due-today, and upcoming queues plus follow-up owner and outcome tracking. Patient inquiries now include optional activity or movement context for details such as athlete status, desk-work posture, sport, mobility goal, or return-to-care context.
+Production release candidate is live at `https://businessosmvp.vercel.app`, the API is live at `https://cbos-api.vercel.app`, and MongoDB Atlas-backed routes are working. The clinic-feedback reactivation workflow is deployed with overdue, due-today, and upcoming queues plus follow-up owner and outcome tracking. Patient inquiries now include optional activity or movement context for details such as athlete status, desk-work posture, sport, mobility goal, or return-to-care context.
 
-Staff login is enabled in production as of 2026-08-22, so every staff route requires a token while health, config, and the public intake form stay open. The read paths are indexed and no longer load the whole collection, the inquiry list is paginated and filtered in the database, CSV import writes in bulk, and a Duplicates screen merges patients recorded twice.
+Staff login was enabled earlier in production, but the current fake-data demo intentionally has `ADMIN_PASSWORD` unset (`/api/auth/status` returns `authEnabled:false`). Do not use real patient data while the demo is open. The read paths are indexed and no longer load the whole collection, the inquiry list is paginated and filtered in the database, CSV import writes in bulk, and a Duplicates screen merges patients recorded twice.
 
 Pull Request #1 was merged into `main` at commit `b46add8`, so the public source now matches the production deployment. Dr. McIntyre Canva collateral remains preserved separately from the deployment branch.
 
 ## Last Completed Task
 
-2026-09-18: Completed the CBOS pilot-readiness system on `chatgpt/pilot-readiness`: action-first UX refinements plus controlled validation, differentiation, data-sync, reactivation, ICP, pricing, pilot offer, onboarding, success, real-data, sales, analytics, and feedback-loop documentation.
+2026-09-30: Merged PR #7 into `chatgpt/pilot-readiness`, passed post-merge quality gate #50, then merged PR #6 into `main` at `3d3f3df8c3c910e3fca5681978e92677e16cc63f`. The production frontend and API deployments are READY.
 
 ## Current Task
 
-Local implementation and validation of the bounded CBOS Intelligence Foundation v1 are complete on `chatgpt/intelligence-foundation-v1`. The next unresolved work is clinic-owner validation of the synthetic Review -> Intelligence workflow. Real patient data, client outreach, production merge, and deployment remain blocked behind their existing manual gates.
+The release candidate is now merged to `main` and deployed as an open fake-data demo. The next unresolved product work is clinic-owner validation of the revised CBOS wedge and synthetic Review -> Intelligence workflow. Real patient data remains blocked behind identity/RBAC, source-system, data-minimization, operational-security, contractual, and legal/compliance gates.
 
 ## Validation Resume Gate
 
@@ -83,7 +83,7 @@ Rather than a file list that goes stale between cycles, the durable references:
 
 ## Current Branch
 
-`chatgpt/intelligence-foundation-v1`
+`main`
 
 ## Verification Status
 

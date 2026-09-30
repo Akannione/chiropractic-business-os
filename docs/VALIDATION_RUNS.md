@@ -26,7 +26,7 @@ changed, no production demo data was reset, and no real patient data was used.
 | CBOS production health | `/api/health` returned 200 |
 | CBOS production auth | `/api/auth/status` returned auth enabled |
 | Protected staff route | `/api/reactivations` returned 401 without a token, as intended |
-| Frontend | `https://frontend-gold-alpha-31.vercel.app` returned 200 |
+| Frontend | `https://businessosmvp.vercel.app` returned 200 |
 | Local tests | `npm run test` passed |
 
 ### What The 20 Minutes Look Like

@@ -80,13 +80,16 @@ function StaffGate() {
       />
     );
   }
-  return <StaffApp onLogout={() => {
-    clearAuthToken();
-    setAuthenticated(false);
-  }} />;
+  return <StaffApp
+    authRequired={authRequired}
+    onLogout={() => {
+      clearAuthToken();
+      setAuthenticated(false);
+    }}
+  />;
 }
 
-function StaffApp({ onLogout }: { onLogout: () => void }) {
+function StaffApp({ authRequired, onLogout }: { authRequired: boolean; onLogout: () => void }) {
   const [view, setView] = useState<View>(() => viewFromPath(window.location.pathname));
   const [inquiryDrawerOpen, setInquiryDrawerOpen] = useState(false);
   const {
@@ -147,6 +150,7 @@ function StaffApp({ onLogout }: { onLogout: () => void }) {
       onDemoReset={resetDemoData}
       onRetry={retryLoadData}
       onLogout={onLogout}
+      staffAuthEnabled={authRequired}
     >
       {view === 'dashboard' && (
         <DashboardPage

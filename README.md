@@ -154,7 +154,7 @@ Public intake includes a lightweight in-memory rate limit to reduce accidental s
 
 The demo uses two Vercel projects from the same GitHub repository:
 
-- React frontend: `https://frontend-gold-alpha-31.vercel.app`
+- React frontend: `https://businessosmvp.vercel.app`
 - Express API: `https://cbos-api.vercel.app`
 - MongoDB: Atlas M0 free cluster
 
@@ -163,15 +163,11 @@ The Vercel projects are rooted separately for Git deployments:
 - API project root: `backend`
 - Frontend project root: `frontend`
 
-The frontend production variable is:
-
-```bash
-VITE_API_BASE_URL=https://cbos-api.vercel.app/api
-```
+Production uses the frontend's same-origin `/api` rewrite to `https://cbos-api.vercel.app/api`. Do not set `VITE_API_BASE_URL` in production unless there is a deliberate cross-origin deployment reason and CORS has been reviewed.
 
 The API stores `MONGODB_URI` as a sensitive production variable in the `cbos-api` Vercel project. The Atlas credential was rotated and the database-backed production workflow was verified on June 29, 2026. Never commit or paste database credentials into documentation, Git, or chat.
 
-Current production also has `ADMIN_PASSWORD` enabled. That password is only for the CBOS staff dashboard; it is not the MongoDB password, Vercel account password, or a clinic EHR password. Public intake remains open without login.
+Current production is an open fake-data demo: `ADMIN_PASSWORD` is intentionally unset and `/api/auth/status` reports `authEnabled:false`. Do not enter real patient data. Re-enable individual/clinic-appropriate access controls before any real-data pilot.
 
 This free deployment is for demos and validation. A paying-client deployment should use an appropriate commercial hosting plan and client-specific credentials.
 

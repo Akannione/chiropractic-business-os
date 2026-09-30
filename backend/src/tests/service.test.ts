@@ -21,6 +21,7 @@ import { assertSecureAuthConfig, assertValidPracticeTimeZone, env } from '../con
 import { resetSampleData, seedSampleDataIfEmpty } from '../services/seedService.js';
 import { findDuplicateGroups } from '../services/duplicateService.js';
 import { assertWebhookAuthorized } from '../controllers/automationController.js';
+import { assertDemoMutationAllowed } from '../controllers/demoController.js';
 import { toCsv } from '../utils/csv.js';
 import {
   addDays,
@@ -774,6 +775,27 @@ async function testSeedRefusesOutsideDemoMode() {
   }
 }
 
+function testRemoteDemoMutationRequiresAuth() {
+  const originalDemoMode = env.demoMode;
+  const originalPassword = env.adminPassword;
+  try {
+    (env as { demoMode: boolean }).demoMode = true;
+    (env as { adminPassword: string }).adminPassword = '';
+    assert.doesNotThrow(() => assertDemoMutationAllowed('localhost'));
+    assert.doesNotThrow(() => assertDemoMutationAllowed('127.0.0.1'));
+    assert.throws(
+      () => assertDemoMutationAllowed('cbos-api.vercel.app'),
+      /Remote demo reset requires staff authentication/,
+    );
+
+    (env as { adminPassword: string }).adminPassword = 'test-password';
+    assert.doesNotThrow(() => assertDemoMutationAllowed('cbos-api.vercel.app'));
+  } finally {
+    (env as { demoMode: boolean }).demoMode = originalDemoMode;
+    (env as { adminPassword: string }).adminPassword = originalPassword;
+  }
+}
+
 /**
  * Grouping must catch the same patient recorded twice without ever proposing
  * that a household be combined into one person.
@@ -818,6 +840,7 @@ async function runTests() {
   testWebhookAuthorization();
   testPatchValidationMatchesCreate();
   await testSeedRefusesOutsideDemoMode();
+  testRemoteDemoMutationRequiresAuth();
 }
 
 runTests()

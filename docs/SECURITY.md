@@ -1,16 +1,21 @@
 # CBOS Security Posture
 
-Last reviewed: 2026-08-22.
+Last reviewed: 2026-09-30.
 
 CBOS holds patient names, phone numbers, email addresses, and clinical service
 interest. That is personal health-adjacent data even though the application
 stores no diagnoses or notes from treatment.
 
-## Current posture: closed
+## Current posture: open fake-data demo
 
-Staff login was switched on in production on 2026-08-22. `ADMIN_PASSWORD` is
-set as a Vercel sensitive secret and `AUTH_TOKEN_SECRET` is a freshly generated
-64-character value. Verified against the live deployment immediately after:
+The current production demo intentionally has `ADMIN_PASSWORD` unset, so
+`/api/auth/status` reports `{"authEnabled":false}`. `BUSINESS_OS_DEMO_MODE`
+remains enabled for fabricated demo records. **Do not enter real patient data
+while this environment is open.**
+
+A previous production configuration enabled staff login on 2026-08-22 and was
+verified as follows; this table is historical evidence of the auth implementation,
+not a description of the current open-demo setting:
 
 | Check | Result |
 |---|---|
@@ -22,11 +27,16 @@ set as a Vercel sensitive secret and `AUTH_TOKEN_SECRET` is a freshly generated
 | Response headers | nosniff, DENY, no-referrer present |
 
 The routes that must stay open still are: `/api/health`, `/api/config`, and
-`/api/auth/status` return 200, and `POST /api/public/inquiries` returns 201, so
-the website intake form still accepts patients. CORS returns the frontend
-origin, and the frontend loads and now presents the login screen.
+`/api/auth/status` return 200, and `POST /api/public/inquiries` remains public.
 
-One layer remains open: Atlas still permits all network addresses. See below.
+With staff auth disabled, normal demo staff workflows are also open. The
+destructive demo seed/reset endpoints are separately hardened: remote reset or
+seed now requires staff authentication even when demo mode is enabled, while
+localhost demo development remains usable. The frontend also hides Reset demo
+data and Sign out when staff auth is disabled.
+
+One infrastructure layer remains open: Atlas still permits all network
+addresses. See below.
 
 ### Note on the demo data
 
@@ -104,9 +114,11 @@ demo mode is what makes `Reset demo data` work. The real hazard is that
 is off**. Once staff login is on, that route requires a token and the exposure
 is gone.
 
-So: demo mode may stay true for a demo with fake data, provided login is on. It
-must be false before the deployment holds a single real patient, at which point
-resetting the collection is never something anyone should be able to do.
+So: demo mode may stay true for a **fake-data-only** public demo. When staff
+login is off, remote demo reset/seed fail closed; when staff login is on, those
+routes require a valid staff token. Demo mode must be false before the deployment
+holds a single real patient, at which point resetting the collection is never
+something anyone should be able to do.
 
 ## Atlas network access
 
