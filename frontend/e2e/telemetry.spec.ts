@@ -29,10 +29,18 @@ test('SDK outbound policy removes URL, referrer, super-properties and free text'
   });
   await page.addInitScript(() => Object.defineProperty(navigator, 'webdriver', { get: () => false }));
   await page.goto('http://cbos.test/?patient=PRIVATE_SENTINEL');
+  await page.addScriptTag({
+    type: 'module',
+    content: `import { captureWithSdk } from '/e2e/fixtures/telemetry-harness.ts';
+window.__cbosCaptureWithSdk = captureWithSdk;`,
+  });
+  await page.waitForFunction(() => typeof (window as typeof window & { __cbosCaptureWithSdk?: unknown }).__cbosCaptureWithSdk === 'function');
   const result = await page.evaluate(async () => {
-    const path = '/e2e/fixtures/telemetry-harness.ts';
-    const harness = await import(path);
-    return harness.captureWithSdk();
+    const testWindow = window as typeof window & { __cbosCaptureWithSdk: () => Promise<{
+      captured: { properties: Record<string, unknown> };
+      rejected: unknown;
+    }> };
+    return testWindow.__cbosCaptureWithSdk();
   });
   expect(result.captured).toBeTruthy();
   expect(result.captured.properties.workspace).toBe('inquiries');
