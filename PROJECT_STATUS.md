@@ -1,3 +1,7 @@
+[Reading 143 lines from start (total: 143 lines, 0 remaining)]
+
+[Reading 139 lines from start (total: 139 lines, 0 remaining)]
+
 # Project Status
 
 ## Project Purpose
@@ -12,11 +16,11 @@ Staff login was enabled earlier in production, but the current fake-data demo in
 
 Pull Request #1 was merged into `main` at commit `b46add8`, so the public source now matches the production deployment. Dr. McIntyre Canva collateral remains preserved separately from the deployment branch.
 
-The release-candidate chain is also complete: PR #7 merged into `chatgpt/pilot-readiness` at `76b168c`, and PR #8 merged the post-release hardening branch into `main` at `a32da16`. The active follow-up branch is `chatgpt/demo-data-safety-ux` at `7f015a2`; it adds explicit fake-data safety messaging and has no uncommitted source changes.
+The release-candidate chain is also complete: PR #7 merged into `chatgpt/pilot-readiness` at `76b168c`, and PR #8 merged the post-release hardening branch into `main` at `a32da16`. The active follow-up branch is `chatgpt/demo-data-safety-ux`; PR #9 is open against `main` with explicit fake-data safety UX plus release-hygiene hardening.
 
 ## Last Completed Task
 
-2026-09-30: Reconciled the release chain: PR #7 is merged at `76b168c`, PR #8 is merged into `main` at `a32da16`, and the active fake-data safety UX branch is clean at `7f015a2`. Local typecheck, unit/routing/telemetry tests, MongoDB integration tests, production build, bundle budget, dependency audits, tracked-secret scan, Chromium E2E, WebKit E2E, and auth smoke all pass. Firefox E2E is blocked by the local Playwright browser failing to create its temporary profile before test execution; Vercel deployment smoke is blocked by Deployment Protection on the supplied preview URL.
+2026-09-30: Reconciled the release chain and validated PR #9's branch. GitHub quality gate #55 passed on the demo-safety branch with Linux cross-browser E2E and auth smoke green. Local typecheck, unit/routing/telemetry tests, MongoDB integration tests, production build, bundle budget, dependency audits, tracked-secret scan, Chromium E2E, WebKit E2E, and auth smoke pass. Reinstalling Playwright Firefox did not resolve the macOS-local pre-launch `Could not find profile folder` failure, while Linux CI Firefox passes. Canonical production deployment smoke passes against `https://businessosmvp.vercel.app` for the shell, core workspaces, public intake, and security headers. Branch-preview smoke remains access-blocked by Vercel Deployment Protection; the smoke runner now detects a Vercel authentication redirect explicitly rather than mislabeling it as a CBOS header failure.
 
 ## Current Task
 
@@ -89,7 +93,7 @@ Rather than a file list that goes stale between cycles, the durable references:
 
 ## Verification Status
 
-Release-candidate verification on September 30, 2026: `npm run typecheck`, `npm run test`, `npm run build`, `npm run check:bundle`, `npm run check:secrets`, `npm run test:db`, both production dependency audits, Chromium E2E (28/28), WebKit E2E (28/28), and auth smoke passed. The combined cross-browser run passed 56 cases and failed 28 Firefox cases at browser launch with `Could not find profile folder`; no Firefox test body executed. Deployment smoke was attempted against a Vercel preview but stopped at the expected Deployment Protection redirect, so it was not counted as a product failure.
+Release-candidate verification on September 30, 2026: `npm run typecheck`, `npm run test`, `npm run build`, `npm run check:bundle`, `npm run check:secrets`, `npm run test:db`, both production dependency audits, Chromium E2E (28/28), WebKit E2E (28/28), and auth smoke passed locally; GitHub quality gate #55 also passed the full Linux cross-browser job, including Firefox. The macOS-local Firefox binary still exits before page creation with `Could not find profile folder` even after reinstall, so CI is the authoritative Firefox signal. Canonical production deployment smoke passed against `https://businessosmvp.vercel.app`. Protected branch-preview smoke still resolves through Vercel authentication, and the smoke runner now reports that condition explicitly instead of treating the login page as an application response.
 
 Passed again on July 1, 2026 after the governed analytics documentation update:
 
@@ -137,3 +141,7 @@ Internal fake-data walkthrough on September 8, 2026: `npm run demo:csv` regenera
 Reliability audit verification on September 15, 2026: `npm run typecheck`, `npm run test`, `npm run build`, `npm run test:db`, `npm audit --prefix frontend --audit-level=high`, `npm audit --prefix backend --audit-level=moderate`, and `git diff --check` all passed locally. `npm run test` now includes backend service tests and lightweight frontend regression tests. `npm run test:db` passed against a local MongoDB process.
 
 Production smoke verification on September 15, 2026 after pushing the audit work: `https://cbos-api.vercel.app/api/health` returned 200, `https://cbos-api.vercel.app/api/config` returned `practiceTimeZone:"America/New_York"`, `https://cbos-api.vercel.app/api/reactivations` returned 401 without a staff token, `https://cbos-api.vercel.app/api/webhooks/inquiries` returned 404 because `WEBHOOK_SECRET` is not configured, and the frontend returned 200.
+
+[executed on device: Mac.DYN.kennesaw.edu (b857c58a-060b-4e45-97da-c5699c88338c)]
+
+[executed on device: Mac.DYN.kennesaw.edu (b857c58a-060b-4e45-97da-c5699c88338c)]

@@ -4,6 +4,24 @@ const baseUrl = process.env.E2E_DEPLOYMENT_URL;
 const apiDeploymentUrl = process.env.E2E_API_DEPLOYMENT_URL;
 if (!baseUrl) throw new Error('Set E2E_DEPLOYMENT_URL to the authorized frontend deployment URL.');
 
+function assertNotVercelProtection(response, label) {
+  const responseUrl = new URL(response.url());
+  const contentType = response.headers()['content-type'] || '';
+  if (
+    responseUrl.hostname === 'vercel.com' &&
+    (responseUrl.pathname.startsWith('/login') || responseUrl.pathname.startsWith('/sso-api'))
+  ) {
+    throw new Error(
+      `${label} is still behind Vercel Deployment Protection. Provide an authorized preview URL or automation bypass instead of treating the Vercel login page as an application response.`,
+    );
+  }
+  if (contentType.includes('text/html') && responseUrl.hostname === 'vercel.com') {
+    throw new Error(
+      `${label} resolved to a Vercel authentication page instead of the CBOS deployment.`,
+    );
+  }
+}
+
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const errors = [];
@@ -16,6 +34,7 @@ try {
   const deployment = new URL(baseUrl);
   const documentResponse = await page.goto(baseUrl, { waitUntil: 'networkidle', timeout: 30_000 });
   if (!documentResponse) throw new Error('Deployment did not return a document response.');
+  assertNotVercelProtection(documentResponse, 'Frontend preview');
   const headers = documentResponse.headers();
   const requiredHeaders = {
     'x-content-type-options': 'nosniff',
@@ -46,6 +65,7 @@ try {
     const apiDeployment = new URL(apiDeploymentUrl);
     if (apiDeployment.searchParams.has('_vercel_share')) {
       const apiBootstrap = await page.request.get(apiDeploymentUrl);
+      assertNotVercelProtection(apiBootstrap, 'API preview access bootstrap');
       if (!apiBootstrap.ok()) {
         throw new Error(`API preview access bootstrap returned HTTP ${apiBootstrap.status()}.`);
       }
@@ -54,13 +74,16 @@ try {
   }
 
   const health = await page.request.get(`${apiOrigin}/api/health`);
+  assertNotVercelProtection(health, 'Deployment API health');
   if (!health.ok()) throw new Error(`Deployment API health returned HTTP ${health.status()}.`);
   if (!health.headers()['cache-control']?.includes('no-store')) {
     throw new Error('Deployment API responses must include Cache-Control: no-store.');
   }
   const authStatus = await page.request.get(`${apiOrigin}/api/auth/status`);
+  assertNotVercelProtection(authStatus, 'Deployment auth status');
   if (!authStatus.ok()) throw new Error(`Deployment auth status returned HTTP ${authStatus.status()}.`);
   const config = await page.request.get(`${apiOrigin}/api/config`);
+  assertNotVercelProtection(config, 'Deployment config');
   if (!config.ok()) throw new Error(`Deployment config returned HTTP ${config.status()}.`);
 
   if (apiDeploymentUrl) {
@@ -75,6 +98,7 @@ try {
         }],
       },
     });
+    assertNotVercelProtection(intelligence, 'Branch Intelligence preview');
     if (!intelligence.ok()) throw new Error(`Branch Intelligence preview returned HTTP ${intelligence.status()}.`);
     const result = await intelligence.json();
     if (result?.summary?.recognizedReports !== 1 || !Array.isArray(result?.signals) || result.signals.length === 0) {
