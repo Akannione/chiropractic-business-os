@@ -4,10 +4,11 @@ import { KpiCard } from '../components/KpiCard';
 import { PageHeader } from '../components/PageHeader';
 import { api } from '../services/api';
 import { captureTelemetry } from '../services/analytics';
-import type { ImportPreview } from '../types';
+import type { AppConfig, ImportPreview } from '../types';
 import { todayIso } from '../utils/format';
 
 type ExportsPageProps = {
+  config: AppConfig | null;
   /** Total inquiries available to export, from the paginated list endpoint. */
   inquiryTotal: number;
   onChanged: (message: string) => Promise<void>;
@@ -23,7 +24,7 @@ export function importFileError(file: Pick<File, 'name' | 'size'>) {
   return '';
 }
 
-export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPageProps) {
+export function ExportsPage({ config, inquiryTotal, onChanged, setError }: ExportsPageProps) {
   const [csvText, setCsvText] = useState('');
   const [preview, setPreview] = useState<ImportPreview | null>(null);
   const [importing, setImporting] = useState(false);
@@ -109,6 +110,12 @@ export function ExportsPage({ inquiryTotal, onChanged, setError }: ExportsPagePr
             Upload a CSV to preview rows first. Rows are treated as possible duplicates only when
             the patient name and a contact detail match an existing record.
           </p>
+          {config?.demoMode && (
+            <div className="notice demo-safety-notice" role="note" aria-label="Demo import safety notice">
+              <strong>Demo mode — do not upload a real clinic export.</strong>
+              <span> Use fabricated or explicitly deidentified CSV data only.</span>
+            </div>
+          )}
           <input
             accept=".csv,text/csv"
             aria-label="Choose patient inquiry CSV file"

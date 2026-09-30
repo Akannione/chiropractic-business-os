@@ -54,6 +54,7 @@ test('inquiry quick filters and reset remain usable', async ({ page }) => {
 test('CSV import previews valid rows then imports them', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Import & Export', exact: true }).click();
+  await expect(page.getByLabel('Demo import safety notice')).toContainText(/do not upload a real clinic export/i);
   const csv = [
     'name,phone,email,service_needed,source,notes',
     'CSV E2E Patient,4045550177,csv-e2e@example.com,Spinal Adjustment,Website,Imported by browser test',

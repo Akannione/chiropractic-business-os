@@ -183,7 +183,7 @@ function StaffApp({ authRequired, onLogout }: { authRequired: boolean; onLogout:
       {view === 'duplicates' && (
         <DuplicatesPage onChanged={refreshWithMessage} setError={setError} />
       )}
-      {view === 'exports' && <ExportsPage inquiryTotal={inquiryTotal} onChanged={refreshWithMessage} setError={setError} />}
+      {view === 'exports' && <ExportsPage config={config} inquiryTotal={inquiryTotal} onChanged={refreshWithMessage} setError={setError} />}
       {view === 'settings' && <SettingsPage config={config} onChanged={refreshWithMessage} setError={setError} />}
       {view === 'public-intake' && <PublicInquiryPage config={config} />}
       {inquiryDrawerOpen && (
