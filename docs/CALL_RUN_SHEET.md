@@ -67,7 +67,7 @@ Do not add screens. Ask better questions instead:
 ## Two minutes before the call
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp" && npm run demo:csv
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp" && npm run demo:csv
 ```
 
 Then, in order:

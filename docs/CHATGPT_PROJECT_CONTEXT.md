@@ -165,7 +165,7 @@ Recent UX roadmap completed:
 Current live repository path:
 
 ```text
-/Users/tobiloba202/Developer/New project/business_os_mvp
+/Users/tobiloba202/Developer/New-project/business_os_mvp
 ```
 
 Remote:
@@ -174,11 +174,13 @@ Remote:
 https://github.com/Akannione/chiropractic-business-os
 ```
 
-Current branch:
+Current development branch:
 
 ```text
-main
+chatgpt/demo-data-safety-ux
 ```
+
+Active review: PR #9 into `main`. PR #9 is not merged until explicitly approved.
 
 Important note:
 
@@ -1102,9 +1104,9 @@ Current production demo:
 - Public intake path: /intake
 
 Current repository:
-- /Users/tobiloba202/Developer/New project/business_os_mvp
+- /Users/tobiloba202/Developer/New-project/business_os_mvp
 - GitHub: https://github.com/Akannione/chiropractic-business-os
-- main branch
+- Active development branch: chatgpt/demo-data-safety-ux (PR #9 into main)
 
 The project started on May 31, 2026 as a Streamlit/SQLite Business OS MVP and became a chiropractor-specific full-stack app. The current cleaned repository focuses on the modern React/Node/Mongo app plus docs and demo recordings.
 

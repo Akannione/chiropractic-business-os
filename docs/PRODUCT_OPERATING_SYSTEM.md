@@ -22,7 +22,9 @@ CBOS uses a small set of systems with explicit ownership. The goal is to avoid d
 - Notion EHR research: https://app.notion.com/p/3ebcd6d70fe881c0a44bf08b1c86dad4
 - Notion healthcare UX evidence: https://app.notion.com/p/3ebcd6d70fe88108bed8d5f62c49fe37
 - PostHog product health: https://us.posthog.com/project/636213/dashboard/2152957
-- GitHub PR #7: https://github.com/Akannione/chiropractic-business-os/pull/7
+- Active GitHub PR #9: https://github.com/Akannione/chiropractic-business-os/pull/9
+- Historical release PR #7 (merged): https://github.com/Akannione/chiropractic-business-os/pull/7
+- Production fake-data demo: https://businessosmvp.vercel.app
 
 ## Decision flow
 
