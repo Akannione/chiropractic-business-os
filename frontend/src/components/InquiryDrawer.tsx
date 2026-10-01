@@ -79,7 +79,7 @@ export function InquiryDrawer({ config, onClose, onCreated, setError }: InquiryD
               try {
                 await api.createInquiry(form);
                 onClose();
-                await onCreated();
+                void onCreated();
               } catch (error) {
                 setError((error as Error).message);
                 throw error;
