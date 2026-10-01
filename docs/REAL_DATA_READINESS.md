@@ -31,6 +31,8 @@ The current product is ready for fake-data validation and can evaluate approved 
 - inquiry changes create an operational activity trail;
 - production dependency audits currently report no known vulnerabilities;
 - CI scans tracked source files for high-confidence credential/private-key patterns before installing or building;
+- demo CSV import and Intelligence upload controls require an explicit fabricated/deidentified-data confirmation before enabling file selection;
+- privacy-safe product analytics explicitly disable GeoIP enrichment in addition to excluding patient/clinical fields;
 - automated accessibility and release-candidate browser tests run in CI.
 
 These controls improve the engineering baseline. They do **not** satisfy the real-data gate by themselves.
