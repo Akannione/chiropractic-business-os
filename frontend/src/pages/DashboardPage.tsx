@@ -25,8 +25,7 @@ function followUpTiming(nextFollowUpDate: string) {
   if (nextFollowUpDate === today) return { label: 'Due today', className: 'due-today' };
   return { label: 'Upcoming', className: 'upcoming' };
 }
-export function DashboardPage({ kpis, config, recentInquiries, followUps, onChanged, setError }: DashboardPageProps) {
-  const overdue = useMemo(() => followUps.filter((item) => item.next_follow_up_date && item.next_follow_up_date < todayIso()), [followUps]);
+export function DashboardPage({ kpis, recentInquiries, followUps, onChanged, setError }: DashboardPageProps) {
   const dueToday = useMemo(() => followUps.filter((item) => item.next_follow_up_date === todayIso()), [followUps]);
   const todayQueue = useMemo(() => followUps.slice(0, 5), [followUps]);
 
