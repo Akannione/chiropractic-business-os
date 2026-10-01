@@ -8,6 +8,19 @@ test.beforeEach(async ({ request }) => {
   expect(reset.ok()).toBeTruthy();
 });
 
+test('local startup uses same-origin API requests and renders the dashboard', async ({ page }) => {
+  const apiUrls: string[] = [];
+  page.on('request', (request) => {
+    if (new URL(request.url()).pathname.startsWith('/api/')) apiUrls.push(request.url());
+  });
+  await page.goto('/');
+  await expect(page.getByText('Good to see you.')).toBeVisible();
+  const origin = new URL(page.url()).origin;
+  expect(apiUrls.some((url) => url.endsWith('/api/auth/status'))).toBe(true);
+  expect(apiUrls.some((url) => url.endsWith('/api/config'))).toBe(true);
+  expect(apiUrls.every((url) => new URL(url).origin === origin)).toBe(true);
+});
+
 test('public intake stays non-interactive until practice configuration is known', async ({ page }) => {
   let releaseConfig!: () => void;
   const configGate = new Promise<void>((resolve) => {

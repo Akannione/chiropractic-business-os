@@ -31,7 +31,17 @@ export function resolveApiBaseUrl(
   hostname = typeof window !== 'undefined' && window.location ? window.location.hostname : '',
 ) {
   if (isCbosPreviewHostname(hostname)) return '/api';
-  return environment.VITE_API_BASE_URL || (environment.DEV ? 'http://localhost:4000/api' : '/api');
+  const configured = String(environment.VITE_API_BASE_URL || '');
+  // Local Vite traffic uses its proxy, independent of the frontend's port.
+  if (environment.DEV) {
+    if (!configured || configured === '/api') return '/api';
+    try {
+      if (['localhost', '127.0.0.1', '[::1]'].includes(new URL(configured).hostname)) return '/api';
+    } catch {
+      // Keep intentional relative configuration unchanged.
+    }
+  }
+  return configured || '/api';
 }
 
 const API_BASE_URL = resolveApiBaseUrl();

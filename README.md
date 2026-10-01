@@ -144,7 +144,7 @@ SMTP_FROM=CBOS <no-reply@example.com>
 Frontend variables live in `frontend/.env.example`:
 
 ```bash
-VITE_API_BASE_URL=http://localhost:4000/api
+VITE_API_BASE_URL=/api
 ```
 
 SMTP variables are optional. If they are not configured, inquiry creation still works and notification is skipped.
@@ -166,6 +166,8 @@ The Vercel projects are rooted separately for Git deployments:
 - Frontend project root: `frontend`
 
 Production uses the frontend's same-origin `/api` rewrite to `https://cbos-api.vercel.app/api`. Do not set `VITE_API_BASE_URL` in production unless there is a deliberate cross-origin deployment reason and CORS has been reviewed.
+
+Local Vite also proxies `/api` to port 4000. Existing localhost `VITE_API_BASE_URL` values select the proxy's backend target (for example, `http://localhost:4010/api`), while browser requests stay same-origin. This lets Vite use 5175 or another available port without changing backend CORS. Restart Vite after changing environment variables. If startup shows an unavailable message, inspect `/api/auth/status` in the browser Network panel first; a successful terminal health check alone does not verify browser access.
 
 The API stores `MONGODB_URI` as a sensitive production variable in the `cbos-api` Vercel project. The Atlas credential was rotated and the database-backed production workflow was verified on June 29, 2026. Never commit or paste database credentials into documentation, Git, or chat.
 
