@@ -1,3 +1,4 @@
+import { withRequestTimeout } from './requestTimeout';
 import {
   Activity,
   AppConfig,
@@ -78,6 +79,10 @@ function mergeHeaders(path: string, options?: RequestInit) {
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  return withRequestTimeout((signal) => requestWithSignal<T>(path, { ...options, signal }));
+}
+
+async function requestWithSignal<T>(path: string, options?: RequestInit): Promise<T> {
   const token = getAuthToken();
   let response: Response;
   try {
@@ -165,17 +170,20 @@ export const api = {
   sendDailySummary: () => request<ReminderResult>('/reminders/daily-summary', { method: 'POST' }),
   resetDemo: () => request<{ inserted: number }>('/demo/reset', { method: 'POST' }),
   downloadExportCsv: async () => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/exports/inquiries.csv`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    return withRequestTimeout(async (signal) => {
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/exports/inquiries.csv`, {
+        signal,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (response.status === 401 && token) {
+        clearAuthToken();
+        unauthorizedHandler?.();
+        throw new Error('Staff login is required.');
+      }
+      if (!response.ok) throw new Error('CSV export failed.');
+      return await response.blob();
     });
-    if (response.status === 401 && token) {
-      clearAuthToken();
-      unauthorizedHandler?.();
-      throw new Error('Staff login is required.');
-    }
-    if (!response.ok) throw new Error('CSV export failed.');
-    return response.blob();
   },
   exportUrl: `${API_BASE_URL}/exports/inquiries.csv`,
 };

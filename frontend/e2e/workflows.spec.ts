@@ -44,6 +44,30 @@ test('public intake submits a new inquiry end to end', async ({ page }) => {
   await expect(page.getByText(/demo inquiry received/i)).toBeVisible();
 });
 
+test('stalled inquiry save times out without retrying or closing the form', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: 'Add Inquiry', exact: true })).toBeEnabled();
+  await page.clock.install();
+  let submissions = 0;
+  await page.route('**/api/inquiries', (route) => {
+    if (route.request().method() !== 'POST') return route.continue();
+    submissions += 1;
+    // Leave this request unanswered to model a stalled connection.
+  });
+  await page.getByRole('button', { name: 'Add Inquiry', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Add Patient Inquiry' });
+  await dialog.getByLabel('Patient Name').fill('Synthetic Timeout Patient');
+  await dialog.getByRole('textbox', { name: 'Phone', exact: true }).fill('4045550199');
+  await dialog.getByRole('textbox', { name: 'Email', exact: true }).fill('timeout@example.com');
+  await dialog.getByRole('button', { name: 'Add Inquiry', exact: true }).click();
+  await expect.poll(() => submissions).toBe(1);
+  await page.clock.fastForward(31_000);
+  await expect(page.getByText(/The request took too long/).first()).toBeVisible();
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByLabel('Patient Name')).toHaveValue('Synthetic Timeout Patient');
+  expect(submissions).toBe(1);
+});
+
 test('staff workspace fails closed when practice configuration cannot load', async ({ page }) => {
   await page.route('**/api/config', async (route) => {
     await route.fulfill({

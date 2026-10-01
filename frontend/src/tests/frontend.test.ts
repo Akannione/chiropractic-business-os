@@ -46,6 +46,31 @@ function installWindow() {
 
 installWindow();
 
+const { withRequestTimeout } = await import('../services/requestTimeout');
+
+async function testRequestTimeout() {
+  assertEqual(await withRequestTimeout(async () => 'complete', 100), 'complete');
+  let attempts = 0;
+  await assertRejects(
+    () => withRequestTimeout(async (signal) => {
+      attempts += 1;
+      // Headers have arrived; the body still needs the same deadline.
+      const response = await Promise.resolve({
+        json: () => new Promise((_resolve, reject) => {
+          signal.addEventListener('abort', () => reject(new Error('Aborted')), { once: true });
+        }),
+      });
+      return response.json();
+    }, 5),
+    /took too long.*Check whether your changes were saved/,
+  );
+  assertEqual(attempts, 1);
+  await assertRejects(
+    () => withRequestTimeout(async () => { throw new Error('Original failure'); }),
+    /Original failure/,
+  );
+}
+
 const apiModule = await import('../services/api');
 const formatModule = await import('../utils/format');
 const pipelineModule = await import('../pages/PipelinePage');
@@ -233,6 +258,7 @@ function testFatalErrorRecoveryDoesNotRenderExceptionDetails() {
 }
 
 testAuthTokenUsesTabSessionStorage();
+await testRequestTimeout();
 await testCsvImportKeepsAuthHeader();
 await testIntelligencePreviewKeepsStaffAuth();
 await testExpiredStaffTokenClearsSession();
