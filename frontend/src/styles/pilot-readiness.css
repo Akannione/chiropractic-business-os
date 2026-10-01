@@ -1308,6 +1308,26 @@ table tbody tr:hover {
   color: #4f3900;
 }
 
+.demo-safety-confirmation {
+  align-items: center;
+  display: inline-flex;
+  flex-basis: 100%;
+  font-weight: 650;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.demo-safety-confirmation input {
+  height: 24px;
+  margin: 0;
+  width: 24px;
+}
+
+.intelligence-file-label.disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 .public-demo-safety {
   margin: 18px 0 4px;
 }

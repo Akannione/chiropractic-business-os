@@ -28,6 +28,7 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
   const [csvText, setCsvText] = useState('');
   const [preview, setPreview] = useState<ImportPreview | null>(null);
   const [importing, setImporting] = useState(false);
+  const [demoImportConfirmed, setDemoImportConfirmed] = useState(false);
   const previewRows = useMemo(() => preview?.rows.slice(0, 8) || [], [preview]);
 
   async function handleFile(file: File | null) {
@@ -114,6 +115,14 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
             <div id="demo-import-safety" className="notice demo-safety-notice" role="note" aria-label="Demo import safety notice">
               <strong>Demo mode — do not upload a real clinic export.</strong>
               <span> Use fabricated or explicitly deidentified CSV data only.</span>
+              <label className="demo-safety-confirmation">
+                <input
+                  type="checkbox"
+                  checked={demoImportConfirmed}
+                  onChange={(event) => setDemoImportConfirmed(event.target.checked)}
+                />
+                I confirm this CSV contains only fabricated or deidentified data.
+              </label>
             </div>
           )}
           <input
@@ -121,6 +130,7 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
             aria-label="Choose patient inquiry CSV file"
             aria-describedby={config?.demoMode ? 'demo-import-safety' : undefined}
             type="file"
+            disabled={Boolean(config?.demoMode && !demoImportConfirmed)}
             onChange={(event) => handleFile(event.target.files?.[0] || null)}
           />
         </div>

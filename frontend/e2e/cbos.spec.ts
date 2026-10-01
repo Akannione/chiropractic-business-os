@@ -56,6 +56,10 @@ test('Intelligence synthetic demo produces report matches and signals', async ({
   await page.getByRole('button', { name: 'Intelligence', exact: true }).click();
   await expect(page.getByLabel('Intelligence demo data safety notice')).toContainText(/no raw clinic exports/i);
   await expect(page.getByRole('heading', { name: 'Start with synthetic or deidentified exports' })).toBeVisible();
+  const intelligenceFileInput = page.locator('input[type=file]');
+  await expect(intelligenceFileInput).toBeDisabled();
+  await page.getByLabel('I confirm these CSVs contain only fabricated or deidentified data.').check();
+  await expect(intelligenceFileInput).toBeEnabled();
   await page.getByRole('button', { name: /Try sample data/i }).click();
   await expect(page.getByText('Report matches')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'What needs attention', exact: true })).toBeVisible();

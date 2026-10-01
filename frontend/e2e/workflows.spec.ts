@@ -98,11 +98,15 @@ test('CSV import previews valid rows then imports them', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Import & Export', exact: true }).click();
   await expect(page.getByLabel('Demo import safety notice')).toContainText(/do not upload a real clinic export/i);
+  const fileInput = page.getByLabel('Choose patient inquiry CSV file');
+  await expect(fileInput).toBeDisabled();
+  await page.getByLabel('I confirm this CSV contains only fabricated or deidentified data.').check();
+  await expect(fileInput).toBeEnabled();
   const csv = [
     'name,phone,email,service_needed,source,notes',
     'CSV E2E Patient,4045550177,csv-e2e@example.com,Spinal Adjustment,Website,Imported by browser test',
   ].join('\n');
-  await page.locator('input[type=file]').setInputFiles({ name: 'e2e-inquiries.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+  await fileInput.setInputFiles({ name: 'e2e-inquiries.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
   await expect(page.getByRole('heading', { name: 'Import Preview' })).toBeVisible();
   await expect(page.getByText('CSV E2E Patient')).toBeVisible();
   const importButton = page.getByRole('button', { name: 'Import Previewed Rows' });
@@ -114,6 +118,7 @@ test('CSV import previews valid rows then imports them', async ({ page }) => {
 test('CSV import rejects oversized files before reading or previewing them', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Import & Export', exact: true }).click();
+  await page.getByLabel('I confirm this CSV contains only fabricated or deidentified data.').check();
   await page.locator('input[type=file]').setInputFiles({
     name: 'oversized.csv',
     mimeType: 'text/csv',
@@ -127,6 +132,7 @@ test('CSV import rejects oversized files before reading or previewing them', asy
 test('CSV import blocks malformed rows instead of importing them', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Import & Export', exact: true }).click();
+  await page.getByLabel('I confirm this CSV contains only fabricated or deidentified data.').check();
   const csv = ['name,phone,email,service_needed', ',,,'].join('\n');
   await page.locator('input[type=file]').setInputFiles({ name: 'invalid.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
   const importButton = page.getByRole('button', { name: 'Import Previewed Rows' });
