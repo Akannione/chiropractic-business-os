@@ -24,6 +24,8 @@ export async function listImportBatches(limit = 20) {
   }));
 }
 
+const PROCESSING_UNDO_GRACE_MS = 15 * 60 * 1000;
+
 type UndoResult = {
   batchId: string;
   deletedInquiries: number;
@@ -48,7 +50,10 @@ async function runUndoImportBatch(batchId: string, session?: ClientSession): Pro
     };
   }
 
-  if (batch.status === 'processing') {
+  if (
+    batch.status === 'processing'
+    && Date.now() - batch.created_at.getTime() < PROCESSING_UNDO_GRACE_MS
+  ) {
     return {
       batchId,
       deletedInquiries: 0,
