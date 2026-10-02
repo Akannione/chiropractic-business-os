@@ -4,6 +4,7 @@ import { env } from '../config/env.js';
 import { HttpError } from '../middleware/errorHandler.js';
 import { createAutomatedInquiry, normalizeSource } from '../services/automationService.js';
 import { importInquiryCsv, mapExternalRow, previewInquiryCsv } from '../services/importService.js';
+import { listImportBatches, undoImportBatch } from '../services/importBatchService.js';
 import { serializeInquiry } from '../serializers/inquirySerializer.js';
 import { validatePublicInquiryBody } from '../validators/inquiryValidators.js';
 
@@ -62,4 +63,26 @@ export async function postImportCsvPreview(req: Request, res: Response) {
   const csvText = typeof req.body === 'string' ? req.body : String(req.body?.csv || '');
   if (!csvText.trim()) throw new HttpError(400, 'CSV content is required.');
   res.json(await previewInquiryCsv(csvText));
+}
+
+
+export async function getImportBatches(req: Request, res: Response) {
+  const limit = Number(req.query.limit || 20);
+  res.json(await listImportBatches(limit));
+}
+
+export async function postUndoImportBatch(req: Request, res: Response) {
+  const result = await undoImportBatch(String(req.params.batchId || ''));
+  if (!result) throw new HttpError(404, 'Import batch not found.');
+  if (result.blockedModifiedCount === -1) {
+    throw new HttpError(409, 'This import is still processing and cannot be undone yet.');
+  }
+  if (result.blockedModifiedCount > 0) {
+    res.status(409).json({
+      ...result,
+      message: `${result.blockedModifiedCount} imported record(s) were modified after import. Undo was blocked to prevent data loss.`,
+    });
+    return;
+  }
+  res.json(result);
 }

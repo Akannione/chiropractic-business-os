@@ -87,7 +87,7 @@ them from a home directory will either fail or, worse, offer to deploy that
 directory:
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp/backend"
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp/backend"
 vercel env add ADMIN_PASSWORD production
 vercel --prod
 ```

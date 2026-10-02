@@ -31,6 +31,8 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const configReady = Boolean(pageConfig);
+  const safeAutocomplete = pageConfig?.demoMode !== false;
 
   useEffect(() => {
     if (pageConfig) return;
@@ -47,7 +49,9 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
     try {
       await api.createPublicInquiry(form);
       captureTelemetry('public_intake_submitted');
-      setMessage('Your inquiry was received. The practice team will follow up soon.');
+      setMessage(pageConfig?.demoMode
+        ? 'Demo inquiry received. Only fabricated information should be used in this environment.'
+        : 'Your inquiry was received. The practice team will follow up soon.');
       setForm({
         name: '',
         phone: '',
@@ -76,6 +80,13 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
           </p>
         </div>
 
+        {pageConfig?.demoMode && (
+          <div className="notice demo-safety-notice public-demo-safety" role="note" aria-label="Demo data safety notice">
+            <strong>Demo environment — use fabricated information only.</strong>
+            <span> Do not submit a real patient's name, phone, email, health details, or other sensitive information.</span>
+          </div>
+        )}
+
         <div className="public-trust-strip" aria-label="What this inquiry form does">
           <span>No payment</span>
           <span>No insurance details</span>
@@ -85,35 +96,40 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
         {message && <div className="notice success">{message}</div>}
         {error && <div className="notice error">{error}</div>}
 
-        <form className="inquiry-form public-form" onSubmit={submit}>
+        {!configReady && !error && <div className="notice" role="status" aria-live="polite">Loading practice settings...</div>}
+
+        <form className="inquiry-form public-form" aria-busy={!configReady} onSubmit={submit}>
           <label>
             Patient Name
             <input
-              autoComplete="name"
+              autoComplete={safeAutocomplete ? 'off' : 'name'}
               value={form.name}
               onChange={(event) => setForm({ ...form, name: event.target.value })}
               placeholder="Full name"
+              disabled={!configReady}
               required
             />
           </label>
           <label>
             Phone
             <input
-              autoComplete="tel"
+              autoComplete={safeAutocomplete ? 'off' : 'tel'}
               value={form.phone}
               onChange={(event) => setForm({ ...form, phone: event.target.value })}
               placeholder="Best callback number"
+              disabled={!configReady}
               required
             />
           </label>
           <label>
             Email
             <input
-              autoComplete="email"
+              autoComplete={safeAutocomplete ? 'off' : 'email'}
               type="email"
               value={form.email}
               onChange={(event) => setForm({ ...form, email: event.target.value })}
               placeholder="Best email"
+              disabled={!configReady}
               required
             />
           </label>
@@ -124,6 +140,7 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
               onChange={(event) => setForm({ ...form, service_needed: event.target.value })}
               list="public-services"
               placeholder="Example: Spinal Adjustment"
+              disabled={!configReady}
               required
             />
             <datalist id="public-services">
@@ -136,6 +153,7 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
               value={form.activity_context || ''}
               onChange={(event) => setForm({ ...form, activity_context: event.target.value })}
               placeholder="Example: runner, desk worker, return-to-sport goal, or mobility goal"
+              disabled={!configReady}
               maxLength={500}
             />
           </label>
@@ -145,18 +163,19 @@ export function PublicInquiryPage({ config }: PublicInquiryPageProps) {
               value={form.notes}
               onChange={(event) => setForm({ ...form, notes: event.target.value })}
               placeholder="Briefly describe what you are looking for or what you want the practice to know before calling you."
+              disabled={!configReady}
             />
           </label>
           <input type="hidden" value={form.source} />
-          <button className="primary-button full" type="submit" disabled={submitting}>
-            {submitting ? 'Sending Inquiry...' : 'Send Inquiry to Practice'}
+          <button className="primary-button full" type="submit" disabled={submitting || !configReady}>
+            {submitting ? 'Sending Inquiry...' : pageConfig?.demoMode ? 'Submit Demo Inquiry' : 'Send Inquiry to Practice'}
           </button>
         </form>
 
         <p className="public-footnote">
           Inquiry source: {source}. This form sends a message to the practice only.
           It does not schedule an appointment, replace clinical advice, or collect
-          insurance or payment information.
+          insurance or payment information. {pageConfig?.demoMode ? 'This demo must use fabricated information only.' : ''}
         </p>
       </section>
     </main>

@@ -29,8 +29,11 @@ The current product is ready for fake-data validation and can evaluate approved 
 - frontend and API responses set anti-framing, MIME-sniffing, referrer, permissions, and Content Security Policy headers;
 - public webhook intake requires a configured shared secret before it can be used;
 - inquiry changes create an operational activity trail;
+- CSV imports are now assigned recoverable batch IDs, with batch-level counts, status, failure reporting, activity linkage, and a guarded undo path that refuses to erase imported records modified after the batch completed;
 - production dependency audits currently report no known vulnerabilities;
 - CI scans tracked source files for high-confidence credential/private-key patterns before installing or building;
+- demo CSV import and Intelligence upload controls require an explicit fabricated/deidentified-data confirmation before enabling file selection;
+- privacy-safe product analytics explicitly disable GeoIP enrichment in addition to excluding patient/clinical fields;
 - automated accessibility and release-candidate browser tests run in CI.
 
 These controls improve the engineering baseline. They do **not** satisfy the real-data gate by themselves.
@@ -43,7 +46,8 @@ These controls improve the engineering baseline. They do **not** satisfy the rea
 - no field-level encryption;
 - process-local rate limiting;
 - current demo hosting/network configuration is not a final client architecture;
-- data retention, backup, restore, and deletion procedures require client-specific approval.
+- data retention and deletion procedures require client-specific approval;
+- local backup/restore mechanics have been exercised against a dedicated 50,000-record synthetic benchmark database: `mongodump` completed, `mongorestore` restored 50,000/50,000 records with indexes, and the restored database passed KPI parity and read-path benchmarks. This is engineering evidence only; production backup schedule, retention, off-site protection, restore ownership, and recovery objectives still require client-specific design and approval.
 
 ## De-identification check
 

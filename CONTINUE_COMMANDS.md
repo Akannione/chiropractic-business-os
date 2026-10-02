@@ -3,7 +3,7 @@
 ## Project Path
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp"
 ```
 
 ## Inspect State
@@ -26,7 +26,7 @@ npm run install:all
 Terminal 1:
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp"
 mkdir -p .mongo-data
 mongod --dbpath .mongo-data --bind_ip 127.0.0.1 --port 27017
 ```
@@ -34,14 +34,14 @@ mongod --dbpath .mongo-data --bind_ip 127.0.0.1 --port 27017
 Terminal 2:
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp"
 BUSINESS_OS_DEMO_MODE=true npm run dev:backend
 ```
 
 Terminal 3:
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp"
 npm --prefix frontend run dev -- --host 127.0.0.1
 ```
 
@@ -54,7 +54,7 @@ http://localhost:5173/
 ## Validate
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp"
 npm ci --prefix frontend
 npm run typecheck
 npm run test
@@ -75,7 +75,7 @@ curl -sS -X POST http://localhost:4000/api/imports/inquiries.csv/preview \
 After the local backend is running with `BUSINESS_OS_DEMO_MODE=true`:
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp"
 npm run smoke:reactivation
 ```
 
@@ -94,7 +94,7 @@ The current package is website-aligned to the supplied Wix screenshots and resiz
 Inspect the local Canva-ready deliverables:
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp"
 ls -lh ../outputs/dr_mcintyre_canva/*.pptx
 sed -n '1,220p' ../outputs/dr_mcintyre_canva/README.md
 open ../outputs/dr_mcintyre_canva
@@ -103,7 +103,7 @@ open ../outputs/dr_mcintyre_canva
 Preview rendered QA images:
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp"
 find ../outputs/dr_mcintyre_canva/previews -name 'slide-*.png' | wc -l
 open ../outputs/dr_mcintyre_canva/previews/dr_mcintyre_instagram_feed_square_1080x1080/slide-010.png
 open ../outputs/dr_mcintyre_canva/previews/dr_mcintyre_instagram_feed_portrait_1080x1350/slide-020.png
@@ -121,7 +121,7 @@ Open the completed Canva project at https://www.canva.com/folder/FAHN7Tn3DQc. Do
 ## GitHub Pull Request
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp"
 gh pr view 1 --web
 gh pr checks 1
 ```
@@ -131,7 +131,7 @@ gh pr checks 1
 Start with the controlled validation and pilot-readiness decisions:
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp"
 sed -n '1,260p' docs/PILOT_READINESS.md
 sed -n '1,260p' docs/CLINIC_VALIDATION_PLAYBOOK.md
 sed -n '1,220p' docs/PAID_PILOT_OFFER.md
@@ -143,7 +143,7 @@ CBOS may be offered as a `$100`, 30-day controlled paid pilot using fake data. D
 Review the production walkthrough, decision measures, and ready-to-send invite:
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp"
 sed -n '1,320p' docs/DEMO_WALKTHROUGH.md
 open -a Safari https://businessosmvp.vercel.app
 ```
@@ -157,14 +157,14 @@ Dr. McIntyre Canva collateral was preserved before deployment work so it does no
 Inspect the stash:
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp"
 git stash list -n 3
 ```
 
 Restore later only when you are ready to work on collateral again:
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp"
 git stash apply stash@{0}
 ```
 
@@ -173,8 +173,9 @@ git stash apply stash@{0}
 Work on the separate branch:
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
-git switch chatgpt/intelligence-foundation-v1
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp"
+git branch --show-current
+# Active review branch: chatgpt/demo-data-safety-ux (PR #9). Preserve local work.
 npm run typecheck
 npm run test
 npm run build
@@ -191,78 +192,47 @@ sed -n '1,220p' docs/DATA_SYNC_ARCHITECTURE.md
 sed -n '1,220p' docs/REAL_DATA_READINESS.md
 ```
 
-## Production Verification
+## Production And Preview Verification
 
-Current production endpoints:
-
-```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp/backend"
-vercel env ls production
-curl -sS -i https://cbos-api.vercel.app/api/health | sed -n '1,40p'
-# Staff routes require a bearer token since 2026-08-22; 401 here is correct.
-curl -sS -i https://cbos-api.vercel.app/api/auth/status | sed -n '1,40p'
-```
-
-Expected:
-
-```text
-/api/health returns 200.
-Current fake-data production demo returns {"authEnabled":false}. Do not use real patient data while staff auth is disabled.
-/api/reactivations returns 401 without a staff token, which is expected.
-With a staff token, /api/reactivations returns 200 with overdue, dueToday, upcoming, and rows fields.
-```
-
-Redeploy the API only after validation passes. The Vercel project root is
-already configured as `backend`, so prefer a Git-triggered deployment or
-Vercel's redeploy action. A direct CLI deploy from inside `backend/` can
-double-apply the root and look for `backend/backend`.
+Production is the open **fake-data demo** at `https://businessosmvp.vercel.app`.
+Check the live auth/config posture instead of assuming the historical staff-login state:
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp/backend"
-vercel env ls production
-# Preferred manual path if a deployment URL exists:
-#   vercel redeploy <api-deployment-url> --target production
-curl -sS https://cbos-api.vercel.app/api/health
-# /api/reactivations now requires a staff token and returns 401 without one.
-# That is the intended state, not a fault. To check it, log in first:
-#   TOKEN=$(curl -sS -X POST https://cbos-api.vercel.app/api/auth/login \
-#     -H 'Content-Type: application/json' -d '{"password":"<staff password>"}' \
-#     | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
-#   curl -sS -H "Authorization: Bearer $TOKEN" https://cbos-api.vercel.app/api/reactivations
-curl -sS https://cbos-api.vercel.app/api/auth/status
+cd "/Users/tobiloba202/Developer/New-project/business_os_mvp"
+curl -fsS https://cbos-api.vercel.app/api/health
+curl -fsS https://cbos-api.vercel.app/api/auth/status
+curl -fsS https://cbos-api.vercel.app/api/config
+gh pr checks 9
 ```
 
-Deploy the frontend:
+At the last verified production check, `authEnabled:false` and `demoMode:true`.
+When authentication is enabled, staff routes require a bearer token and reject
+unauthenticated requests with 401. An open demo is not ready for real patient data.
+Do not reset or seed a remote database as part of a read-only health check.
+
+For a protected branch preview, use the existing authenticated Vercel CLI:
 
 ```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp/frontend"
-# Preferred path: push main and let Vercel deploy with root directory `frontend`,
-# or use Vercel's redeploy action for the latest frontend deployment.
+vercel curl /api/health --deployment <verified-api-preview-id> -- --silent --show-error
+vercel curl / --deployment <verified-frontend-preview-id> -- --silent --show-error --output /tmp/cbos-preview.html --write-out '%{http_code}\n'
 ```
 
-After production deploy, run:
+A successful HTTP preview check does not establish browser-workflow coverage.
+Full preview browser smoke requires an authorized share URL or the supported
+protection-bypass environment variables documented in `frontend/e2e/deployment-smoke.mjs`.
+Do not disable Deployment Protection to make tests pass.
 
-```bash
-cd "/Users/tobiloba202/Developer/New project/business_os_mvp"
-curl -sS https://cbos-api.vercel.app/api/health
-# /api/reactivations now requires a staff token and returns 401 without one.
-# That is the intended state, not a fault. To check it, log in first:
-#   TOKEN=$(curl -sS -X POST https://cbos-api.vercel.app/api/auth/login \
-#     -H 'Content-Type: application/json' -d '{"password":"<staff password>"}' \
-#     | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
-#   curl -sS -H "Authorization: Bearer $TOKEN" https://cbos-api.vercel.app/api/reactivations
-curl -sS https://cbos-api.vercel.app/api/auth/status
-gh pr checks 1
-```
-
-Do not pull `MONGODB_URI` into a tracked file. If the Atlas credential is exposed again, rotate it before any redeploy and overwrite the Vercel variable as sensitive.
+**Merging and production deployment require explicit approval.** Passing checks
+alone is not approval. The API project root is already `backend`; avoid a nested
+`backend/backend` CLI deployment. Keep database credentials and bypass secrets out
+of tracked files, command output, and project notes.
 
 ## Resume With Codex
 
 ```text
 Read AGENTS.md, PROJECT_STATUS.md, and CONTINUE_COMMANDS.md in
-/Users/tobiloba202/Developer/New project/business_os_mvp.
-Continue from the pilot-readiness branch and read docs/PILOT_READINESS.md first.
+/Users/tobiloba202/Developer/New-project/business_os_mvp.
+Continue from chatgpt/demo-data-safety-ux (PR #9), inspect live branch/PR state, and read docs/PILOT_READINESS.md first. Do not merge or deploy production without explicit approval.
 Do not repeat the completed reactivation prototype.
 Uncommitted Dr. McIntyre Canva collateral is preserved in a Git stash named preserve-dr-mcintyre-canva-assets-before-cbos-deploy.
 Pull Request #1 is merged and production proof is complete. The measured clinic-validation invite was sent June 29. The thread was reconciled July 13 and a concise threaded follow-up draft exists in Gmail but is unsent. The validation lane is active again for preparation and review, but external send remains manual. Review the existing draft; do not recreate it or resend the invite automatically. When accepted, run the measured 20-minute fake-data walkthrough in docs/DEMO_WALKTHROUGH.md and record the clinic's workflow evidence and Go / Revise / Stop decision. Use private tracking for contact identifiers.

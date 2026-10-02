@@ -40,6 +40,7 @@ const inquirySchema = new mongoose.Schema(
       enum: FOLLOW_UP_OUTCOMES,
       default: 'Not Contacted',
     },
+    import_batch_id: { type: String, trim: true },
     created_at: { type: Date, required: true, default: Date.now },
     updated_at: { type: Date, required: true, default: Date.now },
   },
@@ -70,6 +71,9 @@ inquirySchema.index({ phone: 1 });
 
 // Default listing and CSV export sort.
 inquirySchema.index({ created_at: -1, _id: -1 });
+
+// Imported rows can be traced to, and safely removed with, their import batch.
+inquirySchema.index({ import_batch_id: 1 }, { sparse: true });
 
 // Follow-up KPIs, the daily reminder queries, and the dashboard workflow.
 inquirySchema.index({ status: 1, next_follow_up_date: 1 });

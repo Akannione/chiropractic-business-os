@@ -14,6 +14,8 @@
 
 import mongoose from 'mongoose';
 import { Inquiry } from '../models/Inquiry.js';
+import { Activity } from '../models/Activity.js';
+import { ImportBatch } from '../models/ImportBatch.js';
 import { listInquiriesForReports, listInquiriesPage, listReactivationCandidates } from '../services/inquiryService.js';
 import { calculateKpis, calculateKpisFromDatabase } from '../services/kpiService.js';
 import { buildReactivationQueue } from '../services/reactivationService.js';
@@ -92,7 +94,7 @@ async function main() {
 
   // Mongoose builds indexes asynchronously on model init; wait so the report
   // below describes the indexes the timings actually ran against.
-  await Inquiry.init();
+  await Promise.all([Inquiry.init(), Activity.init(), ImportBatch.init()]);
 
   const count = await Inquiry.countDocuments();
   const indexes = await mongoose.connection.db!.collection('inquiries').indexes();

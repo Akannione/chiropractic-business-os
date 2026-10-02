@@ -4,9 +4,12 @@ import { KpiCard } from '../components/KpiCard';
 import { PageHeader } from '../components/PageHeader';
 import { api } from '../services/api';
 import { captureTelemetry } from '../services/analytics';
-import type { IntelligencePreview, IntelligenceSignal } from '../types';
+import type { AppConfig, IntelligencePreview, IntelligenceSignal } from '../types';
 
-type IntelligencePageProps = { setError: (message: string) => void };
+type IntelligencePageProps = {
+  config: AppConfig | null;
+  setError: (message: string) => void;
+};
 
 const syntheticFiles = [
   { name: 'Appointments Export.csv', csvText: ['Patient,Appointment Date,Status,Provider','Demo Patient A,2026-09-10,Completed,Dr. Demo','Demo Patient B,2026-09-11,Cancelled,Dr. Demo','Demo Patient C,2026-09-12,No Show,Dr. Demo'].join('\n') },
@@ -26,10 +29,12 @@ function displaySignalValue(signal: IntelligenceSignal) {
   return String(signal.value);
 }
 
-export function IntelligencePage({ setError }: IntelligencePageProps) {
+export function IntelligencePage({ config, setError }: IntelligencePageProps) {
   const [preview, setPreview] = useState<IntelligencePreview | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [selectedNames, setSelectedNames] = useState<string[]>([]);
+  const [demoUploadConfirmed, setDemoUploadConfirmed] = useState(false);
+  const demoUploadBlocked = Boolean(config?.demoMode && !demoUploadConfirmed);
 
   async function analyze(files: Array<{ name: string; csvText: string }>, source: 'sample' | 'upload') {
     setAnalyzing(true); setError('');
@@ -71,17 +76,36 @@ export function IntelligencePage({ setError }: IntelligencePageProps) {
         <div className="intelligence-start-copy">
           <FileSearch size={30} />
           <div>
-            <h3>Start with your clinic exports</h3>
-            <p>Choose the reports you already export. No API? That is okay — CBOS can use the existing export workflow and identifies reports before showing supported signals.</p>
+            <h3>{config?.demoMode ? 'Start with synthetic or deidentified exports' : 'Start with your clinic exports'}</h3>
+            <p>{config?.demoMode
+              ? 'Use the sample data or explicitly deidentified CSVs only. Do not upload raw clinic exports or real patient information to this demo.'
+              : 'Choose the reports you already export. No API? That is okay — CBOS can use the existing export workflow and identifies reports before showing supported signals.'}</p>
           </div>
         </div>
+        {config?.demoMode && (
+          <div id="intelligence-demo-safety" className="notice demo-safety-notice" role="note" aria-label="Intelligence demo data safety notice">
+            <strong>Demo mode — no raw clinic exports.</strong>
+            <span> Use fabricated or explicitly deidentified CSV files only.</span>
+            <label className="demo-safety-confirmation">
+              <input
+                type="checkbox"
+                checked={demoUploadConfirmed}
+                onChange={(event) => setDemoUploadConfirmed(event.target.checked)}
+              />
+              I confirm these CSVs contain only fabricated or deidentified data.
+            </label>
+          </div>
+        )}
         <div className="intelligence-start-actions">
           <button className="ghost-action" type="button" disabled={analyzing} onClick={() => analyze(syntheticFiles, 'sample')}>
             <Lightbulb size={18} /> Try sample data
           </button>
-          <label className="primary-button intelligence-file-label">
+          <label
+            className={'primary-button intelligence-file-label' + (analyzing || demoUploadBlocked ? ' disabled' : '')}
+            aria-disabled={analyzing || demoUploadBlocked}
+          >
             <Upload size={18} /> {analyzing ? 'Analyzing...' : 'Choose CSV files'}
-            <input hidden multiple accept=".csv,text/csv" type="file" disabled={analyzing} onChange={(event) => handleFiles(event.target.files)} />
+            <input hidden multiple accept=".csv,text/csv" type="file" aria-describedby={config?.demoMode ? 'intelligence-demo-safety' : undefined} disabled={analyzing || demoUploadBlocked} onChange={(event) => handleFiles(event.target.files)} />
           </label>
         </div>
         <div className="intelligence-steps" aria-label="Intelligence preview steps">

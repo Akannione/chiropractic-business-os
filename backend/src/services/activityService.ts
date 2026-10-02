@@ -6,6 +6,7 @@ type ActivityInput = {
   patientName?: string;
   action: string;
   detail?: string;
+  importBatchId?: string;
 };
 
 export async function logActivity(input: ActivityInput, session?: ClientSession) {
@@ -14,6 +15,7 @@ export async function logActivity(input: ActivityInput, session?: ClientSession)
     patient_name: input.patientName || '',
     action: input.action,
     detail: input.detail || '',
+    ...(input.importBatchId ? { import_batch_id: input.importBatchId } : {}),
     created_at: new Date(),
   }], { session });
 }
@@ -28,6 +30,7 @@ export async function logActivities(inputs: ActivityInput[]) {
       patient_name: input.patientName || '',
       action: input.action,
       detail: input.detail || '',
+      ...(input.importBatchId ? { import_batch_id: input.importBatchId } : {}),
       created_at: now,
     })),
     { ordered: false },

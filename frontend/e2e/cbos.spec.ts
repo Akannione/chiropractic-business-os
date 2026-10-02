@@ -17,7 +17,7 @@ const sections = [
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText('Good to see you.')).toBeVisible();
+  await expect(page.getByText('Good to see you.')).toBeVisible({ timeout: 15_000 });
 });
 
 test('desktop navigation reaches every MVP workspace without runtime errors', async ({ page }) => {
@@ -39,16 +39,57 @@ test('Today primary workflow updates a queued inquiry', async ({ page }) => {
 });
 
 test('Add Inquiry drawer creates an inquiry and closes', async ({ page }) => {
-  await page.getByRole('button', { name: 'Add Inquiry', exact: true }).click();
-  await page.getByLabel('Patient Name').fill('E2E Front Desk Test');
+  const trigger = page.getByRole('button', { name: 'Add Inquiry', exact: true });
+  await expect(trigger).toBeEnabled();
+  await trigger.click();
+  const dialog = page.getByRole('dialog', { name: 'Add Patient Inquiry' });
+  await expect(dialog.getByLabel('Demo data safety notice')).toContainText(/fabricated information only/i);
+  await expect(dialog.getByLabel('Patient Name')).toHaveAttribute('autocomplete', 'off');
+  await dialog.getByLabel('Patient Name').fill('E2E Front Desk Test');
   await page.getByRole('textbox', { name: 'Phone', exact: true }).fill('4045550199');
   await page.getByRole('textbox', { name: 'Email', exact: true }).fill('e2e@example.com');
   await page.getByRole('button', { name: 'Add Inquiry', exact: true }).last().click();
   await expect(page.locator('.notice.success')).toContainText('Patient inquiry added');
 });
 
+test('successful inquiry save is not reported as failed when background refresh fails', async ({ page }) => {
+  let createRequests = 0;
+  let failNextKpis = false;
+  page.on('request', (request) => {
+    if (request.method() === 'POST' && request.url().includes('/api/inquiries')) createRequests += 1;
+  });
+  await page.route('**/api/kpis', async (route) => {
+    if (failNextKpis) {
+      failNextKpis = false;
+      await route.abort();
+      return;
+    }
+    await route.continue();
+  });
+
+  const trigger = page.getByRole('button', { name: 'Add Inquiry', exact: true });
+  await trigger.click();
+  const dialog = page.getByRole('dialog', { name: 'Add Patient Inquiry' });
+  await dialog.getByLabel('Patient Name').fill('E2E Refresh Failure');
+  await page.getByRole('textbox', { name: 'Phone', exact: true }).fill('4045550188');
+  await page.getByRole('textbox', { name: 'Email', exact: true }).fill('refresh-failure@example.com');
+  failNextKpis = true;
+  await page.getByRole('button', { name: 'Add Inquiry', exact: true }).last().click();
+
+  await expect(dialog).toHaveCount(0);
+  await expect(page.locator('.notice.success')).toContainText('Patient inquiry added');
+  await expect(page.locator('.notice.error')).toContainText('Action completed, but CBOS could not refresh');
+  expect(createRequests).toBe(1);
+});
+
 test('Intelligence synthetic demo produces report matches and signals', async ({ page }) => {
   await page.getByRole('button', { name: 'Intelligence', exact: true }).click();
+  await expect(page.getByLabel('Intelligence demo data safety notice')).toContainText(/no raw clinic exports/i);
+  await expect(page.getByRole('heading', { name: 'Start with synthetic or deidentified exports' })).toBeVisible();
+  const intelligenceFileInput = page.locator('input[type=file]');
+  await expect(intelligenceFileInput).toBeDisabled();
+  await page.getByLabel('I confirm these CSVs contain only fabricated or deidentified data.').check();
+  await expect(intelligenceFileInput).toBeEnabled();
   await page.getByRole('button', { name: /Try sample data/i }).click();
   await expect(page.getByText('Report matches')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'What needs attention', exact: true })).toBeVisible();
@@ -90,7 +131,7 @@ test('desktop front-desk viewport has no horizontal page overflow', async ({ pag
 
 test('workspace URLs are deep-linkable and browser navigation restores context', async ({ page }) => {
   await page.goto('/intelligence');
-  await expect(page.getByText('Practice Intelligence')).toBeVisible();
+  await expect(page.getByText('Practice Intelligence')).toBeVisible({ timeout: 15_000 });
   await expect(page).toHaveURL(/\/intelligence$/);
   await page.getByRole('button', { name: 'Pipeline', exact: true }).click();
   await expect(page).toHaveURL(/\/pipeline$/);

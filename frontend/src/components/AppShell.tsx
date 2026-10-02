@@ -118,12 +118,26 @@ export function AppShell(props: AppShellProps) {
             <button className="mobile-menu-button" aria-label="Open navigation" onClick={() => setMobileOpen(true)}><Menu size={20} /></button>
             <div><span className="topbar-context">{config?.practiceName || 'CBOS'} · Front desk</span><h1>{activeItem?.label || 'Workspace'}</h1><p className="product-positioning">{view === 'dashboard' ? 'Your operational home for today.' : 'See what needs attention, what is being missed, and what your team should do next.'}</p></div>
           </div>
-          <button id="add-inquiry-button" className="primary-button" onClick={onAddInquiry}><Plus size={18} /> Add Inquiry</button>
+          <button id="add-inquiry-button" className="primary-button" disabled={!config || loading} onClick={onAddInquiry}><Plus size={18} /> Add Inquiry</button>
         </header>
 
+        {config?.demoMode && (
+          <div className="notice demo-safety-notice" role="note" aria-label="Demo data safety notice">
+            <strong>{staffAuthEnabled ? 'Demo mode — fake data only.' : 'Public demo — fake data only.'}</strong>
+            <span> Do not enter real patient names, contact details, health information, or other sensitive data.</span>
+          </div>
+        )}
         {message && <div className="notice success" role="status" aria-live="polite">{message}</div>}
         {error && <div className="notice error error-with-action" role="alert"><span>{error}</span><button type="button" onClick={() => void onRetry()}>Try again</button></div>}
-        {loading ? <WorkspaceSkeleton /> : children}
+        {loading ? (
+          <WorkspaceSkeleton />
+        ) : config ? (
+          children
+        ) : (
+          <div className="empty-state" role="status">
+            Practice settings are unavailable. Retry before entering or changing any data.
+          </div>
+        )}
       </main>
     </div>
   );

@@ -178,12 +178,12 @@ function StaffApp({ authRequired, onLogout }: { authRequired: boolean; onLogout:
       )}
       {view === 'summary' && <WeeklySummaryPage summary={summary} />}
       {view === 'monthly' && <MonthlySummaryPage summary={monthlySummary} />}
-      {view === 'intelligence' && <IntelligencePage setError={setError} />}
+      {view === 'intelligence' && <IntelligencePage config={config} setError={setError} />}
       {view === 'activity' && <ActivityPage activities={activities} />}
       {view === 'duplicates' && (
         <DuplicatesPage onChanged={refreshWithMessage} setError={setError} />
       )}
-      {view === 'exports' && <ExportsPage inquiryTotal={inquiryTotal} onChanged={refreshWithMessage} setError={setError} />}
+      {view === 'exports' && <ExportsPage config={config} inquiryTotal={inquiryTotal} onChanged={refreshWithMessage} setError={setError} />}
       {view === 'settings' && <SettingsPage config={config} onChanged={refreshWithMessage} setError={setError} />}
       {view === 'public-intake' && <PublicInquiryPage config={config} />}
       {inquiryDrawerOpen && (

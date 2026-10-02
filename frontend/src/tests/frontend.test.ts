@@ -46,6 +46,31 @@ function installWindow() {
 
 installWindow();
 
+const { withRequestTimeout } = await import('../services/requestTimeout');
+
+async function testRequestTimeout() {
+  assertEqual(await withRequestTimeout(async () => 'complete', 100), 'complete');
+  let attempts = 0;
+  await assertRejects(
+    () => withRequestTimeout(async (signal) => {
+      attempts += 1;
+      // Headers have arrived; the body still needs the same deadline.
+      const response = await Promise.resolve({
+        json: () => new Promise((_resolve, reject) => {
+          signal.addEventListener('abort', () => reject(new Error('Aborted')), { once: true });
+        }),
+      });
+      return response.json();
+    }, 5),
+    /took too long.*Check whether your changes were saved/,
+  );
+  assertEqual(attempts, 1);
+  await assertRejects(
+    () => withRequestTimeout(async () => { throw new Error('Original failure'); }),
+    /Original failure/,
+  );
+}
+
 const apiModule = await import('../services/api');
 const formatModule = await import('../utils/format');
 const pipelineModule = await import('../pages/PipelinePage');
@@ -193,7 +218,14 @@ function testApiBaseUrlResolution() {
     ),
     '/api',
   );
-  assertEqual(resolveApiBaseUrl({ DEV: true }, ''), 'http://localhost:4000/api');
+  assertEqual(resolveApiBaseUrl({ DEV: true }, ''), '/api');
+  assertEqual(resolveApiBaseUrl({ DEV: true, VITE_API_BASE_URL: 'http://localhost:4000/api' }, 'localhost'), '/api');
+  assertEqual(resolveApiBaseUrl({ DEV: true, VITE_API_BASE_URL: 'http://127.0.0.1:4010/api' }, 'localhost'), '/api');
+  assertEqual(resolveApiBaseUrl({ DEV: false, VITE_API_BASE_URL: 'http://localhost:4000/api' }, 'localhost'), '/api');
+  assertEqual(resolveApiBaseUrl({ DEV: false, VITE_API_BASE_URL: 'http://127.0.0.1:4000/api' }, '127.0.0.1'), '/api');
+  assertEqual(resolveApiBaseUrl({ DEV: false, VITE_API_BASE_URL: 'https://cbos-api.vercel.app/api' }, 'localhost'), 'https://cbos-api.vercel.app/api');
+  assertEqual(resolveApiBaseUrl({ DEV: false, VITE_API_BASE_URL: 'http://localhost:4000/api' }, 'cbos.example.com'), 'http://localhost:4000/api');
+  assertEqual(resolveApiBaseUrl({ DEV: true, VITE_API_BASE_URL: 'https://cbos-api.vercel.app/api' }, 'localhost'), 'https://cbos-api.vercel.app/api');
   assertEqual(
     resolveApiBaseUrl({ VITE_API_BASE_URL: 'https://cbos-api.vercel.app/api' }, 'cbos.example.com'),
     'https://cbos-api.vercel.app/api',
@@ -233,6 +265,7 @@ function testFatalErrorRecoveryDoesNotRenderExceptionDetails() {
 }
 
 testAuthTokenUsesTabSessionStorage();
+await testRequestTimeout();
 await testCsvImportKeepsAuthHeader();
 await testIntelligencePreviewKeepsStaffAuth();
 await testExpiredStaffTokenClearsSession();

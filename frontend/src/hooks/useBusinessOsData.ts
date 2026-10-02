@@ -105,9 +105,18 @@ export function useBusinessOsData() {
   }, []);
 
   async function refreshWithMessage(nextMessage: string) {
-    await loadData();
+    // The action already succeeded before callers reach this helper. Surface that
+    // success immediately and treat a stale dashboard refresh as a separate
+    // recovery problem so staff are not encouraged to repeat a successful write.
     setMessage(nextMessage);
     window.setTimeout(() => setMessage(''), 2800);
+    try {
+      await loadData();
+    } catch {
+      setError(
+        'Action completed, but CBOS could not refresh the latest practice data. Use Retry before repeating the action.',
+      );
+    }
   }
 
   return {

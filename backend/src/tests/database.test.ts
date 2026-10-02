@@ -17,6 +17,7 @@ import assert from 'node:assert/strict';
 import mongoose from 'mongoose';
 import { Activity } from '../models/Activity.js';
 import { Inquiry } from '../models/Inquiry.js';
+import { ImportBatch } from '../models/ImportBatch.js';
 import {
   buildInquiryDocument,
   listInquiriesPage,
@@ -25,6 +26,8 @@ import {
 import { calculateKpis, calculateKpisFromDatabase } from '../services/kpiService.js';
 import { buildReactivationQueue } from '../services/reactivationService.js';
 import { findDuplicateGroups, mergeInquiries } from '../services/duplicateService.js';
+import { importInquiryCsv } from '../services/importService.js';
+import { listImportBatches, undoImportBatch } from '../services/importBatchService.js';
 import { addDays, formatDate, startOfToday } from '../utils/date.js';
 
 const TEST_URI = process.env.TEST_MONGODB_URI || 'mongodb://127.0.0.1:27017/cbos_integration_test';
@@ -53,9 +56,29 @@ function inquiry(overrides: Record<string, unknown> & { created_at?: Date }) {
   return created_at ? { ...document, created_at } : document;
 }
 
+function testInquiryPersistenceWhitelist() {
+  const document = buildInquiryDocument({
+    name: 'Whitelist Test',
+    phone: '404-555-0111',
+    email: 'whitelist@example.com',
+    service_needed: 'Spinal Adjustment',
+    source: 'Website',
+    status: 'New Inquiry',
+    estimated_value: 100,
+    import_batch_id: 'forged-batch-id',
+    arbitrary_field: 'must-not-persist',
+  } as never) as Record<string, unknown>;
+
+  assert.equal('import_batch_id' in document, false,
+    'manual inquiry payloads must not be able to forge import batch membership');
+  assert.equal('arbitrary_field' in document, false,
+    'unknown request fields must not be copied into stored inquiry documents');
+}
+
 async function seed() {
   await Inquiry.deleteMany({});
   await Activity.deleteMany({});
+  await ImportBatch.deleteMany({});
   await Inquiry.insertMany([
     // No follow-up date at all. BSON sorts null before dates, so a bare
     // `$lt: today` would wrongly match this in the Overdue view.
@@ -325,6 +348,137 @@ async function testMergeKeepsTheRicherRecord() {
   );
 }
 
+async function testImportBatchRecovery() {
+  await Inquiry.deleteMany({});
+  await Activity.deleteMany({});
+  await ImportBatch.deleteMany({});
+
+  const manual = await Inquiry.create(inquiry({
+    name: 'Manual Record',
+    email: 'manual@example.com',
+    phone: '470-555-1000',
+  }));
+
+  const csv = [
+    'name,phone,email,service_needed',
+    'Imported One,470-555-1001,import1@example.com,Spinal Adjustment',
+    'Imported Two,470-555-1002,import2@example.com,Wellness Consultation',
+  ].join('\n');
+
+  const result = await importInquiryCsv(csv);
+  assert.equal(result.imported, 2);
+  assert.equal(result.failed, 0);
+  assert.equal(result.status, 'completed');
+  assert.ok(result.batchId, 'successful imports receive a batch id');
+
+  assert.equal(
+    await Inquiry.countDocuments({ import_batch_id: result.batchId }),
+    2,
+    'every imported inquiry is linked to the batch',
+  );
+  assert.equal(
+    await Activity.countDocuments({ import_batch_id: result.batchId }),
+    2,
+    'import-created activities are linked to the same batch',
+  );
+
+  const history = await listImportBatches();
+  assert.equal(history.length, 1);
+  assert.equal(history[0].batchId, result.batchId);
+  assert.equal(history[0].imported, 2);
+  assert.equal(history[0].status, 'completed');
+
+  const undone = await undoImportBatch(result.batchId);
+  assert.ok(undone);
+  assert.equal(undone?.deletedInquiries, 2);
+  assert.equal(undone?.deletedActivities, 2);
+  assert.equal(await Inquiry.countDocuments({ _id: manual._id }), 1,
+    'undo import must never remove unrelated manual records');
+
+  const repeatedUndo = await undoImportBatch(result.batchId);
+  assert.equal(repeatedUndo?.alreadyUndone, true, 'undo is idempotent');
+
+  const partial = await importInquiryCsv([
+    'name,phone,email,service_needed',
+    'Partial Good,470-555-1010,partial-good@example.com,Spinal Adjustment',
+    'Partial Bad,not-a-phone,partial-bad@example.com,Spinal Adjustment',
+  ].join('\n'));
+  assert.equal(partial.imported, 1);
+  assert.equal(partial.failed, 1);
+  assert.equal(partial.status, 'partial');
+  assert.equal(await Inquiry.countDocuments({ import_batch_id: partial.batchId }), 1);
+  const partialBatch = await ImportBatch.findOne({ batch_id: partial.batchId }).lean();
+  assert.equal(partialBatch?.status, 'partial');
+  assert.equal(partialBatch?.failed, 1);
+  assert.ok(partialBatch?.error_messages[0]?.startsWith('Row 3:'),
+    'partial batch errors identify the CSV row without repeating patient data');
+
+  const allInvalid = await importInquiryCsv([
+    'name,phone,email,service_needed',
+    'Invalid Only,bad-phone,invalid-only@example.com,Spinal Adjustment',
+  ].join('\n'));
+  assert.equal(allInvalid.imported, 0);
+  assert.equal(allInvalid.failed, 1);
+  assert.equal(allInvalid.status, 'failed');
+
+  const duplicateOnly = await importInquiryCsv([
+    'name,phone,email,service_needed',
+    'Manual Record,470-555-1000,manual@example.com,Spinal Adjustment',
+  ].join('\n'));
+  assert.equal(duplicateOnly.imported, 0);
+  assert.equal(duplicateOnly.skippedDuplicates, 1);
+  assert.equal(duplicateOnly.failed, 0);
+  assert.equal(duplicateOnly.status, 'completed');
+
+  const staleBatchId = 'stale-processing-batch';
+  const staleCreatedAt = new Date(Date.now() - 20 * 60 * 1000);
+  await ImportBatch.create({
+    batch_id: staleBatchId,
+    total_rows: 1,
+    imported: 0,
+    skipped_duplicates: 0,
+    failed: 0,
+    error_messages: [],
+    status: 'processing',
+    created_at: staleCreatedAt,
+  });
+  const staleInquiry = await Inquiry.create({
+    ...inquiry({
+      name: 'Interrupted Import',
+      email: 'interrupted@example.com',
+      phone: '470-555-1004',
+    }),
+    import_batch_id: staleBatchId,
+  });
+  await Activity.create({
+    inquiry_id: staleInquiry._id,
+    patient_name: staleInquiry.name,
+    action: 'Inquiry created',
+    import_batch_id: staleBatchId,
+  });
+  const staleUndo = await undoImportBatch(staleBatchId);
+  assert.equal(staleUndo?.deletedInquiries, 1,
+    'stale processing batches can be recovered after the grace period');
+  assert.equal(staleUndo?.deletedActivities, 1);
+
+  const second = await importInquiryCsv([
+    'name,phone,email,service_needed',
+    'Modified Import,470-555-1003,modified@example.com,Spinal Adjustment',
+  ].join('\n'));
+  const batch = await ImportBatch.findOne({ batch_id: second.batchId }).lean();
+  assert.ok(batch?.completed_at);
+  await Inquiry.updateOne(
+    { import_batch_id: second.batchId },
+    { $set: { notes: 'Edited after import', updated_at: new Date(batch!.completed_at!.getTime() + 1000) } },
+  );
+
+  const blocked = await undoImportBatch(second.batchId);
+  assert.equal(blocked?.blockedModifiedCount, 1,
+    'undo must block when an imported record was changed after the batch completed');
+  assert.equal(await Inquiry.countDocuments({ import_batch_id: second.batchId }), 1,
+    'blocked undo must preserve the modified inquiry');
+}
+
 async function main() {
   try {
     await mongoose.connect(TEST_URI, { serverSelectionTimeoutMS: 3000 });
@@ -338,7 +492,8 @@ async function main() {
   }
 
   try {
-    await Inquiry.init();
+    await Promise.all([Inquiry.init(), Activity.init(), ImportBatch.init()]);
+    testInquiryPersistenceWhitelist();
     await seed();
 
     await testFollowUpFiltersHandleNulls();
@@ -350,6 +505,7 @@ async function main() {
     await testKpiAggregationParity();
     await testDuplicateGroupingAgainstRealData();
     await testMergeKeepsTheRicherRecord();
+    await testImportBatchRecovery();
 
     console.log('Database tests passed.');
   } finally {

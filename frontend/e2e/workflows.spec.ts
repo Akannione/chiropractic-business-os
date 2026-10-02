@@ -1,3 +1,4 @@
+
 import { test, expect } from '@playwright/test';
 
 const API = process.env.E2E_API_URL || 'http://localhost:4010/api';
@@ -7,14 +8,103 @@ test.beforeEach(async ({ request }) => {
   expect(reset.ok()).toBeTruthy();
 });
 
+test('local startup uses same-origin API requests and renders the dashboard', async ({ page }) => {
+  const apiUrls: string[] = [];
+  page.on('request', (request) => {
+    if (new URL(request.url()).pathname.startsWith('/api/')) apiUrls.push(request.url());
+  });
+  await page.goto('/');
+  await expect(page.getByText('Good to see you.')).toBeVisible();
+  const origin = new URL(page.url()).origin;
+  expect(apiUrls.some((url) => url.endsWith('/api/auth/status'))).toBe(true);
+  expect(apiUrls.some((url) => url.endsWith('/api/config'))).toBe(true);
+  expect(apiUrls.every((url) => new URL(url).origin === origin)).toBe(true);
+});
+
+test('public intake stays non-interactive until practice configuration is known', async ({ page }) => {
+  let releaseConfig!: () => void;
+  const configGate = new Promise<void>((resolve) => {
+    releaseConfig = resolve;
+  });
+
+  await page.route('**/api/config', async (route) => {
+    await configGate;
+    await route.continue();
+  });
+
+  await page.goto('/intake');
+  const patientName = page.getByRole('textbox', { name: 'Patient Name', exact: true });
+  await expect(page.getByText('Loading practice settings...')).toBeVisible();
+  await expect(patientName).toBeDisabled();
+  await expect(patientName).toHaveAttribute('autocomplete', 'off');
+  await expect(page.getByRole('button', { name: 'Send Inquiry to Practice' })).toBeDisabled();
+
+  releaseConfig();
+  await expect(page.getByLabel('Demo data safety notice')).toBeVisible();
+  await expect(patientName).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Submit Demo Inquiry' })).toBeEnabled();
+});
+
 test('public intake submits a new inquiry end to end', async ({ page }) => {
   await page.goto('/intake?source=E2E');
+  await expect(page.getByLabel('Demo data safety notice')).toContainText('fabricated information only');
+  await expect(page.getByRole('textbox', { name: 'Patient Name', exact: true })).toHaveAttribute('autocomplete', 'off');
   await page.getByRole('textbox', { name: 'Patient Name', exact: true }).fill('Public E2E Patient');
   await page.getByRole('textbox', { name: 'Phone', exact: true }).fill('4045550188');
   await page.getByRole('textbox', { name: 'Email', exact: true }).fill('public-e2e@example.com');
   await page.getByLabel('Requested Service', { exact: true }).fill('Spinal Adjustment');
-  await page.getByRole('button', { name: 'Send Inquiry to Practice' }).click();
-  await expect(page.getByText(/thank|received|sent/i).first()).toBeVisible();
+  await page.getByRole('button', { name: 'Submit Demo Inquiry' }).click();
+  await expect(page.getByText(/demo inquiry received/i)).toBeVisible();
+});
+
+test('stalled inquiry save times out without retrying or closing the form', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: 'Add Inquiry', exact: true })).toBeEnabled();
+  await page.clock.install();
+  let submissions = 0;
+  await page.route('**/api/inquiries', (route) => {
+    if (route.request().method() !== 'POST') return route.continue();
+    submissions += 1;
+    // Leave this request unanswered to model a stalled connection.
+  });
+  await page.getByRole('button', { name: 'Add Inquiry', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Add Patient Inquiry' });
+  await dialog.getByLabel('Patient Name').fill('Synthetic Timeout Patient');
+  await dialog.getByRole('textbox', { name: 'Phone', exact: true }).fill('4045550199');
+  await dialog.getByRole('textbox', { name: 'Email', exact: true }).fill('timeout@example.com');
+  await dialog.getByRole('button', { name: 'Add Inquiry', exact: true }).click();
+  await expect.poll(() => submissions).toBe(1);
+  await page.clock.fastForward(31_000);
+  await expect(page.getByText(/The request took too long/).first()).toBeVisible();
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByLabel('Patient Name')).toHaveValue('Synthetic Timeout Patient');
+  expect(submissions).toBe(1);
+});
+
+test('staff workspace fails closed when practice configuration cannot load', async ({ page }) => {
+  await page.route('**/api/config', async (route) => {
+    await route.fulfill({
+      status: 503,
+      contentType: 'application/json',
+      body: JSON.stringify({ error: 'Config unavailable' }),
+    });
+  });
+
+  await page.goto('/');
+  await expect(page.getByRole('alert')).toBeVisible();
+  await expect(
+    page.getByText('Practice settings are unavailable. Retry before entering or changing any data.'),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add Inquiry' })).toBeDisabled();
+  await expect(page.getByText('Good to see you.')).toHaveCount(0);
+});
+
+test('staff workspace makes fake-data-only demo status explicit', async ({ page }) => {
+  await page.goto('/');
+  const notice = page.getByLabel('Demo data safety notice');
+  await expect(notice).toBeVisible();
+  await expect(notice).toContainText(/fake data only/i);
+  await expect(notice).toContainText(/Do not enter real patient/i);
 });
 
 test('reactivation queue saves front-desk follow-up details', async ({ page }) => {
@@ -41,25 +131,46 @@ test('inquiry quick filters and reset remain usable', async ({ page }) => {
   }
 });
 
-test('CSV import previews valid rows then imports them', async ({ page }) => {
+test('CSV import previews valid rows then imports them', async ({ page, request }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Import & Export', exact: true }).click();
+  await expect(page.getByLabel('Demo import safety notice')).toContainText(/do not upload a real clinic export/i);
+  const fileInput = page.getByLabel('Choose patient inquiry CSV file');
+  await expect(fileInput).toBeDisabled();
+  await page.getByLabel('I confirm this CSV contains only fabricated or deidentified data.').check();
+  await expect(fileInput).toBeEnabled();
   const csv = [
     'name,phone,email,service_needed,source,notes',
     'CSV E2E Patient,4045550177,csv-e2e@example.com,Spinal Adjustment,Website,Imported by browser test',
   ].join('\n');
-  await page.locator('input[type=file]').setInputFiles({ name: 'e2e-inquiries.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+  await fileInput.setInputFiles({ name: 'e2e-inquiries.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
   await expect(page.getByRole('heading', { name: 'Import Preview' })).toBeVisible();
   await expect(page.getByText('CSV E2E Patient')).toBeVisible();
   const importButton = page.getByRole('button', { name: 'Import Previewed Rows' });
   await expect(importButton).toBeEnabled();
   await importButton.click();
-  await expect(page.locator('.notice.success')).toContainText(/imported/i);
+  await expect(page.locator('.notice.success').first()).toContainText(/imported/i);
+  await expect(page.getByRole('heading', { name: 'Recent Imports' })).toBeVisible();
+  await expect(page.getByText(/1 imported · 0 duplicates · 0 failed/)).toBeVisible();
+
+  const undoButton = page.getByRole('button', { name: /Undo import / }).first();
+  await expect(undoButton).toBeVisible();
+  await undoButton.click();
+  const confirmUndo = page.getByRole('button', { name: 'Confirm undo' });
+  await expect(confirmUndo).toBeVisible();
+  await confirmUndo.click();
+  await expect(page.locator('.notice.success').first()).toContainText(/Undo complete/i);
+
+  const afterUndo = await request.get(`${API}/inquiries?search=csv-e2e%40example.com&pageSize=25`);
+  expect(afterUndo.ok()).toBeTruthy();
+  const afterUndoBody = await afterUndo.json();
+  expect(afterUndoBody.total).toBe(0);
 });
 
 test('CSV import rejects oversized files before reading or previewing them', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Import & Export', exact: true }).click();
+  await page.getByLabel('I confirm this CSV contains only fabricated or deidentified data.').check();
   await page.locator('input[type=file]').setInputFiles({
     name: 'oversized.csv',
     mimeType: 'text/csv',
@@ -73,6 +184,7 @@ test('CSV import rejects oversized files before reading or previewing them', asy
 test('CSV import blocks malformed rows instead of importing them', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Import & Export', exact: true }).click();
+  await page.getByLabel('I confirm this CSV contains only fabricated or deidentified data.').check();
   const csv = ['name,phone,email,service_needed', ',,,'].join('\n');
   await page.locator('input[type=file]').setInputFiles({ name: 'invalid.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
   const importButton = page.getByRole('button', { name: 'Import Previewed Rows' });

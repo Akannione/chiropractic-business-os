@@ -28,10 +28,15 @@ test('core workspaces have no serious or critical automated accessibility violat
 test('Add Inquiry drawer is keyboard operable and restores focus', async ({ page }) => {
   await page.goto('/');
   const trigger = page.getByRole('button', { name: 'Add Inquiry' });
+  await expect(trigger).toBeEnabled();
   await trigger.focus();
   await page.keyboard.press('Enter');
   const dialog = page.getByRole('dialog', { name: 'Add Patient Inquiry' });
   await expect(dialog).toBeVisible();
+  await expect(dialog.getByLabel('Demo data safety notice')).toBeVisible();
+  const results = await new AxeBuilder({ page }).include('.inquiry-drawer').analyze();
+  const severe = results.violations.filter((v) => ['serious', 'critical'].includes(v.impact || ''));
+  expect(severe, severe.map((v) => `${v.id}: ${v.help}`).join('; ')).toEqual([]);
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
   await expect(trigger).toBeFocused();

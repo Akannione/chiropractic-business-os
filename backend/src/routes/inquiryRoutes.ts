@@ -12,7 +12,14 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { requireStaffAuth } from '../middleware/authMiddleware.js';
 import { rateLimit } from '../middleware/rateLimiter.js';
 import { getKpis, getMonthlySummary, getWeeklySummary } from '../controllers/reportController.js';
-import { postImportCsv, postImportCsvPreview, postPublicInquiry, postWebhookInquiry } from '../controllers/automationController.js';
+import {
+  getImportBatches,
+  postImportCsv,
+  postImportCsvPreview,
+  postPublicInquiry,
+  postUndoImportBatch,
+  postWebhookInquiry,
+} from '../controllers/automationController.js';
 import {
   getInquiries,
   patchInquiry,
@@ -35,6 +42,8 @@ inquiryRouter.post('/webhooks/inquiries', intakeLimiter, asyncHandler(postWebhoo
 inquiryRouter.use(requireStaffAuth);
 inquiryRouter.post('/imports/inquiries.csv/preview', asyncHandler(postImportCsvPreview));
 inquiryRouter.post('/imports/inquiries.csv', asyncHandler(postImportCsv));
+inquiryRouter.get('/imports/inquiries.csv/batches', asyncHandler(getImportBatches));
+inquiryRouter.post('/imports/inquiries.csv/batches/:batchId/undo', asyncHandler(postUndoImportBatch));
 inquiryRouter.get('/inquiries', asyncHandler(getInquiries));
 inquiryRouter.get('/duplicates', asyncHandler(getDuplicates));
 inquiryRouter.post('/inquiries/:id/merge', asyncHandler(postMergeInquiries));

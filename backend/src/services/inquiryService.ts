@@ -218,12 +218,13 @@ export async function listInquiriesPage(query: InquiryQuery) {
  */
 export function buildInquiryDocument(input: InquiryInput, now = new Date()) {
   return {
-    ...input,
     name: input.name.trim(),
     phone: input.phone.trim(),
     email: input.email.trim(),
     service_needed: input.service_needed.trim(),
     activity_context: input.activity_context?.trim() || '',
+    source: input.source,
+    status: input.status,
     estimated_value: Number(input.estimated_value || 0),
     notes: input.notes?.trim() || '',
     next_follow_up_date: parseDateOnly(input.next_follow_up_date),
@@ -263,11 +264,17 @@ export type BulkInsertFailure = { index: number; message: string };
  * failure refers to the position in `inputs`, letting the caller map a failure
  * back to its CSV row number.
  */
-export async function createInquiriesBulk(inputs: InquiryInput[]) {
+export async function createInquiriesBulk(
+  inputs: InquiryInput[],
+  options: { importBatchId?: string } = {},
+) {
   if (!inputs.length) return { inserted: 0, failures: [] as BulkInsertFailure[] };
 
   const now = new Date();
-  const documents = inputs.map((input) => buildInquiryDocument(input, now));
+  const documents = inputs.map((input) => ({
+    ...buildInquiryDocument(input, now),
+    ...(options.importBatchId ? { import_batch_id: options.importBatchId } : {}),
+  }));
 
   let insertedDocs: { id?: string; _id?: unknown; name: string; source: string; status: string }[] = [];
   const failures: BulkInsertFailure[] = [];
@@ -288,7 +295,10 @@ export async function createInquiriesBulk(inputs: InquiryInput[]) {
     for (const writeError of writeErrors) {
       failures.push({
         index: writeError.index,
-        message: writeError.errmsg || writeError.err?.errmsg || 'Could not save this row.',
+        // Do not persist raw database error text in import history: driver
+        // messages can echo document values. The CSV row number is enough for
+        // staff to identify the failed record without duplicating patient data.
+        message: 'Could not save this row.',
       });
     }
   }
@@ -299,6 +309,7 @@ export async function createInquiriesBulk(inputs: InquiryInput[]) {
       patientName: doc.name,
       action: 'Inquiry created',
       detail: `Created from ${doc.source} with status ${doc.status}.`,
+      importBatchId: options.importBatchId,
     })));
   }
 

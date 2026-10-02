@@ -1,3 +1,4 @@
+
 # Project Status
 
 ## Project Purpose
@@ -12,13 +13,30 @@ Staff login was enabled earlier in production, but the current fake-data demo in
 
 Pull Request #1 was merged into `main` at commit `b46add8`, so the public source now matches the production deployment. Dr. McIntyre Canva collateral remains preserved separately from the deployment branch.
 
+The release-candidate chain is also complete: PR #7 merged into `chatgpt/pilot-readiness` at `76b168c`, and PR #8 merged the post-release hardening branch into `main` at `a32da16`. The active follow-up branch is `chatgpt/demo-data-safety-ux`; PR #9 is open against `main` with explicit fake-data safety UX plus release-hygiene hardening.
+
 ## Last Completed Task
 
-2026-09-30: Merged PR #7 into `chatgpt/pilot-readiness`, passed post-merge quality gate #50, then merged PR #6 into `main` at `3d3f3df8c3c910e3fca5681978e92677e16cc63f`. The production frontend and API deployments are READY.
+2026-10-01: Added recoverable CSV import batches on PR #9. Each import now gets a batch ID, persisted outcome counts/status, import-created inquiry/activity linkage, recent import history, a failure report, and guarded undo. Undo is transactional where MongoDB supports transactions and retry-safe on standalone development MongoDB; it is idempotent and refuses to erase imported inquiries edited after the batch completed. Demo reset clears import history and activity alongside inquiries. Internal batch IDs are excluded from ordinary inquiry API responses and CSV exports. Integration coverage now includes successful, partial, fully failed, duplicate-only, repeated-undo, unrelated-record preservation, and modified-record blocking cases. CI verification for the newest head remains authoritative before merge.
+
+2026-10-01: Proved local synthetic backup/restore mechanics at 50,000 inquiries. `mongodump` completed; namespace-remapped `mongorestore` restored 50,000/50,000 records with zero failures and restored indexes; the restored database benchmark ran without reseeding and passed KPI parity. Added a read-only `npm run verify:restore` command and `docs/BACKUP_RESTORE_RUNBOOK.md` so the drill is repeatable. This does not open the real-data gate; production schedule, retention, storage, RPO/RTO, access, and ownership remain client-specific requirements.
+
+
+2026-10-01: Fixed local production-preview routing. Loopback API URLs now normalize to `/api` on local browser hosts even in production builds; Vite preview shares the development proxy. Remote production HTTPS API URLs remain absolute. Typecheck, frontend/telemetry tests, frontend build, and whitespace checks passed. Existing backend4000 remained unchanged and healthy; preview4173 returned successful auth/status and health responses. Chromium and WebKit rendered the dashboard with nine same-origin startup API requests, zero failed requests, and zero page exceptions. Preview remains available locally; no production deployment or PR merge was performed.
+
+2026-10-01: Hardened post-write refresh behavior so a successful inquiry/action is never reported as failed just because the background dashboard refresh later fails. Successful Add Inquiry now closes immediately, refreshes in the background, and surfaces a separate recovery message if fresh practice data cannot be loaded; it does not retry the write. Added browser regression coverage that aborts a post-save KPI refresh and verifies exactly one inquiry POST, success feedback, drawer closure, and the stale-data recovery warning. Chromium 33/33 and WebKit 33/33 passed locally on an isolated fake-data stack. Local macOS Firefox remains blocked before test execution by Playwright's known temporary-profile launcher issue; GitHub Linux CI is the authoritative Firefox signal. Full typecheck, unit/routing/telemetry tests, MongoDB integration, production build, bundle budget, tracked-secret scan, both dependency audits, and `git diff --check` passed. Updated active runbook paths to the repository's current `/Users/tobiloba202/Developer/New-project/business_os_mvp` location.
+
+2026-10-01: Fixed local frontend initialization on alternate Vite ports. Browser evidence showed `GET http://localhost:4000/api/auth/status` returning 200 but being blocked because backend CORS allowed `http://localhost:5173`, while the browser origin was `http://localhost:5175`. StaffGate surfaced the API network error as "CBOS is temporarily unavailable." Local development now uses Vite's same-origin `/api` proxy, preserving existing loopback backend port configuration and production behavior without changing backend CORS. Dashboard rendering on the existing localhost:5175 instance was verified with zero failed requests. Typecheck, all unit/routing/telemetry tests, MongoDB integration tests, production build, bundle budget, whitespace checks, and 64 Chromium/WebKit browser tests passed. Regression tests verify startup auth/config requests stay same-origin. No temporary application logging was added; test servers used an isolated fake-data database.
+
+2026-09-30: Enabled TypeScript unused-local and unused-parameter checks in both projects after removing two unused dashboard bindings. These checks run through the existing typecheck/build gates; no additional dependency or behavior change was introduced.
+
+2026-09-30: Added a shared 30-second frontend request deadline covering JSON and CSV response bodies. Timed-out saves preserve the inquiry form and explain that staff should check whether the write succeeded before retrying; no automatic write retry was added. Unit regressions cover stalled bodies, single attempts, success, and original errors. Typecheck, backend/frontend/routing/telemetry tests, MongoDB integration, build, bundle budget, tracked-secret scan, both production dependency audits, 60 existing Chromium/WebKit E2E checks, and two new timeout browser checks passed. Browser validation used isolated fake data on ports 4015/5175; the first attempts used a stale frontend and then a mismatched CORS origin, corrected without weakening application CORS. This development change does not deploy production or merge PR #9.
+
+2026-09-30: Reconciled the release chain and continued PR #9 hardening. The current branch adds explicit fake/deidentified-data confirmation gates before demo CSV import or Intelligence uploads, disables PostHog GeoIP enrichment, and improves successful inquiry completion feedback. Local typecheck, unit/routing/telemetry tests, production build, bundle budget, tracked-secret scan, Chromium targeted E2E (29/29), and WebKit targeted E2E (29/29) pass. GitHub quality gate #55 previously passed Linux cross-browser E2E including Firefox; the newest current-head gate is running. Local macOS Firefox still fails before test execution with `Could not find profile folder`, so Linux CI remains the authoritative Firefox signal. Canonical production deployment smoke passes, and authenticated `vercel curl` now verifies protected current-head frontend/API preview responses without weakening Deployment Protection; a full browser preview smoke still needs an authorized browser-access path.
 
 ## Current Task
 
-The release candidate is now merged to `main` and deployed as an open fake-data demo. The next unresolved product work is clinic-owner validation of the revised CBOS wedge and synthetic Review -> Intelligence workflow. Real patient data remains blocked behind identity/RBAC, source-system, data-minimization, operational-security, contractual, and legal/compliance gates.
+PR #9 remains an open release-candidate hardening branch and must not be merged or production-deployed without explicit approval. The current engineering lane is finishing import-recovery verification and then freezing major feature work for clinic validation. Real patient data remains blocked behind individual identity/RBAC requirements, a validated first source adapter, data-minimization and operational-security controls, vendor/contract review, and legal/compliance approval.
 
 ## Validation Resume Gate
 
@@ -55,7 +73,7 @@ Outreach was paused on 2026-08-11. Tobi asked on 2026-09-07 what it looks like t
 
 * Vercel Hobby and Atlas M0 are demo infrastructure, not the final paying-client hosting plan.
 * Atlas permits public network access for Vercel's dynamic demo egress; the strong unique database credential limits access, but paid deployment should use stricter infrastructure.
-* Resolved on August 11, 2026: the recurring duplicate `@types` folders were caused by iCloud Desktop and Documents sync, which was syncing the repository including `node_modules`, `.git`, and `.mongo-data`. Its file provider raced with the atomic file replacement that npm, git, and Vite all rely on, and materialised the losing copy as `react 2`, `react 3`, and so on. The same mechanism produced stale `.git/index` copies. The workspace now lives at `/Users/tobiloba202/Developer/New project`, outside any synced location, and `brctl status` no longer tracks it. `npm ci --prefix frontend` remains the repair if duplicates are ever seen again.
+* Resolved on August 11, 2026: the recurring duplicate `@types` folders were caused by iCloud Desktop and Documents sync, which was syncing the repository including `node_modules`, `.git`, and `.mongo-data`. Its file provider raced with the atomic file replacement that npm, git, and Vite all rely on, and materialised the losing copy as `react 2`, `react 3`, and so on. The same mechanism produced stale `.git/index` copies. The workspace now lives at `/Users/tobiloba202/Developer/New-project`, outside any synced location, and `brctl status` no longer tracks it. `npm ci --prefix frontend` remains the repair if duplicates are ever seen again.
 * Client outreach and real-data use remain manual gates; see the Validation Resume Gate above.
 * Staff password authentication is temporarily disabled for fake-data demonstrations because `ADMIN_PASSWORD` was removed from the production API environment. Do not use real patient data until access controls are restored and real-data readiness is approved.
 * Machine webhook intake now requires `WEBHOOK_SECRET`; production webhook intake should be treated as disabled until that secret is configured securely.
@@ -80,14 +98,13 @@ Rather than a file list that goes stale between cycles, the durable references:
 * `npm run bench`, `npm run test:db`, and `npm run audit:duplicates` for the
   measurements and checks behind the recent work
 
-
 ## Current Branch
 
-`main`
+`chatgpt/demo-data-safety-ux`
 
 ## Verification Status
 
-Pilot-readiness verification on September 18, 2026: `npm run typecheck`, `npm run test`, `npm run build`, `npm run test:db`, `npm audit --prefix frontend --audit-level=high`, `npm audit --prefix backend --audit-level=moderate`, and `git diff --check` all passed after the final documentation and continuity updates. Both audits reported zero vulnerabilities.
+Release-candidate verification on September 30, 2026: `npm run typecheck`, `npm run test`, `npm run build`, `npm run check:bundle`, `npm run check:secrets`, `npm run test:db`, both production dependency audits, auth smoke, and full earlier Chromium/WebKit suites passed; GitHub quality gate #55 passed the full Linux cross-browser job, including Firefox. On the current PR #9 head, the most recently changed accessibility/core/workflow surfaces pass 29/29 in Chromium and 29/29 in WebKit, with the newest Linux quality gate running. The macOS-local Firefox binary still exits before page creation with `Could not find profile folder`, so CI is the authoritative Firefox signal. Canonical production deployment smoke passed against `https://businessosmvp.vercel.app`. Protected branch previews can now be inspected read-only through authenticated `vercel curl`; full browser preview smoke remains behind Vercel Deployment Protection unless an authorized browser bypass/share path is provided.
 
 Passed again on July 1, 2026 after the governed analytics documentation update:
 

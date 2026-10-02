@@ -26,11 +26,14 @@ A focused full-stack web app for chiropractic practices to capture patient inqui
 - Exports patient inquiries as CSV
 - Supports automated intake from website links, Google/referral source links, webhook payloads, and CSV imports
 - Previews CSV imports and skips rows matching a patient already on file by name and contact detail, while letting a household share a phone number and email address
+- Tracks each CSV import as a recoverable batch with outcome counts, import history, failure reporting, and guarded undo that refuses to erase imported records modified after import
 - Finds patients recorded more than once and merges them on request, keeping the fuller record and preserving both histories
 - Optionally sends internal email notifications for new automated inquiries when SMTP is configured. Bulk CSV imports do not notify.
 - Supports optional staff login when `ADMIN_PASSWORD` is configured, which also requires a real `AUTH_TOKEN_SECRET`; see `docs/SECURITY.md`
 
 ### Operational Intelligence Preview
+
+API requests and CSV downloads have a 30-second deadline, including response-body reading. A timed-out save is not retried automatically: it may already have reached the server. Check the inquiry list before submitting again.
 
 CBOS now includes a bounded **Review -> Intelligence** workspace for fake-data validation. It can preview multiple CSV exports, recognize known operational report families, and surface a small set of review signals when the required columns are present.
 
@@ -142,7 +145,7 @@ SMTP_FROM=CBOS <no-reply@example.com>
 Frontend variables live in `frontend/.env.example`:
 
 ```bash
-VITE_API_BASE_URL=http://localhost:4000/api
+VITE_API_BASE_URL=/api
 ```
 
 SMTP variables are optional. If they are not configured, inquiry creation still works and notification is skipped.
@@ -164,6 +167,10 @@ The Vercel projects are rooted separately for Git deployments:
 - Frontend project root: `frontend`
 
 Production uses the frontend's same-origin `/api` rewrite to `https://cbos-api.vercel.app/api`. Do not set `VITE_API_BASE_URL` in production unless there is a deliberate cross-origin deployment reason and CORS has been reviewed.
+
+Local Vite also proxies `/api` to port 4000. Existing localhost `VITE_API_BASE_URL` values select the proxy's backend target (for example, `http://localhost:4010/api`), while browser requests stay same-origin. This lets Vite use 5175 or another available port without changing backend CORS. Restart Vite after changing environment variables. If startup shows an unavailable message, inspect `/api/auth/status` in the browser Network panel first; a successful terminal health check alone does not verify browser access.
+
+For a local production build, run `npm run build --prefix frontend` then `npm run preview --prefix frontend`. Preview uses the same API proxy at `http://localhost:4173`; loopback API URLs are normalized to `/api` when the browser itself is on a loopback host. Remote HTTPS API URLs remain unchanged. Keep the build and preview API environment aligned, and rebuild after changing the API URL. Vite preview is for local verification, not production hosting.
 
 The API stores `MONGODB_URI` as a sensitive production variable in the `cbos-api` Vercel project. The Atlas credential was rotated and the database-backed production workflow was verified on June 29, 2026. Never commit or paste database credentials into documentation, Git, or chat.
 
@@ -199,6 +206,15 @@ Then:
 POST /api/imports/inquiries.csv
 ```
 
+Import recovery:
+
+```text
+GET /api/imports/inquiries.csv/batches
+POST /api/imports/inquiries.csv/batches/:batchId/undo
+```
+
+Undo is batch-scoped and idempotent. It removes only inquiries and import-created activity records linked to that batch, and it is blocked if any imported inquiry was modified after the import completed.
+
 The preview route flags rows that match an existing patient by normalized name plus email or phone, and rows with missing or invalid fields before the import runs.
 It also accepts optional clinic workflow columns such as patient type, appointment status, last visit date, visit frequency, follow-up owner, and follow-up outcome. Use `docs/METASOFT_REACTIVATION_DEMO.csv` as a fake-data import example before working with a real practice export.
 It also accepts optional activity context columns, such as `activity_context`, `movement_context`, `movement_pattern`, or `Activity / Movement Context`. Use this for simple operational context like "runner returning to training" or "desk worker with neck stiffness"; it is not an EHR field or clinical diagnosis.
@@ -228,6 +244,8 @@ More details:
 - `docs/DUPLICATE_POLICY.md`
 - `docs/API.md`
 - `docs/PRODUCTION_DEPLOYMENT.md`
+- `docs/BACKUP_RESTORE_RUNBOOK.md`
+- `docs/PERFORMANCE_BASELINE.md`
 - `docs/WORKFLOW_AUTOMATION.md`
 - `docs/INTAKE_EMBED_SNIPPETS.md`
 - `docs/PILOT_READINESS.md`
@@ -320,6 +338,18 @@ npm run bench
 
 It refuses to run against any database not named for benchmarking, so it cannot
 touch demo or production data. Override the size with `BENCH_SIZE`.
+
+### Restore Verification
+
+After a synthetic `mongodump`/`mongorestore` drill, compare the source and restored benchmark databases without modifying either one:
+
+```bash
+RESTORE_SOURCE_URI="mongodb://127.0.0.1:27017/cbos_benchmark" \
+RESTORE_TARGET_URI="mongodb://127.0.0.1:27017/cbos_benchmark_restore" \
+npm run verify:restore
+```
+
+The verifier refuses non-benchmark database names and compares collection counts, indexes, and KPI results. See `docs/BACKUP_RESTORE_RUNBOOK.md`.
 
 ### Duplicate Audit
 
