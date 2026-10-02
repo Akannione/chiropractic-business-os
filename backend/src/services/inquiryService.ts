@@ -294,7 +294,10 @@ export async function createInquiriesBulk(
     for (const writeError of writeErrors) {
       failures.push({
         index: writeError.index,
-        message: writeError.errmsg || writeError.err?.errmsg || 'Could not save this row.',
+        // Do not persist raw database error text in import history: driver
+        // messages can echo document values. The CSV row number is enough for
+        // staff to identify the failed record without duplicating patient data.
+        message: 'Could not save this row.',
       });
     }
   }
