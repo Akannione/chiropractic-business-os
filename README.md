@@ -244,6 +244,7 @@ More details:
 - `docs/DUPLICATE_POLICY.md`
 - `docs/API.md`
 - `docs/PRODUCTION_DEPLOYMENT.md`
+- `docs/BACKUP_RESTORE_RUNBOOK.md`
 - `docs/WORKFLOW_AUTOMATION.md`
 - `docs/INTAKE_EMBED_SNIPPETS.md`
 - `docs/PILOT_READINESS.md`
@@ -336,6 +337,18 @@ npm run bench
 
 It refuses to run against any database not named for benchmarking, so it cannot
 touch demo or production data. Override the size with `BENCH_SIZE`.
+
+### Restore Verification
+
+After a synthetic `mongodump`/`mongorestore` drill, compare the source and restored benchmark databases without modifying either one:
+
+```bash
+RESTORE_SOURCE_URI="mongodb://127.0.0.1:27017/cbos_benchmark" \
+RESTORE_TARGET_URI="mongodb://127.0.0.1:27017/cbos_benchmark_restore" \
+npm run verify:restore
+```
+
+The verifier refuses non-benchmark database names and compares collection counts, indexes, and KPI results. See `docs/BACKUP_RESTORE_RUNBOOK.md`.
 
 ### Duplicate Audit
 
