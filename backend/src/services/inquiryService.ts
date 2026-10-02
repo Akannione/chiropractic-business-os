@@ -218,12 +218,13 @@ export async function listInquiriesPage(query: InquiryQuery) {
  */
 export function buildInquiryDocument(input: InquiryInput, now = new Date()) {
   return {
-    ...input,
     name: input.name.trim(),
     phone: input.phone.trim(),
     email: input.email.trim(),
     service_needed: input.service_needed.trim(),
     activity_context: input.activity_context?.trim() || '',
+    source: input.source,
+    status: input.status,
     estimated_value: Number(input.estimated_value || 0),
     notes: input.notes?.trim() || '',
     next_follow_up_date: parseDateOnly(input.next_follow_up_date),
