@@ -23,6 +23,7 @@ import { findDuplicateGroups } from '../services/duplicateService.js';
 import { assertWebhookAuthorized } from '../controllers/automationController.js';
 import { assertDemoMutationAllowed } from '../controllers/demoController.js';
 import { toCsv } from '../utils/csv.js';
+import { serializeInquiry } from '../serializers/inquirySerializer.js';
 import {
   addDays,
   dateOnlyInPracticeTimeZone,
@@ -99,6 +100,16 @@ const blankOptionalRow = mapExternalRow(parseInquiryCsv(
 assert.equal(blankOptionalRow.patient_type, 'New Patient');
 assert.equal(blankOptionalRow.last_visit_date, null);
 assert.equal(blankOptionalRow.expected_visit_frequency_days, null);
+
+const serializedImportInquiry = serializeInquiry({
+  _id: 'synthetic-id',
+  name: 'Synthetic Patient',
+  import_batch_id: 'internal-batch-id',
+  created_at: new Date('2026-01-01T00:00:00.000Z'),
+  updated_at: new Date('2026-01-01T00:00:00.000Z'),
+});
+assert.equal('import_batch_id' in serializedImportInquiry, false,
+  'internal import batch IDs must not leak through ordinary inquiry responses');
 
 const weeklySummary = buildWeeklySummary(inquiries);
 assert.equal(weeklySummary.totalPatientInquiries, 2);
