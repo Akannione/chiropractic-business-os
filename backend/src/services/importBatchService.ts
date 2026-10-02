@@ -1,3 +1,4 @@
+import mongoose, { type ClientSession } from 'mongoose';
 import { Activity } from '../models/Activity.js';
 import { ImportBatch } from '../models/ImportBatch.js';
 import { Inquiry } from '../models/Inquiry.js';
@@ -23,8 +24,18 @@ export async function listImportBatches(limit = 20) {
   }));
 }
 
-export async function undoImportBatch(batchId: string) {
-  const batch = await ImportBatch.findOne({ batch_id: batchId });
+type UndoResult = {
+  batchId: string;
+  deletedInquiries: number;
+  deletedActivities: number;
+  alreadyUndone: boolean;
+  blockedModifiedCount: number;
+};
+
+async function runUndoImportBatch(batchId: string, session?: ClientSession): Promise<UndoResult | null> {
+  const batchQuery = ImportBatch.findOne({ batch_id: batchId });
+  if (session) batchQuery.session(session);
+  const batch = await batchQuery;
   if (!batch) return null;
 
   if (batch.status === 'undone') {
@@ -52,10 +63,12 @@ export async function undoImportBatch(batchId: string) {
   // than a destructive bulk delete.
   const completedAt = batch.completed_at;
   if (completedAt) {
-    const blockedModifiedCount = await Inquiry.countDocuments({
+    const modifiedQuery = Inquiry.countDocuments({
       import_batch_id: batchId,
       updated_at: { $gt: completedAt },
     });
+    if (session) modifiedQuery.session(session);
+    const blockedModifiedCount = await modifiedQuery;
     if (blockedModifiedCount > 0) {
       return {
         batchId,
@@ -67,11 +80,22 @@ export async function undoImportBatch(batchId: string) {
     }
   }
 
-  const activityResult = await Activity.deleteMany({ import_batch_id: batchId });
-  const inquiryResult = await Inquiry.deleteMany({ import_batch_id: batchId });
+  // In standalone MongoDB this fallback is intentionally retry-safe: inquiries
+  // go first, then their import-created activities, and the batch is marked
+  // undone last. If a later write fails, retrying the same batch completes the
+  // remaining cleanup without touching unrelated records.
+  const inquiryResult = await Inquiry.deleteMany(
+    { import_batch_id: batchId },
+    session ? { session } : {},
+  );
+  const activityResult = await Activity.deleteMany(
+    { import_batch_id: batchId },
+    session ? { session } : {},
+  );
   await ImportBatch.updateOne(
     { batch_id: batchId },
     { $set: { status: 'undone', undone_at: new Date() } },
+    session ? { session } : {},
   );
 
   return {
@@ -81,4 +105,27 @@ export async function undoImportBatch(batchId: string) {
     alreadyUndone: false,
     blockedModifiedCount: 0,
   };
+}
+
+function isTransactionUnsupported(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return /Transaction numbers are only allowed|replica set member|transactions are not supported/i.test(message);
+}
+
+export async function undoImportBatch(batchId: string) {
+  const session = await mongoose.startSession();
+  try {
+    let result: UndoResult | null = null;
+    await session.withTransaction(async () => {
+      result = await runUndoImportBatch(batchId, session);
+    });
+    return result;
+  } catch (error) {
+    if (isTransactionUnsupported(error)) {
+      return runUndoImportBatch(batchId);
+    }
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 }
