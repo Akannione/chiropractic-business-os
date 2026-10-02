@@ -5,11 +5,14 @@ import { formatDate, startOfToday } from '../utils/date.js';
 
 export async function exportInquiriesCsv(_req: Request, res: Response) {
   const inquiries = await Inquiry.find().sort({ created_at: -1 }).lean();
-  const rows = inquiries.map((inquiry) => ({
-    ...inquiry,
-    next_follow_up_date: formatDate(inquiry.next_follow_up_date),
-    last_visit_date: formatDate(inquiry.last_visit_date),
-  }));
+  const rows = inquiries.map((inquiry) => {
+    const { import_batch_id: _importBatchId, ...exportedInquiry } = inquiry;
+    return {
+      ...exportedInquiry,
+      next_follow_up_date: formatDate(inquiry.next_follow_up_date),
+      last_visit_date: formatDate(inquiry.last_visit_date),
+    };
+  });
   res.header('Content-Type', 'text/csv');
   res.attachment(`patient_inquiries_${formatDate(startOfToday())}.csv`);
   res.send(toCsv(rows));
