@@ -1,10 +1,10 @@
-import { Download } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Download, RotateCcw } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { KpiCard } from '../components/KpiCard';
 import { PageHeader } from '../components/PageHeader';
 import { api } from '../services/api';
 import { captureTelemetry } from '../services/analytics';
-import type { AppConfig, ImportPreview } from '../types';
+import type { AppConfig, ImportBatch, ImportPreview, ImportResult } from '../types';
 import { todayIso } from '../utils/format';
 
 type ExportsPageProps = {
@@ -29,7 +29,29 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
   const [preview, setPreview] = useState<ImportPreview | null>(null);
   const [importing, setImporting] = useState(false);
   const [demoImportConfirmed, setDemoImportConfirmed] = useState(false);
+  const [lastImportResult, setLastImportResult] = useState<ImportResult | null>(null);
+  const [importHistory, setImportHistory] = useState<ImportBatch[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState('');
+  const [confirmUndoBatchId, setConfirmUndoBatchId] = useState('');
+  const [undoingBatchId, setUndoingBatchId] = useState('');
   const previewRows = useMemo(() => preview?.rows.slice(0, 8) || [], [preview]);
+
+  async function refreshImportHistory() {
+    setHistoryLoading(true);
+    setHistoryError('');
+    try {
+      setImportHistory(await api.importBatches());
+    } catch (nextError) {
+      setHistoryError((nextError as Error).message);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void refreshImportHistory();
+  }, []);
 
   async function handleFile(file: File | null) {
     setError('');
@@ -64,14 +86,51 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
       captureTelemetry('csv_import_completed', { imported_rows: result.imported, skipped_duplicates: result.skippedDuplicates });
       setCsvText('');
       setPreview(null);
+      setLastImportResult(result);
+      await refreshImportHistory();
+      const failedText = result.failed ? ` ${result.failed} row(s) could not be imported.` : '';
       await onChanged(
-        `${result.imported} patient inquiries imported. ${result.skippedDuplicates} duplicate rows skipped.`,
+        `${result.imported} patient inquiries imported. ${result.skippedDuplicates} duplicate rows skipped.${failedText}`,
       );
     } catch (nextError) {
       setError((nextError as Error).message);
     } finally {
       setImporting(false);
     }
+  }
+
+  async function undoBatch(batchId: string) {
+    setUndoingBatchId(batchId);
+    setError('');
+    try {
+      const result = await api.undoImportBatch(batchId);
+      setConfirmUndoBatchId('');
+      await refreshImportHistory();
+      await onChanged(
+        result.alreadyUndone
+          ? 'This import was already undone.'
+          : `Undo complete. ${result.deletedInquiries} imported patient inquiries removed.`,
+      );
+    } catch (nextError) {
+      setError((nextError as Error).message);
+    } finally {
+      setUndoingBatchId('');
+    }
+  }
+
+  function downloadFailureReport(batch: Pick<ImportBatch, 'batchId' | 'errors'>) {
+    if (!batch.errors.length) return;
+    const escapeCell = (value: string) => `"${value.replace(/"/g, '""')}"`;
+    const csv = [
+      'batch_id,error',
+      ...batch.errors.map((error) => `${escapeCell(batch.batchId)},${escapeCell(error)}`),
+    ].join('\n');
+    const url = window.URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `cbos_import_failures_${batch.batchId}.csv`;
+    link.click();
+    window.URL.revokeObjectURL(url);
   }
 
   async function downloadCsv() {
@@ -142,6 +201,118 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
         >
           {importing ? 'Importing...' : 'Import Previewed Rows'}
         </button>
+      </div>
+
+      {lastImportResult && (
+        <div className={`notice ${lastImportResult.failed ? 'warning' : 'success'}`} role="status">
+          <strong>
+            {lastImportResult.status === 'partial' ? 'Import completed with exceptions.' : 'Import completed.'}
+          </strong>
+          <span>
+            {' '}{lastImportResult.imported} imported, {lastImportResult.skippedDuplicates} duplicate(s) skipped,
+            {' '}{lastImportResult.failed} failed. Batch {lastImportResult.batchId}.
+          </span>
+          {lastImportResult.errors.length > 0 && (
+            <button
+              type="button"
+              onClick={() => downloadFailureReport({
+                batchId: lastImportResult.batchId,
+                errors: lastImportResult.errors,
+              })}
+            >
+              Download failure report
+            </button>
+          )}
+        </div>
+      )}
+
+      <div className="panel">
+        <div className="panel-heading">
+          <div>
+            <h3>Recent Imports</h3>
+            <p>
+              Every CSV import is tracked as a recoverable batch. Undo removes only records created
+              by that batch and is blocked if staff edited an imported record afterward.
+            </p>
+          </div>
+          <button type="button" onClick={() => void refreshImportHistory()} disabled={historyLoading}>
+            {historyLoading ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
+        {historyError ? (
+          <div className="notice warning" role="status">
+            Import history could not be loaded. {historyError}
+          </div>
+        ) : historyLoading && !importHistory.length ? (
+          <div className="empty-state">Loading import history...</div>
+        ) : importHistory.length ? (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Imported</th>
+                  <th>Status</th>
+                  <th>Outcome</th>
+                  <th>Batch</th>
+                  <th>Recovery</th>
+                </tr>
+              </thead>
+              <tbody>
+                {importHistory.map((batch) => (
+                  <tr key={batch.batchId}>
+                    <td>{new Date(batch.createdAt).toLocaleString()}</td>
+                    <td>
+                      <span className={`preview-pill ${batch.status === 'completed' ? 'ready' : batch.status === 'undone' ? 'duplicate' : 'error'}`}>
+                        {batch.status}
+                      </span>
+                    </td>
+                    <td>
+                      {batch.imported} imported · {batch.skippedDuplicates} duplicates · {batch.failed} failed
+                      {batch.errors.length > 0 && (
+                        <>
+                          <br />
+                          <button type="button" onClick={() => downloadFailureReport(batch)}>
+                            Download failure report
+                          </button>
+                        </>
+                      )}
+                    </td>
+                    <td><small>{batch.batchId}</small></td>
+                    <td>
+                      {batch.status === 'undone' ? (
+                        <span>Undone</span>
+                      ) : confirmUndoBatchId === batch.batchId ? (
+                        <div className="workflow-actions">
+                          <button
+                            className="danger-action"
+                            type="button"
+                            disabled={undoingBatchId === batch.batchId}
+                            onClick={() => void undoBatch(batch.batchId)}
+                          >
+                            {undoingBatchId === batch.batchId ? 'Undoing...' : 'Confirm undo'}
+                          </button>
+                          <button type="button" onClick={() => setConfirmUndoBatchId('')}>
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          aria-label={`Undo import ${batch.batchId}`}
+                          onClick={() => setConfirmUndoBatchId(batch.batchId)}
+                        >
+                          <RotateCcw size={16} aria-hidden="true" /> Undo import
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="empty-state">No CSV imports have been recorded yet.</div>
+        )}
       </div>
 
       <div className="panel">
@@ -243,9 +414,9 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
             <div className="empty-state">No importable rows were found in this CSV.</div>
           )}
           <div className="notice import-guidance">
-            <strong>Import rule:</strong> CBOS imports clean rows only and skips
-            likely duplicates, so staff can preview a MetaSoft or spreadsheet
-            export before adding anything.
+            <strong>Import rule:</strong> CBOS imports clean rows only and skips likely duplicates.
+            If a database write rejects an otherwise ready row, other successful rows remain imported
+            and the exception is recorded against the import batch for recovery.
           </div>
         </div>
       )}
