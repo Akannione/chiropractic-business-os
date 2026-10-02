@@ -22,8 +22,10 @@ type Snapshot = {
   name: string;
   inquiries: number;
   activities: number;
+  importBatches: number;
   inquiryIndexes: string[];
   activityIndexes: string[];
+  importBatchIndexes: string[];
   kpis: Awaited<ReturnType<typeof calculateKpisFromDatabase>>;
 };
 
@@ -34,7 +36,7 @@ function assertBenchmarkDatabase(name: string) {
 }
 
 async function snapshot(uri: string): Promise<Snapshot> {
-  await mongoose.connect(uri, { serverSelectionTimeoutMS: 10_000 });
+  await mongoose.connect(uri, { serverSelectionTimeoutMS: 10_000, autoIndex: false });
   try {
     const db = mongoose.connection.db;
     if (!db) throw new Error('MongoDB connection has no database handle.');
@@ -43,6 +45,7 @@ async function snapshot(uri: string): Promise<Snapshot> {
 
     const inquiries = await db.collection('inquiries').countDocuments();
     const activities = await db.collection('activities').countDocuments();
+    const importBatches = await db.collection('importbatches').countDocuments();
     const inquiryIndexes = (await db.collection('inquiries').indexes())
       .map((index) => index.name)
       .filter((name): name is string => Boolean(name))
@@ -51,9 +54,13 @@ async function snapshot(uri: string): Promise<Snapshot> {
       .map((index) => index.name)
       .filter((name): name is string => Boolean(name))
       .sort();
+    const importBatchIndexes = (await db.collection('importbatches').indexes())
+      .map((index) => index.name)
+      .filter((name): name is string => Boolean(name))
+      .sort();
     const kpis = await calculateKpisFromDatabase();
 
-    return { name, inquiries, activities, inquiryIndexes, activityIndexes, kpis };
+    return { name, inquiries, activities, importBatches, inquiryIndexes, activityIndexes, importBatchIndexes, kpis };
   } finally {
     await mongoose.disconnect();
   }
@@ -74,11 +81,17 @@ async function main() {
   if (source.activities !== target.activities) {
     problems.push(`activities: source=${source.activities}, restored=${target.activities}`);
   }
+  if (source.importBatches !== target.importBatches) {
+    problems.push(`import batches: source=${source.importBatches}, restored=${target.importBatches}`);
+  }
   if (!sameJson(source.inquiryIndexes, target.inquiryIndexes)) {
     problems.push('inquiry indexes differ');
   }
   if (!sameJson(source.activityIndexes, target.activityIndexes)) {
     problems.push('activity indexes differ');
+  }
+  if (!sameJson(source.importBatchIndexes, target.importBatchIndexes)) {
+    problems.push('import batch indexes differ');
   }
   if (!sameJson(source.kpis, target.kpis)) {
     problems.push('KPI results differ');
