@@ -169,6 +169,8 @@ Production uses the frontend's same-origin `/api` rewrite to `https://cbos-api.v
 
 Local Vite also proxies `/api` to port 4000. Existing localhost `VITE_API_BASE_URL` values select the proxy's backend target (for example, `http://localhost:4010/api`), while browser requests stay same-origin. This lets Vite use 5175 or another available port without changing backend CORS. Restart Vite after changing environment variables. If startup shows an unavailable message, inspect `/api/auth/status` in the browser Network panel first; a successful terminal health check alone does not verify browser access.
 
+For a local production build, run `npm run build --prefix frontend` then `npm run preview --prefix frontend`. Preview uses the same API proxy at `http://localhost:4173`; loopback API URLs are normalized to `/api` when the browser itself is on a loopback host. Remote HTTPS API URLs remain unchanged. Keep the build and preview API environment aligned, and rebuild after changing the API URL. Vite preview is for local verification, not production hosting.
+
 The API stores `MONGODB_URI` as a sensitive production variable in the `cbos-api` Vercel project. The Atlas credential was rotated and the database-backed production workflow was verified on June 29, 2026. Never commit or paste database credentials into documentation, Git, or chat.
 
 Current production is an open fake-data demo: `ADMIN_PASSWORD` is intentionally unset and `/api/auth/status` reports `authEnabled:false`. Do not enter real patient data. Re-enable individual/clinic-appropriate access controls before any real-data pilot.

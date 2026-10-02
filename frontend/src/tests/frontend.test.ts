@@ -221,6 +221,10 @@ function testApiBaseUrlResolution() {
   assertEqual(resolveApiBaseUrl({ DEV: true }, ''), '/api');
   assertEqual(resolveApiBaseUrl({ DEV: true, VITE_API_BASE_URL: 'http://localhost:4000/api' }, 'localhost'), '/api');
   assertEqual(resolveApiBaseUrl({ DEV: true, VITE_API_BASE_URL: 'http://127.0.0.1:4010/api' }, 'localhost'), '/api');
+  assertEqual(resolveApiBaseUrl({ DEV: false, VITE_API_BASE_URL: 'http://localhost:4000/api' }, 'localhost'), '/api');
+  assertEqual(resolveApiBaseUrl({ DEV: false, VITE_API_BASE_URL: 'http://127.0.0.1:4000/api' }, '127.0.0.1'), '/api');
+  assertEqual(resolveApiBaseUrl({ DEV: false, VITE_API_BASE_URL: 'https://cbos-api.vercel.app/api' }, 'localhost'), 'https://cbos-api.vercel.app/api');
+  assertEqual(resolveApiBaseUrl({ DEV: false, VITE_API_BASE_URL: 'http://localhost:4000/api' }, 'cbos.example.com'), 'http://localhost:4000/api');
   assertEqual(resolveApiBaseUrl({ DEV: true, VITE_API_BASE_URL: 'https://cbos-api.vercel.app/api' }, 'localhost'), 'https://cbos-api.vercel.app/api');
   assertEqual(
     resolveApiBaseUrl({ VITE_API_BASE_URL: 'https://cbos-api.vercel.app/api' }, 'cbos.example.com'),

@@ -32,11 +32,12 @@ export function resolveApiBaseUrl(
 ) {
   if (isCbosPreviewHostname(hostname)) return '/api';
   const configured = String(environment.VITE_API_BASE_URL || '');
-  // Local Vite traffic uses its proxy, independent of the frontend's port.
-  if (environment.DEV) {
+  // Both local Vite servers use a proxy, independent of their frontend port.
+  const loopbackHosts = ['localhost', '127.0.0.1', '[::1]'];
+  if (environment.DEV || loopbackHosts.includes(hostname)) {
     if (!configured || configured === '/api') return '/api';
     try {
-      if (['localhost', '127.0.0.1', '[::1]'].includes(new URL(configured).hostname)) return '/api';
+      if (loopbackHosts.includes(new URL(configured).hostname)) return '/api';
     } catch {
       // Keep intentional relative configuration unchanged.
     }

@@ -7,11 +7,13 @@ export default defineConfig(({ mode }) => {
   const apiTarget = /^https?:\/\//.test(configuredApi)
     ? new URL(configuredApi).origin
     : 'http://localhost:4000';
+  const proxy = { '/api': { target: apiTarget, changeOrigin: true } };
   return {
     plugins: [react()],
     server: {
       port: 5173,
-      proxy: { '/api': { target: apiTarget, changeOrigin: true } },
+      proxy,
     },
+    preview: { port: 4173, proxy },
   };
 });
