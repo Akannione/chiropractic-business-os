@@ -6,7 +6,8 @@ import { formatDate, startOfToday } from '../utils/date.js';
 export async function exportInquiriesCsv(_req: Request, res: Response) {
   const inquiries = await Inquiry.find().sort({ created_at: -1 }).lean();
   const rows = inquiries.map((inquiry) => {
-    const { import_batch_id: _importBatchId, ...exportedInquiry } = inquiry;
+    const exportedInquiry = { ...inquiry };
+    delete exportedInquiry.import_batch_id;
     return {
       ...exportedInquiry,
       next_follow_up_date: formatDate(inquiry.next_follow_up_date),
