@@ -149,7 +149,22 @@ test('CSV import previews valid rows then imports them', async ({ page }) => {
   const importButton = page.getByRole('button', { name: 'Import Previewed Rows' });
   await expect(importButton).toBeEnabled();
   await importButton.click();
-  await expect(page.locator('.notice.success')).toContainText(/imported/i);
+  await expect(page.locator('.notice.success').first()).toContainText(/imported/i);
+  await expect(page.getByRole('heading', { name: 'Recent Imports' })).toBeVisible();
+  await expect(page.getByText(/1 imported · 0 duplicates · 0 failed/)).toBeVisible();
+
+  const undoButton = page.getByRole('button', { name: /Undo import / }).first();
+  await expect(undoButton).toBeVisible();
+  await undoButton.click();
+  const confirmUndo = page.getByRole('button', { name: 'Confirm undo' });
+  await expect(confirmUndo).toBeVisible();
+  await confirmUndo.click();
+  await expect(page.locator('.notice.success').first()).toContainText(/Undo complete/i);
+
+  const afterUndo = await request.get(`${API}/inquiries?search=csv-e2e%40example.com&pageSize=25`);
+  expect(afterUndo.ok()).toBeTruthy();
+  const afterUndoBody = await afterUndo.json();
+  expect(afterUndoBody.total).toBe(0);
 });
 
 test('CSV import rejects oversized files before reading or previewing them', async ({ page }) => {
