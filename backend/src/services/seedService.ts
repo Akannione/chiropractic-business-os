@@ -1,6 +1,8 @@
 import { buildSampleInquiries } from '../data/sampleData.js';
 import { env } from '../config/env.js';
 import { Inquiry } from '../models/Inquiry.js';
+import { Activity } from '../models/Activity.js';
+import { ImportBatch } from '../models/ImportBatch.js';
 
 /**
  * Populates an empty collection with the fake demo practice.
@@ -40,7 +42,11 @@ export async function resetSampleData() {
     throw new Error('Refusing to reset data: demo mode is disabled.');
   }
 
-  await Inquiry.deleteMany({});
+  await Promise.all([
+    Inquiry.deleteMany({}),
+    Activity.deleteMany({}),
+    ImportBatch.deleteMany({}),
+  ]);
   const rows = buildSampleInquiries();
   await Inquiry.insertMany(rows);
   return rows.length;
