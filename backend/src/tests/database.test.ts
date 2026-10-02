@@ -379,6 +379,30 @@ async function testImportBatchRecovery() {
   const repeatedUndo = await undoImportBatch(result.batchId);
   assert.equal(repeatedUndo?.alreadyUndone, true, 'undo is idempotent');
 
+  const partial = await importInquiryCsv([
+    'name,phone,email,service_needed',
+    'Partial Good,470-555-1010,partial-good@example.com,Spinal Adjustment',
+    'Partial Bad,not-a-phone,partial-bad@example.com,Spinal Adjustment',
+  ].join('\n'));
+  assert.equal(partial.imported, 1);
+  assert.equal(partial.failed, 1);
+  assert.equal(partial.status, 'partial');
+  assert.equal(await Inquiry.countDocuments({ import_batch_id: partial.batchId }), 1);
+  const partialBatch = await ImportBatch.findOne({ batch_id: partial.batchId }).lean();
+  assert.equal(partialBatch?.status, 'partial');
+  assert.equal(partialBatch?.failed, 1);
+  assert.ok(partialBatch?.errors[0]?.startsWith('Row 3:'),
+    'partial batch errors identify the CSV row without repeating patient data');
+
+  const duplicateOnly = await importInquiryCsv([
+    'name,phone,email,service_needed',
+    'Manual Record,470-555-1000,manual@example.com,Spinal Adjustment',
+  ].join('\n'));
+  assert.equal(duplicateOnly.imported, 0);
+  assert.equal(duplicateOnly.skippedDuplicates, 1);
+  assert.equal(duplicateOnly.failed, 0);
+  assert.equal(duplicateOnly.status, 'completed');
+
   const second = await importInquiryCsv([
     'name,phone,email,service_needed',
     'Modified Import,470-555-1003,modified@example.com,Spinal Adjustment',
