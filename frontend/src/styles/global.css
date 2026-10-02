@@ -379,6 +379,7 @@ th {
 }
 
 .notice.success { border-color: #97d3a6; background: #f5fff7; }
+.notice.warning { border-color: #e9c46a; background: #fff9e8; color: #795600; }
 .notice.error { border-color: #e8a1a1; background: #fff5f5; color: #8f1d1d; }
 
 .inquiry-form {
