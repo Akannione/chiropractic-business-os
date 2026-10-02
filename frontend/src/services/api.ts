@@ -4,6 +4,7 @@ import {
   AppConfig,
   AuthStatus,
   DuplicateGroups,
+  ImportBatch,
   ImportPreview,
   ImportResult,
   IntelligencePreview,
@@ -17,6 +18,7 @@ import {
   PublicInquiryInput,
   ReactivationQueue,
   ReminderResult,
+  UndoImportResult,
   WeeklySummary,
 } from '../types';
 
@@ -172,6 +174,12 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'text/csv' },
       body: csvText,
+    }),
+  importBatches: (limit = 20) =>
+    request<ImportBatch[]>(`/imports/inquiries.csv/batches?limit=${limit}`),
+  undoImportBatch: (batchId: string) =>
+    request<UndoImportResult>(`/imports/inquiries.csv/batches/${encodeURIComponent(batchId)}/undo`, {
+      method: 'POST',
     }),
   previewIntelligence: (files: Array<{ name: string; csvText: string }>) =>
     request<IntelligencePreview>('/intelligence/preview', {
