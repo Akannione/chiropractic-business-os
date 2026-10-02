@@ -105,6 +105,7 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
     try {
       const result = await api.undoImportBatch(batchId);
       setConfirmUndoBatchId('');
+      if (lastImportResult?.batchId === batchId) setLastImportResult(null);
       await refreshImportHistory();
       await onChanged(
         result.alreadyUndone
@@ -204,9 +205,16 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
       </div>
 
       {lastImportResult && (
-        <div className={`notice ${lastImportResult.failed ? 'warning' : 'success'}`} role="status">
+        <div
+          className={`notice ${lastImportResult.status === 'failed' ? 'error' : lastImportResult.status === 'partial' ? 'warning' : 'success'}`}
+          role="status"
+        >
           <strong>
-            {lastImportResult.status === 'partial' ? 'Import completed with exceptions.' : 'Import completed.'}
+            {lastImportResult.status === 'failed'
+              ? 'Import failed.'
+              : lastImportResult.status === 'partial'
+                ? 'Import completed with exceptions.'
+                : 'Import completed.'}
           </strong>
           <span>
             {' '}{lastImportResult.imported} imported, {lastImportResult.skippedDuplicates} duplicate(s) skipped,
