@@ -17,6 +17,7 @@ import assert from 'node:assert/strict';
 import mongoose from 'mongoose';
 import { Activity } from '../models/Activity.js';
 import { Inquiry } from '../models/Inquiry.js';
+import { ImportBatch } from '../models/ImportBatch.js';
 import {
   buildInquiryDocument,
   listInquiriesPage,
@@ -25,6 +26,8 @@ import {
 import { calculateKpis, calculateKpisFromDatabase } from '../services/kpiService.js';
 import { buildReactivationQueue } from '../services/reactivationService.js';
 import { findDuplicateGroups, mergeInquiries } from '../services/duplicateService.js';
+import { importInquiryCsv } from '../services/importService.js';
+import { listImportBatches, undoImportBatch } from '../services/importBatchService.js';
 import { addDays, formatDate, startOfToday } from '../utils/date.js';
 
 const TEST_URI = process.env.TEST_MONGODB_URI || 'mongodb://127.0.0.1:27017/cbos_integration_test';
@@ -56,6 +59,7 @@ function inquiry(overrides: Record<string, unknown> & { created_at?: Date }) {
 async function seed() {
   await Inquiry.deleteMany({});
   await Activity.deleteMany({});
+  await ImportBatch.deleteMany({});
   await Inquiry.insertMany([
     // No follow-up date at all. BSON sorts null before dates, so a bare
     // `$lt: today` would wrongly match this in the Overdue view.
@@ -325,6 +329,74 @@ async function testMergeKeepsTheRicherRecord() {
   );
 }
 
+async function testImportBatchRecovery() {
+  await Inquiry.deleteMany({});
+  await Activity.deleteMany({});
+  await ImportBatch.deleteMany({});
+
+  const manual = await Inquiry.create(inquiry({
+    name: 'Manual Record',
+    email: 'manual@example.com',
+    phone: '470-555-1000',
+  }));
+
+  const csv = [
+    'name,phone,email,service_needed',
+    'Imported One,470-555-1001,import1@example.com,Spinal Adjustment',
+    'Imported Two,470-555-1002,import2@example.com,Wellness Consultation',
+  ].join('\n');
+
+  const result = await importInquiryCsv(csv);
+  assert.equal(result.imported, 2);
+  assert.equal(result.failed, 0);
+  assert.equal(result.status, 'completed');
+  assert.ok(result.batchId, 'successful imports receive a batch id');
+
+  assert.equal(
+    await Inquiry.countDocuments({ import_batch_id: result.batchId }),
+    2,
+    'every imported inquiry is linked to the batch',
+  );
+  assert.equal(
+    await Activity.countDocuments({ import_batch_id: result.batchId }),
+    2,
+    'import-created activities are linked to the same batch',
+  );
+
+  const history = await listImportBatches();
+  assert.equal(history.length, 1);
+  assert.equal(history[0].batch_id, result.batchId);
+  assert.equal(history[0].imported, 2);
+  assert.equal(history[0].status, 'completed');
+
+  const undone = await undoImportBatch(result.batchId);
+  assert.ok(undone);
+  assert.equal(undone?.deletedInquiries, 2);
+  assert.equal(undone?.deletedActivities, 2);
+  assert.equal(await Inquiry.countDocuments({ _id: manual._id }), 1,
+    'undo import must never remove unrelated manual records');
+
+  const repeatedUndo = await undoImportBatch(result.batchId);
+  assert.equal(repeatedUndo?.alreadyUndone, true, 'undo is idempotent');
+
+  const second = await importInquiryCsv([
+    'name,phone,email,service_needed',
+    'Modified Import,470-555-1003,modified@example.com,Spinal Adjustment',
+  ].join('\n'));
+  const batch = await ImportBatch.findOne({ batch_id: second.batchId }).lean();
+  assert.ok(batch?.completed_at);
+  await Inquiry.updateOne(
+    { import_batch_id: second.batchId },
+    { $set: { notes: 'Edited after import', updated_at: new Date(batch!.completed_at!.getTime() + 1000) } },
+  );
+
+  const blocked = await undoImportBatch(second.batchId);
+  assert.equal(blocked?.blockedModifiedCount, 1,
+    'undo must block when an imported record was changed after the batch completed');
+  assert.equal(await Inquiry.countDocuments({ import_batch_id: second.batchId }), 1,
+    'blocked undo must preserve the modified inquiry');
+}
+
 async function main() {
   try {
     await mongoose.connect(TEST_URI, { serverSelectionTimeoutMS: 3000 });
@@ -350,6 +422,7 @@ async function main() {
     await testKpiAggregationParity();
     await testDuplicateGroupingAgainstRealData();
     await testMergeKeepsTheRicherRecord();
+    await testImportBatchRecovery();
 
     console.log('Database tests passed.');
   } finally {
