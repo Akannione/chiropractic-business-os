@@ -18,6 +18,11 @@ export async function seedSampleDataIfEmpty() {
   const count = await Inquiry.countDocuments();
   if (count > 0) return 0;
 
+  await Promise.all([
+    Activity.deleteMany({}),
+    ImportBatch.deleteMany({}),
+  ]);
+
   const rows = buildSampleInquiries();
   const result = await Inquiry.collection.bulkWrite(
     rows.map((row) => ({
