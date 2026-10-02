@@ -4,10 +4,23 @@ import { Inquiry } from '../models/Inquiry.js';
 
 export async function listImportBatches(limit = 20) {
   const safeLimit = Math.min(100, Math.max(1, Math.floor(limit || 20)));
-  return ImportBatch.find()
+  const batches = await ImportBatch.find()
     .sort({ created_at: -1, _id: -1 })
     .limit(safeLimit)
     .lean();
+
+  return batches.map((batch) => ({
+    batchId: batch.batch_id,
+    totalRows: batch.total_rows,
+    imported: batch.imported,
+    skippedDuplicates: batch.skipped_duplicates,
+    failed: batch.failed,
+    errors: batch.errors,
+    status: batch.status,
+    createdAt: batch.created_at,
+    completedAt: batch.completed_at,
+    undoneAt: batch.undone_at,
+  }));
 }
 
 export async function undoImportBatch(batchId: string) {
