@@ -1283,3 +1283,10 @@ textarea {
   gap: 8px;
   flex-wrap: wrap;
 }
+
+/* Preserve a minimum 24px interactive target for the Recent Imports refresh
+   control across browser engines. WebKit measured the unscoped button at 23px. */
+.exports-workspace .panel-heading > button {
+  min-height: 24px;
+  padding: 4px 10px;
+}

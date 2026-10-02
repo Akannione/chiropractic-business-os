@@ -14,7 +14,9 @@
     "bench": "tsx src/scripts/benchmark.ts",
     "audit:duplicates": "tsx src/scripts/duplicateAudit.ts",
     "verify:restore": "tsx src/scripts/verifyRestore.ts",
-    "test:db": "tsx src/tests/database.test.ts"
+    "test:db": "tsx src/tests/database.test.ts",
+    "verify:env": "tsx src/scripts/verifyEnv.ts",
+    "verify:indexes": "tsx src/scripts/verifyIndexes.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",

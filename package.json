@@ -24,6 +24,11 @@
     "test:e2e": "npm run test:e2e --prefix frontend",
     "test:e2e:cross-browser": "npm run test:e2e:cross-browser --prefix frontend",
     "test:e2e:auth": "npm run test:e2e:auth --prefix frontend",
-    "test:e2e:deployment": "npm run test:e2e:deployment --prefix frontend"
+    "test:e2e:deployment": "npm run test:e2e:deployment --prefix frontend",
+    "verify:env": "npm --prefix backend run verify:env",
+    "verify:indexes": "npm --prefix backend run verify:indexes",
+    "recovery:drill": "node scripts/recovery-drill.mjs",
+    "release:check": "node scripts/release-check.mjs",
+    "release:check:e2e": "RELEASE_E2E=1 node scripts/release-check.mjs"
   }
 }
