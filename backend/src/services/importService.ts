@@ -385,10 +385,13 @@ export async function importInquiryCsv(csvText: string) {
       errors,
     };
   } catch (error) {
+    const imported = await Inquiry.countDocuments({ import_batch_id: batchId }).catch(() => 0);
     await ImportBatch.updateOne(
       { batch_id: batchId },
       {
         $set: {
+          imported,
+          skipped_duplicates: skippedDuplicates,
           status: 'failed',
           failed: Math.max(1, errors.length),
           errors: errors.length ? errors : ['Import interrupted before completion.'],
