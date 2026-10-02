@@ -1,7 +1,8 @@
 import { formatDate } from '../utils/date.js';
 
 export function serializeInquiry(inquiry: any) {
-  const { import_batch_id: _importBatchId, ...publicInquiry } = inquiry;
+  const publicInquiry = { ...inquiry };
+  delete publicInquiry.import_batch_id;
   return {
     ...publicInquiry,
     id: String(inquiry.id || inquiry._id),
