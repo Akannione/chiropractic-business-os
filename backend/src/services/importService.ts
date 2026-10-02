@@ -360,7 +360,7 @@ export async function importInquiryCsv(csvText: string) {
       errors.push(`Row ${accepted[failure.index]?.rowNumber ?? failure.index + 2}: ${failure.message}`);
     }
 
-    const status = errors.length ? 'partial' : 'completed';
+    const status = errors.length ? (inserted > 0 ? 'partial' : 'failed') : 'completed';
     const completedAt = new Date();
     await ImportBatch.updateOne(
       { batch_id: batchId },
