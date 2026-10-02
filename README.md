@@ -26,6 +26,7 @@ A focused full-stack web app for chiropractic practices to capture patient inqui
 - Exports patient inquiries as CSV
 - Supports automated intake from website links, Google/referral source links, webhook payloads, and CSV imports
 - Previews CSV imports and skips rows matching a patient already on file by name and contact detail, while letting a household share a phone number and email address
+- Tracks each CSV import as a recoverable batch with outcome counts, import history, failure reporting, and guarded undo that refuses to erase imported records modified after import
 - Finds patients recorded more than once and merges them on request, keeping the fuller record and preserving both histories
 - Optionally sends internal email notifications for new automated inquiries when SMTP is configured. Bulk CSV imports do not notify.
 - Supports optional staff login when `ADMIN_PASSWORD` is configured, which also requires a real `AUTH_TOKEN_SECRET`; see `docs/SECURITY.md`
@@ -204,6 +205,15 @@ Then:
 ```text
 POST /api/imports/inquiries.csv
 ```
+
+Import recovery:
+
+```text
+GET /api/imports/inquiries.csv/batches
+POST /api/imports/inquiries.csv/batches/:batchId/undo
+```
+
+Undo is batch-scoped and idempotent. It removes only inquiries and import-created activity records linked to that batch, and it is blocked if any imported inquiry was modified after the import completed.
 
 The preview route flags rows that match an existing patient by normalized name plus email or phone, and rows with missing or invalid fields before the import runs.
 It also accepts optional clinic workflow columns such as patient type, appointment status, last visit date, visit frequency, follow-up owner, and follow-up outcome. Use `docs/METASOFT_REACTIVATION_DEMO.csv` as a fake-data import example before working with a real practice export.
