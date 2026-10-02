@@ -302,7 +302,40 @@ Morgan Allen,404-555-0121,morgan@example.com,Spinal Adjustment,Desk worker with 
 Response:
 
 ```json
-{"imported":1,"skippedDuplicates":0,"failed":0,"errors":[]}
+{
+  "batchId": "2a7a6f86-4b4a-4e20-a389-2ce1ab7fca4f",
+  "status": "completed",
+  "imported": 1,
+  "skippedDuplicates": 0,
+  "failed": 0,
+  "errors": []
+}
+```
+
+The import is persisted as a recovery batch. `status` is `completed` when all ready rows succeed, `partial` when at least one row is imported and at least one row fails validation/write, and `failed` when no row is imported because of errors. Duplicate-only files are `completed` with zero imported rows.
+
+### `GET /imports/inquiries.csv/batches`
+
+Returns recent CSV import batches, newest first. Optional `limit` is capped at 100.
+
+The response includes the batch ID, row counts, failure messages, status, and timestamps. Raw uploaded CSV content is not stored in the batch record.
+
+### `POST /imports/inquiries.csv/batches/:batchId/undo`
+
+Safely reverses one import batch. It removes only inquiries and import-created activity rows linked to that batch. The operation is idempotent.
+
+Undo returns `409` rather than deleting data if any imported inquiry was edited after the import completed, or if the batch is still processing.
+
+Example success:
+
+```json
+{
+  "batchId": "2a7a6f86-4b4a-4e20-a389-2ce1ab7fca4f",
+  "deletedInquiries": 1,
+  "deletedActivities": 1,
+  "alreadyUndone": false,
+  "blockedModifiedCount": 0
+}
 ```
 
 ## Reports
