@@ -13,6 +13,7 @@
     "demo:csv": "tsx src/scripts/generateDemoImportCsv.ts",
     "bench": "tsx src/scripts/benchmark.ts",
     "audit:duplicates": "tsx src/scripts/duplicateAudit.ts",
+    "verify:restore": "tsx src/scripts/verifyRestore.ts",
     "test:db": "tsx src/tests/database.test.ts"
   },
   "dependencies": {
