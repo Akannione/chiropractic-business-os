@@ -160,11 +160,37 @@ export type ImportPreview = {
   errorRows: number;
 };
 
+export type ImportBatchStatus = 'processing' | 'completed' | 'partial' | 'failed' | 'undone';
+
 export type ImportResult = {
+  batchId: string;
+  status: ImportBatchStatus;
   imported: number;
   skippedDuplicates: number;
   failed: number;
   errors: string[];
+};
+
+export type ImportBatch = {
+  batchId: string;
+  totalRows: number;
+  imported: number;
+  skippedDuplicates: number;
+  failed: number;
+  errors: string[];
+  status: ImportBatchStatus;
+  createdAt: string;
+  completedAt: string | null;
+  undoneAt: string | null;
+};
+
+export type UndoImportResult = {
+  batchId: string;
+  deletedInquiries: number;
+  deletedActivities: number;
+  alreadyUndone: boolean;
+  blockedModifiedCount: number;
+  message?: string;
 };
 
 export type ReactivationStatus = 'Overdue' | 'Due Today' | 'Upcoming';
