@@ -54,7 +54,7 @@ Expected evidence includes:
 50000 document(s) restored successfully. 0 document(s) failed to restore.
 ```
 
-and index-restoration lines for the inquiry and activity collections.
+and index-restoration lines for the inquiry, activity, and import-batch collections.
 
 ## 4. Verify the restore
 
@@ -68,8 +68,10 @@ The read-only verifier compares:
 
 - inquiry count;
 - activity count;
+- import-batch count;
 - inquiry indexes;
 - activity indexes;
+- import-batch indexes;
 - KPI results.
 
 It refuses databases not named for benchmarking.
