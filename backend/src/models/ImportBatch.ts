@@ -9,7 +9,7 @@ const importBatchSchema = new mongoose.Schema(
     imported: { type: Number, required: true, default: 0, min: 0 },
     skipped_duplicates: { type: Number, required: true, default: 0, min: 0 },
     failed: { type: Number, required: true, default: 0, min: 0 },
-    errors: { type: [String], default: [] },
+    error_messages: { type: [String], default: [] },
     status: { type: String, required: true, enum: IMPORT_BATCH_STATUSES, default: 'processing' },
     created_at: { type: Date, required: true, default: Date.now },
     completed_at: { type: Date, default: null },

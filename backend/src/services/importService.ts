@@ -329,7 +329,7 @@ export async function importInquiryCsv(csvText: string) {
     imported: 0,
     skipped_duplicates: 0,
     failed: 0,
-    errors: [],
+    error_messages: [],
     status: 'processing',
   });
 
@@ -369,7 +369,7 @@ export async function importInquiryCsv(csvText: string) {
           imported: inserted,
           skipped_duplicates: skippedDuplicates,
           failed: errors.length,
-          errors,
+          error_messages: errors,
           status,
           completed_at: completedAt,
         },
@@ -394,7 +394,7 @@ export async function importInquiryCsv(csvText: string) {
           skipped_duplicates: skippedDuplicates,
           status: 'failed',
           failed: Math.max(1, errors.length),
-          errors: errors.length ? errors : ['Import interrupted before completion.'],
+          error_messages: errors.length ? errors : ['Import interrupted before completion.'],
           completed_at: new Date(),
         },
       },

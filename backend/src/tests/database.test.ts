@@ -410,7 +410,7 @@ async function testImportBatchRecovery() {
   const partialBatch = await ImportBatch.findOne({ batch_id: partial.batchId }).lean();
   assert.equal(partialBatch?.status, 'partial');
   assert.equal(partialBatch?.failed, 1);
-  assert.ok(partialBatch?.errors[0]?.startsWith('Row 3:'),
+  assert.ok(partialBatch?.error_messages[0]?.startsWith('Row 3:'),
     'partial batch errors identify the CSV row without repeating patient data');
 
   const allInvalid = await importInquiryCsv([

@@ -43,8 +43,14 @@ async function snapshot(uri: string): Promise<Snapshot> {
 
     const inquiries = await db.collection('inquiries').countDocuments();
     const activities = await db.collection('activities').countDocuments();
-    const inquiryIndexes = (await db.collection('inquiries').indexes()).map((index) => index.name).sort();
-    const activityIndexes = (await db.collection('activities').indexes()).map((index) => index.name).sort();
+    const inquiryIndexes = (await db.collection('inquiries').indexes())
+      .map((index) => index.name)
+      .filter((name): name is string => Boolean(name))
+      .sort();
+    const activityIndexes = (await db.collection('activities').indexes())
+      .map((index) => index.name)
+      .filter((name): name is string => Boolean(name))
+      .sort();
     const kpis = await calculateKpisFromDatabase();
 
     return { name, inquiries, activities, inquiryIndexes, activityIndexes, kpis };

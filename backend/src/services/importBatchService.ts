@@ -16,7 +16,7 @@ export async function listImportBatches(limit = 20) {
     imported: batch.imported,
     skippedDuplicates: batch.skipped_duplicates,
     failed: batch.failed,
-    errors: batch.errors,
+    errors: batch.error_messages,
     status: batch.status,
     createdAt: batch.created_at,
     completedAt: batch.completed_at,
