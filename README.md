@@ -245,6 +245,7 @@ More details:
 - `docs/API.md`
 - `docs/PRODUCTION_DEPLOYMENT.md`
 - `docs/BACKUP_RESTORE_RUNBOOK.md`
+- `docs/PERFORMANCE_BASELINE.md`
 - `docs/WORKFLOW_AUTOMATION.md`
 - `docs/INTAKE_EMBED_SNIPPETS.md`
 - `docs/PILOT_READINESS.md`
