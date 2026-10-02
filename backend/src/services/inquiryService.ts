@@ -263,11 +263,17 @@ export type BulkInsertFailure = { index: number; message: string };
  * failure refers to the position in `inputs`, letting the caller map a failure
  * back to its CSV row number.
  */
-export async function createInquiriesBulk(inputs: InquiryInput[]) {
+export async function createInquiriesBulk(
+  inputs: InquiryInput[],
+  options: { importBatchId?: string } = {},
+) {
   if (!inputs.length) return { inserted: 0, failures: [] as BulkInsertFailure[] };
 
   const now = new Date();
-  const documents = inputs.map((input) => buildInquiryDocument(input, now));
+  const documents = inputs.map((input) => ({
+    ...buildInquiryDocument(input, now),
+    ...(options.importBatchId ? { import_batch_id: options.importBatchId } : {}),
+  }));
 
   let insertedDocs: { id?: string; _id?: unknown; name: string; source: string; status: string }[] = [];
   const failures: BulkInsertFailure[] = [];
@@ -299,6 +305,7 @@ export async function createInquiriesBulk(inputs: InquiryInput[]) {
       patientName: doc.name,
       action: 'Inquiry created',
       detail: `Created from ${doc.source} with status ${doc.status}.`,
+      importBatchId: options.importBatchId,
     })));
   }
 
