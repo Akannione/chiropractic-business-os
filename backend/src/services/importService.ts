@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import {
   AutomatedInquiryInput,
   buildAutomatedInquiryInput,
@@ -5,6 +6,7 @@ import {
 } from './automationService.js';
 import { createInquiriesBulk } from './inquiryService.js';
 import { Inquiry } from '../models/Inquiry.js';
+import { ImportBatch } from '../models/ImportBatch.js';
 import {
   APPOINTMENT_STATUSES,
   FOLLOW_UP_OUTCOMES,
@@ -315,33 +317,85 @@ export async function previewInquiryCsv(csvText: string) {
  * inbound inquiry, so the import no longer notifies.
  */
 export async function importInquiryCsv(csvText: string) {
+  const batchId = randomUUID();
   const preview = await previewInquiryCsv(csvText);
   const rows = parseInquiryCsv(csvText).map(mapExternalRow);
   let skippedDuplicates = 0;
   const errors: string[] = [];
 
-  // Keep the CSV row number alongside each accepted row so a failure from the
-  // bulk write can be reported against the line the user actually sees.
-  const accepted: { input: ReturnType<typeof buildAutomatedInquiryInput>; rowNumber: number }[] = [];
+  await ImportBatch.create({
+    batch_id: batchId,
+    total_rows: preview.totalRows,
+    imported: 0,
+    skipped_duplicates: 0,
+    failed: 0,
+    errors: [],
+    status: 'processing',
+  });
 
-  for (const [index, row] of rows.entries()) {
-    const previewRow = preview.rows[index];
-    const rowNumber = previewRow?.rowNumber ?? index + 2;
-    if (previewRow?.duplicate) {
-      skippedDuplicates += 1;
-      continue;
+  try {
+    // Keep the CSV row number alongside each accepted row so a failure from the
+    // bulk write can be reported against the line the user actually sees.
+    const accepted: { input: ReturnType<typeof buildAutomatedInquiryInput>; rowNumber: number }[] = [];
+
+    for (const [index, row] of rows.entries()) {
+      const previewRow = preview.rows[index];
+      const rowNumber = previewRow?.rowNumber ?? index + 2;
+      if (previewRow?.duplicate) {
+        skippedDuplicates += 1;
+        continue;
+      }
+      if (previewRow?.errors.length) {
+        errors.push(`Row ${rowNumber}: ${previewRow.errors.join(' ')}`);
+        continue;
+      }
+      accepted.push({ input: buildAutomatedInquiryInput(row, 'CSV import'), rowNumber });
     }
-    if (previewRow?.errors.length) {
-      errors.push(`Row ${rowNumber}: ${previewRow.errors.join(' ')}`);
-      continue;
+
+    const { inserted, failures } = await createInquiriesBulk(
+      accepted.map((entry) => entry.input),
+      { importBatchId: batchId },
+    );
+    for (const failure of failures) {
+      errors.push(`Row ${accepted[failure.index]?.rowNumber ?? failure.index + 2}: ${failure.message}`);
     }
-    accepted.push({ input: buildAutomatedInquiryInput(row, 'CSV import'), rowNumber });
-  }
 
-  const { inserted, failures } = await createInquiriesBulk(accepted.map((entry) => entry.input));
-  for (const failure of failures) {
-    errors.push(`Row ${accepted[failure.index]?.rowNumber ?? failure.index + 2}: ${failure.message}`);
-  }
+    const status = errors.length ? 'partial' : 'completed';
+    const completedAt = new Date();
+    await ImportBatch.updateOne(
+      { batch_id: batchId },
+      {
+        $set: {
+          imported: inserted,
+          skipped_duplicates: skippedDuplicates,
+          failed: errors.length,
+          errors,
+          status,
+          completed_at: completedAt,
+        },
+      },
+    );
 
-  return { imported: inserted, skippedDuplicates, failed: errors.length, errors };
+    return {
+      batchId,
+      status,
+      imported: inserted,
+      skippedDuplicates,
+      failed: errors.length,
+      errors,
+    };
+  } catch (error) {
+    await ImportBatch.updateOne(
+      { batch_id: batchId },
+      {
+        $set: {
+          status: 'failed',
+          failed: Math.max(1, errors.length),
+          errors: errors.length ? errors : ['Import interrupted before completion.'],
+          completed_at: new Date(),
+        },
+      },
+    ).catch(() => undefined);
+    throw error;
+  }
 }
