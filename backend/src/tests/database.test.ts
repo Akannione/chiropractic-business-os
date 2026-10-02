@@ -365,7 +365,7 @@ async function testImportBatchRecovery() {
 
   const history = await listImportBatches();
   assert.equal(history.length, 1);
-  assert.equal(history[0].batch_id, result.batchId);
+  assert.equal(history[0].batchId, result.batchId);
   assert.equal(history[0].imported, 2);
   assert.equal(history[0].status, 'completed');
 
