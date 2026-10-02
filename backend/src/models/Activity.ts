@@ -6,6 +6,7 @@ const activitySchema = new mongoose.Schema(
     patient_name: { type: String, default: '', trim: true },
     action: { type: String, required: true, trim: true },
     detail: { type: String, default: '', trim: true },
+    import_batch_id: { type: String, trim: true },
     created_at: { type: Date, required: true, default: Date.now },
   },
   {
@@ -24,6 +25,7 @@ const activitySchema = new mongoose.Schema(
 // The activity feed reads newest first, and per-inquiry history filters by id.
 activitySchema.index({ created_at: -1 });
 activitySchema.index({ inquiry_id: 1, created_at: -1 });
+activitySchema.index({ import_batch_id: 1, created_at: -1 }, { sparse: true });
 
 export type ActivityShape = InferSchemaType<typeof activitySchema>;
 export const Activity = mongoose.model('Activity', activitySchema);
