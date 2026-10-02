@@ -430,6 +430,37 @@ async function testImportBatchRecovery() {
   assert.equal(duplicateOnly.failed, 0);
   assert.equal(duplicateOnly.status, 'completed');
 
+  const staleBatchId = 'stale-processing-batch';
+  const staleCreatedAt = new Date(Date.now() - 20 * 60 * 1000);
+  await ImportBatch.create({
+    batch_id: staleBatchId,
+    total_rows: 1,
+    imported: 0,
+    skipped_duplicates: 0,
+    failed: 0,
+    errors: [],
+    status: 'processing',
+    created_at: staleCreatedAt,
+  });
+  const staleInquiry = await Inquiry.create({
+    ...inquiry({
+      name: 'Interrupted Import',
+      email: 'interrupted@example.com',
+      phone: '470-555-1004',
+    }),
+    import_batch_id: staleBatchId,
+  });
+  await Activity.create({
+    inquiry_id: staleInquiry._id,
+    patient_name: staleInquiry.name,
+    action: 'Inquiry created',
+    import_batch_id: staleBatchId,
+  });
+  const staleUndo = await undoImportBatch(staleBatchId);
+  assert.equal(staleUndo?.deletedInquiries, 1,
+    'stale processing batches can be recovered after the grace period');
+  assert.equal(staleUndo?.deletedActivities, 1);
+
   const second = await importInquiryCsv([
     'name,phone,email,service_needed',
     'Modified Import,470-555-1003,modified@example.com,Spinal Adjustment',
