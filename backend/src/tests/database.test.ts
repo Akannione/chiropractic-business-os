@@ -56,6 +56,25 @@ function inquiry(overrides: Record<string, unknown> & { created_at?: Date }) {
   return created_at ? { ...document, created_at } : document;
 }
 
+function testInquiryPersistenceWhitelist() {
+  const document = buildInquiryDocument({
+    name: 'Whitelist Test',
+    phone: '404-555-0111',
+    email: 'whitelist@example.com',
+    service_needed: 'Spinal Adjustment',
+    source: 'Website',
+    status: 'New Inquiry',
+    estimated_value: 100,
+    import_batch_id: 'forged-batch-id',
+    arbitrary_field: 'must-not-persist',
+  } as never) as Record<string, unknown>;
+
+  assert.equal('import_batch_id' in document, false,
+    'manual inquiry payloads must not be able to forge import batch membership');
+  assert.equal('arbitrary_field' in document, false,
+    'unknown request fields must not be copied into stored inquiry documents');
+}
+
 async function seed() {
   await Inquiry.deleteMany({});
   await Activity.deleteMany({});
@@ -443,6 +462,7 @@ async function main() {
 
   try {
     await Inquiry.init();
+    testInquiryPersistenceWhitelist();
     await seed();
 
     await testFollowUpFiltersHandleNulls();
