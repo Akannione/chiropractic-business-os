@@ -438,7 +438,7 @@ async function testImportBatchRecovery() {
     imported: 0,
     skipped_duplicates: 0,
     failed: 0,
-    errors: [],
+    error_messages: [],
     status: 'processing',
     created_at: staleCreatedAt,
   });
@@ -492,7 +492,7 @@ async function main() {
   }
 
   try {
-    await Inquiry.init();
+    await Promise.all([Inquiry.init(), Activity.init(), ImportBatch.init()]);
     testInquiryPersistenceWhitelist();
     await seed();
 
