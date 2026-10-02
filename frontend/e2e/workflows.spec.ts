@@ -131,7 +131,7 @@ test('inquiry quick filters and reset remain usable', async ({ page }) => {
   }
 });
 
-test('CSV import previews valid rows then imports them', async ({ page }) => {
+test('CSV import previews valid rows then imports them', async ({ page, request }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Import & Export', exact: true }).click();
   await expect(page.getByLabel('Demo import safety notice')).toContainText(/do not upload a real clinic export/i);
