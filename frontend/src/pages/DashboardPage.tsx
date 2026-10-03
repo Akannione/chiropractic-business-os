@@ -25,9 +25,33 @@ function followUpTiming(nextFollowUpDate: string) {
   if (nextFollowUpDate === today) return { label: 'Due today', className: 'due-today' };
   return { label: 'Upcoming', className: 'upcoming' };
 }
+
+function followUpPriority(inquiry: Inquiry) {
+  const date = inquiry.next_follow_up_date;
+  const today = todayIso();
+
+  if (!date) return 3;
+  if (date < today) return 0;
+  if (date === today) return 1;
+  return 2;
+}
+
 export function DashboardPage({ kpis, recentInquiries, followUps, onChanged, setError }: DashboardPageProps) {
   const dueToday = useMemo(() => followUps.filter((item) => item.next_follow_up_date === todayIso()), [followUps]);
-  const todayQueue = useMemo(() => followUps.slice(0, 5), [followUps]);
+  const todayQueue = useMemo(
+    () =>
+      [...followUps]
+        .sort((a, b) => {
+          const priorityDifference = followUpPriority(a) - followUpPriority(b);
+          if (priorityDifference !== 0) return priorityDifference;
+
+          return (a.next_follow_up_date || '9999-12-31').localeCompare(
+            b.next_follow_up_date || '9999-12-31',
+          );
+        })
+        .slice(0, 5),
+    [followUps],
+  );
 
   const dashboardFocus = useMemo(() => {
     if (kpis.overdueFollowUps > 0) return { title: `${kpis.overdueFollowUps} follow-up${kpis.overdueFollowUps === 1 ? '' : 's'} need you`, detail: 'Start with the people who have already waited past their follow-up date.', tone: 'urgent' };
@@ -111,7 +135,7 @@ export function DashboardPage({ kpis, recentInquiries, followUps, onChanged, set
           <section className="glass-panel pulse-card">
             <span className="eyebrow">Practice pulse</span>
             <h3>{kpis.followUpsNeeded ? 'There is work to recover.' : 'Your queue is healthy.'}</h3>
-            <p>{kpis.followUpsNeeded ? `${kpis.followUpsNeeded} follow-ups represent ${money(kpis.estimatedTreatmentValue)} in estimated opportunity.` : 'No immediate follow-up pressure is showing in CBOS.'}</p>
+            <p>{kpis.followUpsNeeded ? `${kpis.followUpsNeeded} follow-ups need attention.` : 'No immediate follow-up pressure is showing in CBOS.'}</p>
             <div className="pulse-meter"><span style={{ width: `${Math.min(100, kpis.followUpsNeeded * 12)}%` }} /></div>
             <small>Operational signal, not a clinical recommendation.</small>
           </section>

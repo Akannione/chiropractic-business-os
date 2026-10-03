@@ -38,6 +38,112 @@ test('Today primary workflow updates a queued inquiry', async ({ page }) => {
   }
 });
 
+test('Today priority queue orders overdue before due today and upcoming', async ({ page }) => {
+  const today = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+
+  const makeInquiry = (
+    id: string,
+    name: string,
+    nextFollowUpDate: string,
+  ) => ({
+    id,
+    name,
+    phone: '4045550100',
+    email: `${id}@example.com`,
+    service_needed: 'Spinal Adjustment',
+    activity_context: '',
+    source: 'Website',
+    status: 'Follow-Up Needed',
+    estimated_value: 200,
+    notes: '',
+    next_follow_up_date: nextFollowUpDate,
+    appointment_status: 'Not Scheduled',
+    patient_type: 'New Patient',
+    appointment_request: '',
+    offer_type: 'None',
+    last_visit_date: '',
+    expected_visit_frequency_days: null,
+    assigned_follow_up_owner: '',
+    follow_up_outcome: 'Not Contacted',
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_at: '2026-01-01T00:00:00.000Z',
+  });
+
+  await page.route('**/api/inquiries?*', async (route) => {
+    const url = new URL(route.request().url());
+
+    if (url.searchParams.get('followUp') !== 'Needs Follow-Up') {
+      await route.continue();
+      return;
+    }
+
+    const rows = [
+      makeInquiry('future', 'Future Follow Up', '2099-12-31'),
+      makeInquiry('today', 'Due Today Follow Up', today),
+      makeInquiry('overdue-newer', 'Newer Overdue Follow Up', '2021-01-01'),
+      makeInquiry('overdue-oldest', 'Oldest Overdue Follow Up', '2020-01-01'),
+      makeInquiry('no-date', 'No Date Follow Up', ''),
+    ];
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        rows,
+        total: rows.length,
+        page: 1,
+        pageSize: 50,
+      }),
+    });
+  });
+
+  await page.reload();
+  await expect(page.getByText('Good to see you.')).toBeVisible();
+
+  const cards = page.locator('.modern-action-card');
+
+  await expect(cards).toHaveCount(5);
+  await expect(cards.nth(0)).toContainText('Oldest Overdue Follow Up');
+  await expect(cards.nth(1)).toContainText('Newer Overdue Follow Up');
+  await expect(cards.nth(2)).toContainText('Due Today Follow Up');
+  await expect(cards.nth(3)).toContainText('Future Follow Up');
+  await expect(cards.nth(4)).toContainText('No Date Follow Up');
+});
+
+test('Practice Pulse does not attribute overall estimated value to follow-up subset', async ({ page }) => {
+  await page.route('**/api/kpis', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        totalPatientInquiries: 8,
+        newThisWeek: 3,
+        activePatients: 1,
+        followUpsNeeded: 4,
+        followUpsNeededPercent: 50,
+        overdueFollowUps: 3,
+        estimatedTreatmentValue: 1680,
+        inquiryToPatientRate: 12.5,
+        topInquirySource: 'Google',
+      }),
+    });
+  });
+
+  await page.reload();
+  await expect(page.getByText('Good to see you.')).toBeVisible();
+
+  const pulse = page.locator('.pulse-card');
+
+  await expect(pulse).toContainText('4 follow-ups need attention.');
+  await expect(pulse).not.toContainText('4 follow-ups represent');
+  await expect(pulse).not.toContainText('$1,680');
+});
+
 test('Add Inquiry drawer creates an inquiry and closes', async ({ page }) => {
   const trigger = page.getByRole('button', { name: 'Add Inquiry', exact: true });
   await expect(trigger).toBeEnabled();
