@@ -40,7 +40,7 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
       - name: Unit and routing tests
-        run: npm run test && node --test scripts/wait-for-http.test.mjs
+        run: npm run test && node --test scripts/wait-for-http.test.mjs scripts/demo-check.test.mjs
       - name: Database integration tests
         run: npm run test:db
       - name: Production dependency audit
