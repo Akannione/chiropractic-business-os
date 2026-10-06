@@ -13,9 +13,11 @@ Staff login was enabled earlier in production, but the current fake-data demo in
 
 Pull Request #1 was merged into `main` at commit `b46add8`, so the public source now matches the production deployment. Dr. McIntyre Canva collateral remains preserved separately from the deployment branch.
 
-The release-candidate chain is also complete: PR #7 merged into `chatgpt/pilot-readiness` at `76b168c`, and PR #8 merged the post-release hardening branch into `main` at `a32da16`. The active follow-up branch is `chatgpt/demo-data-safety-ux`; PR #9 is open against `main` with explicit fake-data safety UX plus release-hygiene hardening.
+The release-candidate chain is complete through PR #11. PR #9 merged demo-data safety and import recovery; PR #10 fixed Today priority ordering and follow-up value messaging. PR #11 merged compatible dependency security patches and local release verification as `7e2dfb00a21650ff6d182ea81442dc2b7af516fc`. Both canonical Vercel deployments were promoted and verified on October 5, 2026. Older dated entries below are historical evidence, not current branch status.
 
 ## Last Completed Task
+
+2026-10-05: Patched proxy-addr to 2.0.8 and source-map-js to 1.2.2. Complete local dependency audits reported zero vulnerabilities. Typecheck, tests, database validation, build, bundle budget and secret scan passed; 70 Chromium/WebKit tests and 34 Firefox tests passed (one existing telemetry-harness skip). Auth smoke and a 50,000-record synthetic backup/restore drill passed. GitHub's full quality gate passed before PR #11 merged. Canonical production smoke passed after promotion: shell, workspaces, public intake and security headers. Production remains an open fake-data-only demo, not approved for real patient data. Evidence: `docs/validation/2026-10-05-release-verification.md`.
 
 2026-10-01: Added recoverable CSV import batches on PR #9. Each import now gets a batch ID, persisted outcome counts/status, import-created inquiry/activity linkage, recent import history, a failure report, and guarded undo. Undo is transactional where MongoDB supports transactions and retry-safe on standalone development MongoDB; it is idempotent and refuses to erase imported inquiries edited after the batch completed. Demo reset clears import history and activity alongside inquiries. Internal batch IDs are excluded from ordinary inquiry API responses and CSV exports. Integration coverage now includes successful, partial, fully failed, duplicate-only, repeated-undo, unrelated-record preservation, and modified-record blocking cases. CI verification for the newest head remains authoritative before merge.
 
@@ -36,7 +38,7 @@ The release-candidate chain is also complete: PR #7 merged into `chatgpt/pilot-r
 
 ## Current Task
 
-PR #9 remains an open release-candidate hardening branch and must not be merged or production-deployed without explicit approval. The current engineering lane is finishing import-recovery verification and then freezing major feature work for clinic validation. Real patient data remains blocked behind individual identity/RBAC requirements, a validated first source adapter, data-minimization and operational-security controls, vendor/contract review, and legal/compliance approval.
+Release hardening through PR #11 is merged and deployed. Freeze major feature work and run the existing fake-data clinic validation protocol. Separate automated engineering evidence from observed clinic workflow fit and willingness to pay. Real patient data remains blocked behind individual identity/RBAC requirements, a validated first source adapter, data-minimization and operational-security controls, vendor/contract review, and legal/compliance approval.
 
 ## Validation Resume Gate
 
@@ -49,7 +51,7 @@ Outreach was paused on 2026-08-11. Tobi asked on 2026-09-07 what it looks like t
 3. Inspect only a manually approved de-identified export before adding any source-specific adapter.
 4. Keep recurring sync, API/FHIR/HL7 work, EHR writeback, and real patient data out of scope until evidence supports them.
 5. Run the existing fake-data clinic protocol and record Go / Revise / Stop.
-6. Keep production merge/deploy separate from this development branch.
+6. Treat the October 5 release as the current deployed baseline; require focused verification before any future release.
 
 ## Completed This Cycle
 

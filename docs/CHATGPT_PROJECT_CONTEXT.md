@@ -1,6 +1,6 @@
 # CBOS ChatGPT Project Context
 
-Last updated: September 30, 2026
+Last updated: October 5, 2026
 
 Use this file as the starting context for managing CBOS in a new ChatGPT project.
 
@@ -27,7 +27,25 @@ Current production demo:
 
 As of the latest check, the production frontend and API health endpoint return HTTP 200. Staff password authentication is temporarily disabled for fake-data demonstrations; do not enter real patient data while access is open.
 
-## September 19, 2026 Current State
+## Current State - October 5, 2026
+
+- GitHub: https://github.com/Akannione/chiropractic-business-os
+- Latest verified release: PR #11, merge commit `7e2dfb00a21650ff6d182ea81442dc2b7af516fc` on `main`.
+- PR #9 (demo safety/import recovery) and PR #10 (priority ordering/value messaging) are merged, not open work.
+- PR #11 patched two vulnerable dependencies. Local audits reported zero vulnerabilities at verification time; this is not a security guarantee.
+- Local verification passed: typecheck, tests, database tests, build, bundle budget, secret scan, 70 Chromium/WebKit tests, 34 Firefox tests with one intentional telemetry skip, auth smoke, and a 50,000-record backup/restore drill with matching counts/indexes/KPIs.
+- GitHub's full quality gate passed. Canonical frontend and backend deployed successfully; post-promotion hosted smoke passed.
+- The hosted app is an open fake-data-only demo (`demoMode:true`, `authEnabled:false`). Never enter real patient information.
+- No actual clinic pilot outcome, measured clinic time savings, paying-client count or customer ROI is established by these engineering checks.
+- Existing walkthrough video assets are unfinished/uncommitted work and must not be represented as part of this verified release.
+
+Next: use `docs/CLINIC_VALIDATION_PLAYBOOK.md`, record anonymized results in `docs/VALIDATION_RUNS.md`, and decide Go / Revise / Stop. Do not add features solely because terminal checks are complete.
+
+### Instruction To Use In ChatGPT
+
+Act as CBOS's evidence-led product manager. Use this project's current-state section, clinic validation playbook and anonymized validation records. Separate verified engineering facts, observed clinic feedback and untested hypotheses. Help prepare a 20-30 minute fake-data clinic session, then summarize task completion, hesitation, missing information, workflow ownership and purchase objections. Recommend at most three small changes supported by observations. Do not invent time savings, customer outcomes or compliance readiness. Do not expand into EHR, scheduling, billing or insurance features. Do not request patient data or credentials. Keep outreach and real-data decisions under the owner's control.
+
+## Historical State - September 19, 2026
 
 The active delivery branch is `chatgpt/pilot-readiness`, with pull request #6 open against `main`. The latest completed work on this branch includes:
 
