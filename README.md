@@ -155,6 +155,8 @@ Public intake includes a lightweight in-memory rate limit to reduce accidental s
 
 ## Demo Deployment
 
+Before presenting, run `npm run demo:check`. This read-only check verifies the canonical website, same-origin API health, practice configuration and demo-mode flag. For a local demo, use `CBOS_DEMO_URL=http://localhost:5173 npm run demo:check`. Failure exits nonzero with an explanation. It never creates or resets data and cannot certify that existing records are fictional; use fake data only. Browser workflow verification and clinic usability testing remain separate checks.
+
 The demo uses two Vercel projects from the same GitHub repository:
 
 - React frontend: `https://businessosmvp.vercel.app`

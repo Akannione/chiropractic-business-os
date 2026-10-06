@@ -4,6 +4,7 @@
   "private": true,
   "description": "Full-stack CBOS workspace.",
   "scripts": {
+    "demo:check": "node scripts/demo-check.mjs",
     "install:all": "npm install --prefix backend && npm install --prefix frontend",
     "dev:backend": "npm run dev --prefix backend",
     "dev:frontend": "npm run dev --prefix frontend",
