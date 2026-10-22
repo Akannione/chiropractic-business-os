@@ -30,6 +30,14 @@ test('desktop navigation reaches every MVP workspace without runtime errors', as
   expect(errors).toEqual([]);
 });
 
+test('Today prioritizes actions without duplicate explanatory panels', async ({ page }) => {
+  await expect(page.getByText('Good to see you.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Next actions' })).toBeVisible();
+  await expect(page.locator('.product-positioning')).toHaveCount(0);
+  await expect(page.locator('.pulse-card')).toHaveCount(0);
+  await expect(page.getByText('Recent inquiries')).toBeVisible();
+});
+
 test('Today primary workflow updates a queued inquiry', async ({ page }) => {
   const scheduled = page.getByRole('button', { name: 'Scheduled', exact: true }).first();
   if (await scheduled.count()) {
@@ -115,7 +123,7 @@ test('Today priority queue orders overdue before due today and upcoming', async 
   await expect(cards.nth(4)).toContainText('No Date Follow Up');
 });
 
-test('Practice Pulse does not attribute overall estimated value to follow-up subset', async ({ page }) => {
+test('Today separates follow-up urgency from overall estimated value', async ({ page }) => {
   await page.route('**/api/kpis', async (route) => {
     await route.fulfill({
       status: 200,
@@ -137,11 +145,10 @@ test('Practice Pulse does not attribute overall estimated value to follow-up sub
   await page.reload();
   await expect(page.getByText('Good to see you.')).toBeVisible();
 
-  const pulse = page.locator('.pulse-card');
-
-  await expect(pulse).toContainText('4 follow-ups need attention.');
-  await expect(pulse).not.toContainText('4 follow-ups represent');
-  await expect(pulse).not.toContainText('$1,680');
+  const priority = page.locator('.today-hero-copy');
+  await expect(priority).toContainText('3 follow-ups need you');
+  await expect(priority).not.toContainText('$1,680');
+  await expect(page.locator('.today-glance .glance-value')).toContainText('$1,680');
 });
 
 test('Add Inquiry drawer creates an inquiry and closes', async ({ page }) => {

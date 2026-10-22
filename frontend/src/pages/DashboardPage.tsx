@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ArrowRight, CalendarClock, CheckCircle2, Sparkles, TrendingUp, UsersRound } from 'lucide-react';
+import { ArrowRight, CalendarClock, CheckCircle2, TrendingUp, UsersRound } from 'lucide-react';
 import { EmptyState } from '../components/EmptyState';
 import { InquiryTable } from '../components/InquiryTable';
 import { DataFreshness } from '../components/DataFreshness';
@@ -54,10 +54,10 @@ export function DashboardPage({ kpis, recentInquiries, followUps, onChanged, set
   );
 
   const dashboardFocus = useMemo(() => {
-    if (kpis.overdueFollowUps > 0) return { title: `${kpis.overdueFollowUps} follow-up${kpis.overdueFollowUps === 1 ? '' : 's'} need you`, detail: 'Start with the people who have already waited past their follow-up date.', tone: 'urgent' };
-    if (dueToday.length > 0) return { title: `${dueToday.length} follow-up${dueToday.length === 1 ? '' : 's'} due today`, detail: "Clear today's queue before working future opportunities.", tone: 'today' };
-    if (kpis.followUpsNeeded > 0) return { title: `${kpis.followUpsNeeded} patient inquir${kpis.followUpsNeeded === 1 ? 'y' : 'ies'} ready for follow-up`, detail: 'Your queue is active and nothing is overdue.', tone: 'steady' };
-    return { title: 'You are caught up', detail: 'New inquiries and future follow-ups will surface here when they need attention.', tone: 'clear' };
+    if (kpis.overdueFollowUps > 0) return { title: `${kpis.overdueFollowUps} follow-up${kpis.overdueFollowUps === 1 ? '' : 's'} need you`, detail: 'Contact overdue patients first.', tone: 'urgent' };
+    if (dueToday.length > 0) return { title: `${dueToday.length} follow-up${dueToday.length === 1 ? '' : 's'} due today`, detail: "Work through today's follow-ups.", tone: 'today' };
+    if (kpis.followUpsNeeded > 0) return { title: `${kpis.followUpsNeeded} patient inquir${kpis.followUpsNeeded === 1 ? 'y' : 'ies'} ready for follow-up`, detail: 'Nothing is overdue.', tone: 'steady' };
+    return { title: 'You are caught up', detail: 'No follow-ups need action.', tone: 'clear' };
   }, [dueToday.length, kpis.followUpsNeeded, kpis.overdueFollowUps]);
 
   async function updateWorkflow(inquiry: Inquiry, status: InquiryStatus, nextFollowUpDate = inquiry.next_follow_up_date) {
@@ -74,7 +74,7 @@ export function DashboardPage({ kpis, recentInquiries, followUps, onChanged, set
   return (
     <section className="stack today-workspace">
       <div className="today-welcome">
-        <div><span className="eyebrow">Front desk command center</span><h2>Good to see you.</h2><p>Your practice, distilled into the few things worth your attention.</p></div>
+        <div><h2>Good to see you.</h2></div>
         <DataFreshness />
       </div>
 
@@ -82,7 +82,7 @@ export function DashboardPage({ kpis, recentInquiries, followUps, onChanged, set
         <div className="ambient-orb orb-one" aria-hidden="true" />
         <div className="ambient-orb orb-two" aria-hidden="true" />
         <div className="today-hero-copy">
-          <span className="hero-kicker"><Sparkles size={14} /> CBOS Focus</span>
+          <span className="hero-kicker">Priority</span>
           <h3>{dashboardFocus.title}</h3>
           <p>{dashboardFocus.detail}</p>
           {todayQueue.length > 0 && <a className="hero-action" href="#today-actions">Start with next action <ArrowRight size={16} /></a>}
@@ -102,7 +102,7 @@ export function DashboardPage({ kpis, recentInquiries, followUps, onChanged, set
       <div className="today-layout" id="today-actions">
         <section className="glass-panel action-queue-panel">
           <div className="panel-heading modern-heading">
-            <div><span className="eyebrow">Priority queue</span><h3>Next actions</h3><p>One clear decision at a time. Handle the first item and keep moving.</p></div>
+            <div><h3>Next actions</h3></div>
             <span className="queue-count">{todayQueue.length}</span>
           </div>
           {todayQueue.length ? (
@@ -132,14 +132,6 @@ export function DashboardPage({ kpis, recentInquiries, followUps, onChanged, set
         </section>
 
         <aside className="today-side-stack">
-          <section className="glass-panel pulse-card">
-            <span className="eyebrow">Practice pulse</span>
-            <h3>{kpis.followUpsNeeded ? 'There is work to recover.' : 'Your queue is healthy.'}</h3>
-            <p>{kpis.followUpsNeeded ? `${kpis.followUpsNeeded} follow-ups need attention.` : 'No immediate follow-up pressure is showing in CBOS.'}</p>
-            <div className="pulse-meter"><span style={{ width: `${Math.min(100, kpis.followUpsNeeded * 12)}%` }} /></div>
-            <small>Operational signal, not a clinical recommendation.</small>
-          </section>
-
           <section className="glass-panel recent-card">
             <div className="panel-heading modern-heading"><div><span className="eyebrow">Latest</span><h3>Recent inquiries</h3></div></div>
             <InquiryTable inquiries={recentInquiries.slice(0, 4)} compact />
