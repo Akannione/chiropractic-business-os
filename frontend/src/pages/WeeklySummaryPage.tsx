@@ -27,7 +27,7 @@ export function WeeklySummaryPage({ summary }: { summary: WeeklySummary | null }
   if (!summary) {
     return (
       <section className="stack workspace-page owner-workspace">
-        <PageHeader eyebrow="Owner review" title="Weekly Owner Review" description="A simple weekly rhythm for reviewing inquiries, follow-ups, and patient conversion." />
+        <PageHeader eyebrow="Owner review" title="Weekly Owner Review" description="Inquiries, follow-ups, conversion." />
         <EmptyState title="No weekly review yet" description="Add patient inquiries and CBOS will build the owner review as activity accumulates." />
       </section>
     );
@@ -39,7 +39,7 @@ export function WeeklySummaryPage({ summary }: { summary: WeeklySummary | null }
 
   return (
     <section className="stack workspace-page owner-workspace">
-      <PageHeader eyebrow="Owner review" title="Weekly Owner Review" description="Check inquiry activity, follow-up pressure, and estimated treatment value before the week ends." />
+      <PageHeader eyebrow="Owner review" title="Weekly Owner Review" description="Weekly inquiries and follow-up priorities." />
       <div className={`summary-card owner-review-card ${needsAttention ? 'attention' : 'clear'}`}>
         <Activity />
         <div>
@@ -53,7 +53,7 @@ export function WeeklySummaryPage({ summary }: { summary: WeeklySummary | null }
         <div className="panel">
           <div className="panel-heading">
             <h3>Owner Action Plan</h3>
-            <p>What to look at before the week ends.</p>
+
           </div>
           <div className="review-action-list">
             <div className={summary.overdueFollowUps ? 'review-action urgent' : 'review-action'}>
@@ -79,16 +79,15 @@ export function WeeklySummaryPage({ summary }: { summary: WeeklySummary | null }
           </div>
         </div>
         <div className="panel">
-          <div className="panel-heading">
-            <h3>Weekly Review Checklist</h3>
-            <p>A simple agenda for a front-desk or owner review.</p>
-          </div>
-          <ul className="checklist">
-            <li>Review overdue follow-ups.</li>
-            <li>Confirm every new inquiry has a next step.</li>
-            <li>Update patients who scheduled or became active.</li>
-            <li>Export the inquiry list if the owner wants a backup.</li>
-          </ul>
+          <details className="owner-review-details">
+            <summary>Review checklist (4 steps)</summary>
+            <ul className="checklist">
+              <li>Review overdue follow-ups.</li>
+              <li>Confirm every new inquiry has a next step.</li>
+              <li>Update patients who scheduled or became active.</li>
+              <li>Export the inquiry list if the owner wants a backup.</li>
+            </ul>
+          </details>
         </div>
       </div>
       <div className="summary-actions">
@@ -99,16 +98,19 @@ export function WeeklySummaryPage({ summary }: { summary: WeeklySummary | null }
           Download Text Summary
         </a>
       </div>
+      <details className="report-metrics-details">
+        <summary>View detailed weekly metrics (8)</summary>
       <div className="kpi-grid small">
         <KpiCard label="Total Patient Inquiries" value={String(summary.totalPatientInquiries)} help="All patient inquiries currently tracked." />
         <KpiCard label="New This Week" value={String(summary.newThisWeek)} help="New patient inquiries created since Monday." />
         <KpiCard label="Active Patients" value={String(summary.activePatients)} help="Patient inquiries currently marked Active Patient." success />
         <KpiCard label="Follow-Ups Needed" value={String(summary.followUpsNeeded)} help="Patients marked Follow-Up Needed or due today/past due." warning />
         <KpiCard label="Overdue Follow-Ups" value={String(summary.overdueFollowUps)} help="Follow-ups with a date before today." warning />
-        <KpiCard label="Estimated Treatment Value" value={money(summary.estimatedTreatmentValue)} help="Potential treatment revenue from inquiries not marked Lost." featured />
+        <KpiCard label="Estimated Opportunity Value" value={money(summary.estimatedTreatmentValue)} help="Estimated potential value of inquiries not marked Lost. This is not collected revenue." featured />
         <KpiCard label="Inquiry-to-Patient Rate" value={percent(summary.inquiryToPatientRate)} help="The share of inquiries currently marked Active Patient." />
         <KpiCard label="Top Inquiry Source" value={summary.topInquirySource} help="The source generating the most inquiries." />
       </div>
+      </details>
     </section>
   );
 }

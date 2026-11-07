@@ -1,6 +1,14 @@
 
 # Project Status
 
+## November 7, 2026 — CBOS owner-first UX release candidate
+
+**State:** Implemented in isolated worktree business_os_mvp_owner_focus_20261022, branch codex/cbos-ux-20261107, based on merged main commit 1128670. The redesigned production site has **not yet been deployed** as of this entry.
+
+Changes: Today presents overdue follow-ups before secondary metrics, with a single primary action and contextual alternatives. Patient Inquiries adds progressive forms, compact mobile filters, mobile list/detail navigation, safe pending states and unsaved-change guards. Reactivations and Pipeline get action-first selection and responsive compact views. Owner Review simplifies reporting while labeling potential value as an estimate. CSV import requires explicit preview acknowledgement and preserves duplicate detection, history, and undo behavior. Navigation groups secondary tools under More without deleting routes.
+
+Safety and verification: locally isolated demo database only; no production patient records changed. Backend and frontend dependency audit fixes resolve the reported Express, body-parser, Nodemailer, qs, and DOMPurify advisories. Backend/frontend TypeScript, service/frontend/routing tests, local database integration, builds, bundle budget, tracked-secret scan, and both npm audits passed. The malformed-CSV test was corrected to await preview completion and assert that import stays disabled. Focused Chromium/WebKit rerun: 8/8 passed. A 36-page-and-viewport visual scan reported zero horizontal overflow or runtime JS errors. Full GitHub quality CI and production deployment verification must pass before declaring release complete.
+
 ## Project Purpose
 
 Full-stack CBOS for small chiropractic practices to capture patient inquiries, track follow-ups and patient reactivations, review practice KPIs, import/export CSV data, and support a simple owner-facing operations workflow.

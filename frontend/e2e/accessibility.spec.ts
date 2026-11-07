@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 const API = process.env.E2E_API_URL || 'http://localhost:4010/api';
@@ -10,6 +10,15 @@ const workspaces = [
   ['Import & Export', 'Import & Export'], ['Settings', 'Practice Settings'],
 ] as const;
 
+
+async function openWorkspace(page: Page, name: string) {
+  const target = page.getByRole('button', { name, exact: true });
+  if (!(await target.isVisible())) {
+    const more = page.getByRole('button', { name: 'More', exact: true });
+    if (await more.isVisible()) await more.click();
+  }
+  await target.click();
+}
 test.beforeEach(async ({ request }) => {
   const reset = await request.post(`${API}/demo/reset`);
   expect(reset.ok()).toBeTruthy();
@@ -18,7 +27,7 @@ test.beforeEach(async ({ request }) => {
 test('core workspaces have no serious or critical automated accessibility violations', async ({ page }) => {
   await page.goto('/');
   for (const [nav, label] of workspaces) {
-    if (nav !== 'Today') await page.getByRole('button', { name: nav, exact: true }).click();
+    if (nav !== 'Today') await openWorkspace(page, nav);
     const results = await new AxeBuilder({ page }).analyze();
     const severe = results.violations.filter((v) => ['serious', 'critical'].includes(v.impact || ''));
     expect(severe, `${label}: ${severe.map((v) => `${v.id}: ${v.help}`).join('; ')}`).toEqual([]);
@@ -52,7 +61,7 @@ test('public intake has no serious or critical automated accessibility violation
 test('visible interactive targets meet the WCAG 2.2 minimum target size', async ({ page }) => {
   await page.goto('/');
   for (const [nav] of workspaces) {
-    if (nav !== 'Today') await page.getByRole('button', { name: nav, exact: true }).click();
+    if (nav !== 'Today') await openWorkspace(page, nav);
     const undersized = await page.locator('button, a, input[type="checkbox"], input[type="radio"]').evaluateAll((nodes) =>
       nodes
         .filter((node) => {

@@ -1,4 +1,4 @@
-import { CheckCircle2, FileSearch, FolderSync, Lightbulb, PlugZap, ShieldCheck, Upload } from 'lucide-react';
+import { CheckCircle2, FileSearch, Lightbulb, ShieldCheck, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { KpiCard } from '../components/KpiCard';
 import { PageHeader } from '../components/PageHeader';
@@ -64,22 +64,16 @@ export function IntelligencePage({ config, setError }: IntelligencePageProps) {
 
   return (
     <section className="stack workspace-page intelligence-workspace">
-      <PageHeader eyebrow="Operational intelligence" title="Practice Intelligence" description="Turn clinic exports into clear operational signals — without replacing your EHR." action={<span className="intelligence-preview-badge"><ShieldCheck size={14} /> Preview · no data saved</span>} />
-
-      <div className="integration-path-strip" aria-label="CBOS connection options">
-        <div><PlugZap size={17} /><span><strong>API / FHIR</strong><small>When the source system supports it</small></span></div>
-        <div><FolderSync size={17} /><span><strong>Export folder</strong><small>For systems without an open API</small></span></div>
-        <div><Upload size={17} /><span><strong>CSV upload</strong><small>Universal fallback</small></span></div>
-      </div>
+      <PageHeader eyebrow="Operational intelligence" title="Practice Intelligence" description="CSV signal preview. No source changes." action={<span className="intelligence-preview-badge"><ShieldCheck size={14} /> Preview · no data saved</span>} />
 
       <div className="panel intelligence-upload intelligence-start-card">
         <div className="intelligence-start-copy">
           <FileSearch size={30} />
           <div>
-            <h3>{config?.demoMode ? 'Start with synthetic or deidentified exports' : 'Start with your clinic exports'}</h3>
+            <h3>{config?.demoMode ? 'Preview sample reports' : 'Preview CSV reports'}</h3>
             <p>{config?.demoMode
-              ? 'Use the sample data or explicitly deidentified CSVs only. Do not upload raw clinic exports or real patient information to this demo.'
-              : 'Choose the reports you already export. No API? That is okay — CBOS can use the existing export workflow and identifies reports before showing supported signals.'}</p>
+              ? 'Use sample data or verified deidentified CSVs only.'
+              : 'Review CSV evidence before acting.'}</p>
           </div>
         </div>
         {config?.demoMode && (
@@ -127,7 +121,7 @@ export function IntelligencePage({ config, setError }: IntelligencePageProps) {
 
         <div className="intelligence-results-layout">
           <div className="panel">
-            <div className="panel-heading"><div><h3>Report matches</h3><p>Confirm what CBOS recognized before reviewing any insight.</p></div></div>
+            <div className="panel-heading"><div><h3>Report matches</h3></div></div>
             <div className="intelligence-report-list">
               {preview.files.map((file) => <article className={`intelligence-report-row ${file.recognized ? 'recognized' : 'unknown'}`} key={file.fileName}>
                 <div className="intelligence-report-name"><strong>{file.fileName}</strong><small>{file.rowCount} rows · {file.evidenceCoverage} evidence coverage</small></div>
@@ -138,7 +132,7 @@ export function IntelligencePage({ config, setError }: IntelligencePageProps) {
           </div>
 
           <aside className="panel intelligence-attention-panel">
-            <div className="panel-heading"><div><h3>What needs attention</h3><p>Review signals, not automated decisions.</p></div></div>
+            <div className="panel-heading"><div><h3>What needs attention</h3></div></div>
             {preview.signals.length ? <div className="intelligence-signal-list">{preview.signals.map((signal) => <article className={`intelligence-signal-card ${signal.severity}`} key={signal.key}>
               <span>{signal.source}</span><b>{displaySignalValue(signal)}</b><strong>{signal.title}</strong><p>{signal.detail}</p>
             </article>)}</div> : <div className="empty-state">No supported operational signals were found in these files.</div>}

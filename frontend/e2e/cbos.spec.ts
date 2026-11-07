@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 const sections = [
   ['Today', /Good to see you/i],
@@ -15,6 +15,15 @@ const sections = [
   ['Settings', /Practice Settings/i],
 ] as const;
 
+
+async function openWorkspace(page: Page, name: string) {
+  const target = page.getByRole('button', { name, exact: true });
+  if (!(await target.isVisible())) {
+    const more = page.getByRole('button', { name: 'More', exact: true });
+    if (await more.isVisible()) await more.click();
+  }
+  await target.click();
+}
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('Good to see you.')).toBeVisible({ timeout: 15_000 });
@@ -24,7 +33,7 @@ test('desktop navigation reaches every MVP workspace without runtime errors', as
   const errors:string[] = [];
   page.on('pageerror', e => errors.push(e.message));
   for (const [nav, heading] of sections) {
-    await page.getByRole('button', { name: nav, exact: true }).click();
+    await openWorkspace(page, nav);
     await expect(page.getByText(heading).first()).toBeVisible();
   }
   expect(errors).toEqual([]);
@@ -39,7 +48,7 @@ test('Today prioritizes actions without duplicate explanatory panels', async ({ 
 });
 
 test('Today primary workflow updates a queued inquiry', async ({ page }) => {
-  const scheduled = page.getByRole('button', { name: 'Scheduled', exact: true }).first();
+  const scheduled = page.getByRole('button', { name: 'Mark scheduled', exact: true }).first();
   if (await scheduled.count()) {
     await scheduled.click();
     await expect(page.locator('.notice.success')).toBeVisible();
@@ -196,9 +205,9 @@ test('successful inquiry save is not reported as failed when background refresh 
 });
 
 test('Intelligence synthetic demo produces report matches and signals', async ({ page }) => {
-  await page.getByRole('button', { name: 'Intelligence', exact: true }).click();
+  await openWorkspace(page, 'Intelligence');
   await expect(page.getByLabel('Intelligence demo data safety notice')).toContainText(/no raw clinic exports/i);
-  await expect(page.getByRole('heading', { name: 'Start with synthetic or deidentified exports' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Preview sample reports' })).toBeVisible();
   const intelligenceFileInput = page.locator('input[type=file]');
   await expect(intelligenceFileInput).toBeDisabled();
   await page.getByLabel('I confirm these CSVs contain only fabricated or deidentified data.').check();
@@ -209,15 +218,15 @@ test('Intelligence synthetic demo produces report matches and signals', async ({
 });
 
 test('Pipeline loads and refreshes', async ({ page }) => {
-  await page.getByRole('button', { name: 'Pipeline', exact: true }).click();
+  await openWorkspace(page, 'Pipeline');
   await page.getByRole('button', { name: 'Refresh', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Patient Pipeline', exact: true })).toBeVisible();
 });
 
 test('Import & Export exposes CSV download and guarded import workflow', async ({ page }) => {
-  await page.getByRole('button', { name: 'Import & Export', exact: true }).click();
+  await openWorkspace(page, 'Import & Export');
   await expect(page.getByRole('button', { name: /Download CSV/i })).toBeVisible();
-  await expect(page.getByText('Import Existing Patient Inquiries')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Import inquiries' })).toBeVisible();
 });
 
 test('public /intake route works independently', async ({ page }) => {
@@ -231,7 +240,7 @@ test('mobile layout opens navigation and reaches Today/Intelligence', async ({ p
   await page.goto('/');
   await page.getByRole('button', { name: 'Open navigation' }).click();
   await expect(page.locator('.sidebar.mobile-open')).toBeVisible();
-  await page.getByRole('button', { name: 'Intelligence', exact: true }).click();
+  await openWorkspace(page, 'Intelligence');
   await expect(page.getByText('Practice Intelligence')).toBeVisible();
 });
 
@@ -246,7 +255,7 @@ test('workspace URLs are deep-linkable and browser navigation restores context',
   await page.goto('/intelligence');
   await expect(page.getByText('Practice Intelligence')).toBeVisible({ timeout: 15_000 });
   await expect(page).toHaveURL(/\/intelligence$/);
-  await page.getByRole('button', { name: 'Pipeline', exact: true }).click();
+  await openWorkspace(page, 'Pipeline');
   await expect(page).toHaveURL(/\/pipeline$/);
   await expect(page.getByRole('heading', { name: 'Patient Pipeline', exact: true })).toBeVisible();
   await page.goBack();

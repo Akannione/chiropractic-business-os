@@ -29,6 +29,7 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
   const [preview, setPreview] = useState<ImportPreview | null>(null);
   const [importing, setImporting] = useState(false);
   const [demoImportConfirmed, setDemoImportConfirmed] = useState(false);
+  const [importReadyConfirmed, setImportReadyConfirmed] = useState(false);
   const [lastImportResult, setLastImportResult] = useState<ImportResult | null>(null);
   const [importHistory, setImportHistory] = useState<ImportBatch[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
@@ -57,6 +58,8 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
     setError('');
     setPreview(null);
     setCsvText('');
+    setImportReadyConfirmed(false);
+    setLastImportResult(null);
     if (!file) return;
 
     const validationError = importFileError(file);
@@ -78,7 +81,7 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
   }
 
   async function importCsv() {
-    if (!csvText || !preview?.importableRows) return;
+    if (!csvText || !preview?.importableRows || !importReadyConfirmed || importing) return;
     setImporting(true);
     setError('');
     try {
@@ -86,6 +89,7 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
       captureTelemetry('csv_import_completed', { imported_rows: result.imported, skipped_duplicates: result.skippedDuplicates });
       setCsvText('');
       setPreview(null);
+      setImportReadyConfirmed(false);
       setLastImportResult(result);
       await refreshImportHistory();
       const failedText = result.failed ? ` ${result.failed} row(s) could not be imported.` : '';
@@ -151,7 +155,7 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
 
   return (
     <section className="stack workspace-page exports-workspace">
-      <PageHeader eyebrow="Data tools" title="Import & Export" description="Move practice data in and out of CBOS with preview and duplicate protection." />
+      <PageHeader eyebrow="Data tools" title="Import & Export" description="Review CSVs before importing." />
       <div className="export-card">
         <Download />
         <div>
@@ -166,10 +170,14 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
       <div className="export-card import-card">
         <Download />
         <div>
-          <h3>Import Existing Patient Inquiries</h3>
+          <h3>Import inquiries</h3>
+          <ol className="import-steps" aria-label="CSV import progress">
+            <li aria-current={!preview && !lastImportResult ? 'step' : undefined}>1. Choose CSV</li>
+            <li aria-current={preview ? 'step' : undefined}>2. Review preview</li>
+            <li aria-current={lastImportResult ? 'step' : undefined}>3. Results</li>
+          </ol>
           <p>
-            Upload a CSV to preview rows first. Rows are treated as possible duplicates only when
-            the patient name and a contact detail match an existing record.
+            Preview first. Possible duplicates require matching name and contact detail.
           </p>
           {config?.demoMode && (
             <div id="demo-import-safety" className="notice demo-safety-notice" role="note" aria-label="Demo import safety notice">
@@ -194,15 +202,99 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
             onChange={(event) => handleFile(event.target.files?.[0] || null)}
           />
         </div>
-        <button
-          className="primary-button"
-          type="button"
-          disabled={!preview?.importableRows || importing}
-          onClick={importCsv}
-        >
-          {importing ? 'Importing...' : 'Import Previewed Rows'}
-        </button>
+        <div className="import-stage-hint">{preview ? 'Review the preview below.' : 'Select a CSV to begin.'}</div>
       </div>
+
+      {preview && (
+        <div className="panel">
+          <div className="panel-heading">
+            <div>
+              <h3>Import Preview</h3>
+              <p>
+                Review the file before import. Only rows marked Ready will be added.
+              </p>
+            </div>
+          </div>
+          <div className="kpi-grid small import-preview-metrics">
+            <KpiCard label="Rows In File" value={String(preview.totalRows)} help="All rows found in the uploaded CSV." />
+            <KpiCard label="Ready To Import" value={String(preview.importableRows)} help="Clean patient inquiry rows that can be imported." success />
+            <KpiCard label="Possible Duplicates" value={String(preview.duplicateRows)} help="Rows matching a patient already on file." warning />
+            <KpiCard label="Need Cleanup" value={String(preview.errorRows)} help="Rows missing required fields or valid dates." warning />
+          </div>
+          {previewRows.length ? (
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Row</th>
+                    <th>Patient</th>
+                    <th>Requested Service</th>
+                    <th>Patient Type</th>
+                    <th>Last Visit</th>
+                    <th>Source</th>
+                    <th>Preview Result</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {previewRows.map((row) => (
+                    <tr
+                      className={
+                        row.duplicate
+                          ? 'import-row duplicate'
+                          : row.errors.length
+                            ? 'import-row error'
+                            : 'import-row ready'
+                      }
+                      key={row.rowNumber}
+                    >
+                      <td>{row.rowNumber}</td>
+                      <td>
+                        {row.name}
+                        <br />
+                        <small>{row.email || row.phone}</small>
+                      </td>
+                      <td>{row.service_needed}</td>
+                      <td>{row.patient_type}</td>
+                      <td>{row.last_visit_date || 'Not provided'}</td>
+                      <td>{row.source}</td>
+                      <td>
+                        <span
+                          className={
+                            row.duplicate
+                              ? 'preview-pill duplicate'
+                              : row.errors.length
+                                ? 'preview-pill error'
+                                : 'preview-pill ready'
+                          }
+                        >
+                          {row.duplicate ? 'Duplicate' : row.errors.length ? 'Needs Cleanup' : 'Ready'}
+                        </span>
+                        {row.errors.length > 0 && <small>{row.errors.join(' ')}</small>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="empty-state">No importable rows were found in this CSV.</div>
+          )}
+
+          <details className="import-guidance-details">
+            <summary>Import and recovery rules</summary>
+            <p>Only Ready rows are imported. Likely duplicates are skipped. If a database write fails, other successful rows remain in the batch and the exception is recorded for recovery.</p>
+          </details>
+          <div className="import-final-confirmation">
+            <label>
+              <input type="checkbox" checked={importReadyConfirmed} onChange={(event) => setImportReadyConfirmed(event.target.checked)} />
+              I reviewed the preview and confirm importing Ready rows only.
+            </label>
+            <button className="primary-button" type="button" disabled={!preview.importableRows || !importReadyConfirmed || importing} onClick={importCsv}>
+              {importing ? 'Importing...' : 'Import Previewed Rows'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {lastImportResult && (
         <div
@@ -239,8 +331,7 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
           <div>
             <h3>Recent Imports</h3>
             <p>
-              Every CSV import is tracked as a recoverable batch. Undo removes only records created
-              by that batch and is blocked if staff edited an imported record afterward.
+              Undo removes only unchanged records created by that import.
             </p>
           </div>
           <button type="button" onClick={() => void refreshImportHistory()} disabled={historyLoading}>
@@ -323,11 +414,8 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
         )}
       </div>
 
-      <div className="panel">
-        <div className="panel-heading">
-          <h3>CSV Column Mapping</h3>
-          <p>Rename client spreadsheet columns to one of these accepted headers before uploading.</p>
-        </div>
+      <details className="panel csv-mapping-details">
+        <summary>CSV column mapping · accepted headers</summary>
         <div className="mapping-grid">
           <span>Patient Name: `name`, `patient_name`, `full_name`, `Patient Name`</span>
           <span>Phone: `phone`, `Phone`</span>
@@ -345,89 +433,10 @@ export function ExportsPage({ config, inquiryTotal, onChanged, setError }: Expor
           <span>Follow-Up Owner: `assigned_follow_up_owner`, `follow_up_owner`, `Assigned Follow-Up Owner`</span>
           <span>Follow-Up Outcome: `follow_up_outcome`, `Follow-Up Outcome`</span>
         </div>
-      </div>
+      </details>
 
-      {preview && (
-        <div className="panel">
-          <div className="panel-heading">
-            <div>
-              <h3>Import Preview</h3>
-              <p>
-                Review the file before import. Only rows marked Ready will be added.
-              </p>
-            </div>
-          </div>
-          <div className="kpi-grid small import-preview-metrics">
-            <KpiCard label="Rows In File" value={String(preview.totalRows)} help="All rows found in the uploaded CSV." />
-            <KpiCard label="Ready To Import" value={String(preview.importableRows)} help="Clean patient inquiry rows that can be imported." success />
-            <KpiCard label="Possible Duplicates" value={String(preview.duplicateRows)} help="Rows matching a patient already on file." warning />
-            <KpiCard label="Need Cleanup" value={String(preview.errorRows)} help="Rows missing required fields or valid dates." warning />
-          </div>
-          {previewRows.length ? (
-            <div className="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Row</th>
-                    <th>Patient</th>
-                    <th>Requested Service</th>
-                    <th>Patient Type</th>
-                    <th>Last Visit</th>
-                    <th>Source</th>
-                    <th>Preview Result</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {previewRows.map((row) => (
-                    <tr
-                      className={
-                        row.duplicate
-                          ? 'import-row duplicate'
-                          : row.errors.length
-                            ? 'import-row error'
-                            : 'import-row ready'
-                      }
-                      key={row.rowNumber}
-                    >
-                      <td>{row.rowNumber}</td>
-                      <td>
-                        {row.name}
-                        <br />
-                        <small>{row.email || row.phone}</small>
-                      </td>
-                      <td>{row.service_needed}</td>
-                      <td>{row.patient_type}</td>
-                      <td>{row.last_visit_date || 'Not provided'}</td>
-                      <td>{row.source}</td>
-                      <td>
-                        <span
-                          className={
-                            row.duplicate
-                              ? 'preview-pill duplicate'
-                              : row.errors.length
-                                ? 'preview-pill error'
-                                : 'preview-pill ready'
-                          }
-                        >
-                          {row.duplicate ? 'Duplicate' : row.errors.length ? 'Needs Cleanup' : 'Ready'}
-                        </span>
-                        {row.errors.length > 0 && <small>{row.errors.join(' ')}</small>}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="empty-state">No importable rows were found in this CSV.</div>
-          )}
-          <div className="notice import-guidance">
-            <strong>Import rule:</strong> CBOS imports clean rows only and skips likely duplicates.
-            If a database write rejects an otherwise ready row, other successful rows remain imported
-            and the exception is recorded against the import batch for recovery.
-          </div>
-        </div>
-      )}
+
+
     </section>
   );
 }

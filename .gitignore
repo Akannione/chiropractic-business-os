@@ -38,3 +38,8 @@ demo_recordings/cbos_walkthrough_demo.mp4
 frontend/playwright-report/
 frontend/test-results/
 /test-results/
+
+# Local synthetic founder walkthrough outputs and dependency links.
+/output/
+/frontend/node_modules
+/backend/node_modules

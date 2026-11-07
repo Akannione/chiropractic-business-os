@@ -104,3 +104,17 @@ Next action:
 Tobi manually reviews the existing threaded Gmail draft and decides whether to
 send, edit, or hold it. If the clinic accepts, run the same 20-minute flow with
 the clinic and record a customer-level `Go`, `Revise`, or `Stop`.
+
+## 2026-10-22 — Owner-first interface clarity, local synthetic rehearsal
+
+**Source:** Detached local worktree based on live `main` at `1128670` (merged PR #13). The other FigCraft worktree and earlier demo recordings were left unchanged. **No clinic participant was involved.**
+
+**Live baseline verified:** `https://businessosmvp.vercel.app/` and API health returned HTTP 200. Live public config had `demoMode: true`, authentication disabled. Do not enter real patient information. Live Today already reflected PR #13; other workspace titles and text remained repetitive.
+
+**Changes verified locally only:** One visible primary heading per workspace; shortened supporting copy across owner-facing screens; KPI definitions behind keyboard-operable info controls; 4-item Owner Review checklist collapsed by default but still available; unsupported API/FHIR illustration removed; no changes to inquiry/status logic, report cohort semantics, import format, or authorization.
+
+**Evidence:** Desktop screenshots and DOM comparison captured in the worktree's untracked `output/owner-ui-review/` directory. Selected explanatory copy word counts (live → local) were Patient Inquiries 39 → 8; Reactivations 47 → 13; Owner Review 30 → 5; Intelligence 12 → 6. These counts exclude table records, data values, buttons, and the substantive weekly report content.
+
+**Testing:** Frontend/backend TypeScript passed, frontend unit tests passed, production frontend build and bundle budget passed. After final copy and progressive-disclosure changes, **38/38 Chromium E2E passed** and **6/6 focused WebKit E2E passed**, including desktop/mobile navigation, no horizontal overflow, accessibility, demo safety, intake, imported CSV validation, duplicates, follow-up priorities, and owner-clarity controls. The local build used installed Vite 6.4.3 from a reused dependency directory, while `main` pins Vite 6.4.5; reinstall pinned dependencies before any release. No production authentication or end-user onboarding was validated here.
+
+**Decision:** Ready for an unaided founder review and, later, actual chiropractic owner discovery. Not evidence of clinic usability, demand, or HIPAA compliance. No commit, push, merge, deployment, or production mutation was performed.
