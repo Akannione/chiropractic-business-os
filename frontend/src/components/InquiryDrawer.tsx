@@ -23,6 +23,10 @@ type InquiryDrawerProps = {
 export function InquiryDrawer({ config, onClose, onCreated, setError }: InquiryDrawerProps) {
   const drawerRef = useRef<HTMLElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  // StaffApp passes a fresh callback on each render. Keep the current callback
+  // without rerunning focus cleanup when dashboard data or notices change.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     previousFocusRef.current = document.activeElement as HTMLElement | null;
@@ -32,7 +36,7 @@ export function InquiryDrawer({ config, onClose, onCreated, setError }: InquiryD
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (event.key !== 'Tab' || !drawerRef.current) return;
@@ -55,7 +59,7 @@ export function InquiryDrawer({ config, onClose, onCreated, setError }: InquiryD
         : document.getElementById('add-inquiry-button');
       window.requestAnimationFrame(() => returnTarget?.focus());
     };
-  }, [onClose]);
+  }, []);
 
   return (
     <div className="drawer-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>

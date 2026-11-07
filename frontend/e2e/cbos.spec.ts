@@ -170,6 +170,9 @@ test('Add Inquiry drawer creates an inquiry and closes', async ({ page }) => {
   await dialog.getByLabel('Patient Name').fill('E2E Front Desk Test');
   await page.getByRole('textbox', { name: 'Phone', exact: true }).fill('4045550199');
   await page.getByRole('textbox', { name: 'Email', exact: true }).fill('e2e@example.com');
+  await expect(dialog.getByLabel('Patient Name')).toHaveValue('E2E Front Desk Test');
+  await expect(dialog.getByRole('textbox', { name: 'Phone', exact: true })).toHaveValue('4045550199');
+  await expect(dialog.getByRole('textbox', { name: 'Email', exact: true })).toHaveValue('e2e@example.com');
   await page.getByRole('button', { name: 'Add Inquiry', exact: true }).last().click();
   await expect(page.locator('.notice.success')).toContainText('Patient inquiry added');
 });
