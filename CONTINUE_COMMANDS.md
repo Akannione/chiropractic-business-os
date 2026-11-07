@@ -1,5 +1,12 @@
 # Continue Commands
 
+## Active CBOS UX release — November 7, 2026
+
+Release candidate: codex/cbos-ux-20261107 in /Users/tobiloba202/Developer/New-project/business_os_mvp_owner_focus_20261022. This is an isolated checkout; the original repository is not the implementation tree. GitHub main was at 1128670 on release preparation.
+
+The new owner-first frontend and dependency patches are ready for hosted CI and controlled Vercel deployment. Preserve the existing production domain https://businessosmvp.vercel.app/, production API https://cbos-api.vercel.app/, routes, demo-only safety, and existing clinic records. Do not reset MongoDB Atlas or copy local synthetic test data to production. Review GitHub PR, check all CI gates, deploy to existing projects, smoke-test, and record deployment evidence. On Mac, local isolated demo preview uses port 5173 and isolated fake-data API uses 4010; these are not public URLs.
+
+
 ## Project Path
 
 ```bash

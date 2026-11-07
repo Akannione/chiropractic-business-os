@@ -1,3 +1,5 @@
+import { Info } from 'lucide-react';
+
 type KpiCardProps = {
   label: string;
   value: string;
@@ -12,7 +14,7 @@ export function KpiCard({ label, value, help, featured, warning, success }: KpiC
     <article className={`kpi-card ${featured ? 'featured' : ''} ${warning ? 'warning' : ''} ${success ? 'success' : ''}`}>
       <span>{label}</span>
       <strong>{value}</strong>
-      {help && <small>{help}</small>}
+      {help && <details className="kpi-help"><summary aria-label={`About ${label}`} title={`About ${label}`}><Info size={15} aria-hidden="true" /></summary><small>{help}</small></details>}
     </article>
   );
 }

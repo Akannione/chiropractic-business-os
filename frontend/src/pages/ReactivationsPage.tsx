@@ -53,6 +53,8 @@ export function ReactivationsPage({
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState('');
   const [form, setForm] = useState<FollowUpForm | null>(null);
+  const [formRowId, setFormRowId] = useState('');
+  const [saving, setSaving] = useState(false);
 
   const owners = useMemo(
     () =>
@@ -87,7 +89,7 @@ export function ReactivationsPage({
   }, [filter, ownerFilter, queue.rows, search]);
 
   const selectedRow = useMemo(
-    () => queue.rows.find((row) => row.id === selectedId) || filteredRows[0] || null,
+    () => filteredRows.find((row) => row.id === selectedId) || filteredRows[0] || null,
     [filteredRows, queue.rows, selectedId],
   );
 
@@ -95,27 +97,40 @@ export function ReactivationsPage({
     if (!selectedRow) {
       setSelectedId('');
       setForm(null);
+      setFormRowId('');
       return;
     }
     setSelectedId(selectedRow.id);
     setForm(formFromRow(selectedRow));
+    setFormRowId(selectedRow.id);
   }, [selectedRow?.id, queue.rows]);
 
   async function saveFollowUp(event: FormEvent) {
     event.preventDefault();
-    if (!selectedRow || !form) return;
+    if (!selectedRow || !form || formRowId !== selectedRow.id || saving) return;
+    setSaving(true);
     setError('');
     try {
       await api.updateInquiry(selectedRow.id, form);
       await onChanged('Reactivation follow-up updated.');
     } catch (nextError) {
       setError((nextError as Error).message);
+    } finally {
+      setSaving(false);
     }
+  }
+
+  function selectRow(row: ReactivationRow) {
+    if (selectedRow?.id !== row.id && form && selectedRow && JSON.stringify(form) !== JSON.stringify(formFromRow(selectedRow)) && !window.confirm('Discard unsaved follow-up changes?')) return;
+    setSelectedId(row.id);
+    setForm(formFromRow(row));
+    setFormRowId(row.id);
+    document.getElementById('reactivation-edit')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 
   return (
     <section className="stack workspace-page reactivations-workspace">
-      <PageHeader eyebrow="Recovery workflow" title="Patient Reactivations" description="Prioritize patients whose expected return date is overdue, due today, or coming up, then record the next action." />
+      <PageHeader eyebrow="Recovery workflow" title="Patient Reactivations" description="Overdue returns first." />
 
       <div className="kpi-grid small">
         <KpiCard
@@ -145,7 +160,7 @@ export function ReactivationsPage({
 
       <Panel
         title="Call List"
-        description="Start with overdue patients. Use filters to assign and work the list with your team."
+        description="Overdue first."
       >
         <div className="filter-grid reactivation-filters">
           <label>
@@ -195,10 +210,10 @@ export function ReactivationsPage({
                   <tr
                     className={`reactivation-row ${selectedRow?.id === row.id ? 'selected' : ''}`}
                     key={row.id}
-                    onClick={() => setSelectedId(row.id)}
+                    onClick={() => selectRow(row)}
                   >
                     <td>
-                      <strong>{row.name}</strong>
+                      <button type="button" className="reactivation-select" onClick={(event) => { event.stopPropagation(); selectRow(row); }}>{row.name}</button>
                       <span>{row.phone}</span>
                       {row.activity_context && <small>{row.activity_context}</small>}
                     </td>
@@ -229,11 +244,12 @@ export function ReactivationsPage({
         )}
       </Panel>
 
+      <div id="reactivation-edit">
       <Panel
         title={selectedRow ? `Follow Up With ${selectedRow.name}` : 'Follow-Up Details'}
-        description="Record ownership, outcome, and the next action without changing the practice's EHR or schedule."
+        description="Record outcomes and follow-ups. No appointments are booked."
       >
-        {selectedRow && form ? (
+        {selectedRow && form && formRowId === selectedRow.id ? (
           <form className="inquiry-form" onSubmit={saveFollowUp}>
             <div className="detail-summary full">
               <div>
@@ -315,14 +331,15 @@ export function ReactivationsPage({
                 onChange={(event) => setForm({ ...form, notes: event.target.value })}
               />
             </label>
-            <button className="primary-button full" type="submit">
-              Save Follow-Up
+            <button className="primary-button full" type="submit" disabled={saving}>
+              {saving ? 'Saving…' : 'Save follow-up outcome'}
             </button>
           </form>
         ) : (
           <div className="empty-state">Select a patient from the call list to update follow-up details.</div>
         )}
       </Panel>
+      </div>
     </section>
   );
 }

@@ -8,7 +8,7 @@ export function ActivityPage({ activities }: { activities: Activity[] }) {
       <PageHeader
         eyebrow="Audit trail"
         title="Activity History"
-        description="Review recent inquiry changes, imports, and follow-up updates without guessing what happened."
+        description="Recent updates and imports."
       />
       <div className="panel">
         {activities.length ? (

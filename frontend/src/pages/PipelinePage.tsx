@@ -31,6 +31,7 @@ export function PipelinePage({ config, onChanged, setError }: PipelinePageProps)
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState('');
+  const [viewMode, setViewMode] = useState<'board' | 'list'>(() => window.matchMedia('(max-width: 720px)').matches ? 'list' : 'board');
 
   const statuses = useMemo<InquiryStatus[]>(
     () =>
@@ -92,11 +93,11 @@ export function PipelinePage({ config, onChanged, setError }: PipelinePageProps)
 
   return (
     <section className="stack workspace-page pipeline-workspace">
-      <PageHeader eyebrow="Workflow" title="Patient Pipeline" description="Review patient inquiries by status and move them forward without digging through a table." action={<button className="primary-button secondary" type="button" onClick={loadBoard}><RefreshCw size={17} /> Refresh</button>} />
+      <PageHeader eyebrow="Workflow" title="Patient Pipeline" description="Update inquiry stages; no appointments booked." action={<button className="primary-button secondary" type="button" onClick={loadBoard}><RefreshCw size={17} /> Refresh</button>} />
 
       <Panel
         title="Pipeline Overview"
-        description="A simple board for reviewing where patient inquiries stand today."
+        description=""
       >
         {loading ? (
           <div className="empty-state">Loading patient pipeline...</div>
@@ -105,7 +106,12 @@ export function PipelinePage({ config, onChanged, setError }: PipelinePageProps)
             {pipelineLimitMessage(total, rows.length) && (
               <div className="notice">{pipelineLimitMessage(total, rows.length)}</div>
             )}
-            <div className="pipeline-board" aria-label="Patient inquiry pipeline board">
+            <div className="pipeline-view-switch" role="group" aria-label="Pipeline layout">
+              <button type="button" aria-pressed={viewMode === 'board'} onClick={() => setViewMode('board')}>Board</button>
+              <button type="button" aria-pressed={viewMode === 'list'} onClick={() => setViewMode('list')}>Compact list</button>
+            </div>
+            <div className="pipeline-scroll-hint" hidden={viewMode !== 'board'}>Scroll horizontally to see all pipeline stages.</div>
+            {viewMode === 'board' ? <div className="pipeline-board" aria-label="Patient inquiry pipeline board">
               {grouped.map((column) => (
                 <section className="pipeline-column" key={column.status}>
                   <div className="pipeline-column-heading">
@@ -150,7 +156,22 @@ export function PipelinePage({ config, onChanged, setError }: PipelinePageProps)
                   </div>
                 </section>
               ))}
-            </div>
+            </div> : <div className="pipeline-compact-list" aria-label="Patient inquiry pipeline list">
+              {rows.map((inquiry) => (
+                <article className="pipeline-compact-row" key={inquiry.id}>
+                  <div>
+                    <strong>{inquiry.name}</strong>
+                    <small>{inquiry.service_needed} · Follow-up {displayDate(inquiry.next_follow_up_date)}</small>
+                  </div>
+                  <div className="pipeline-compact-status"><StatusChip status={inquiry.status} /><small>Potential: {money(inquiry.estimated_value)}</small></div>
+                  <label>Move to
+                    <select disabled={updatingId === inquiry.id} value={inquiry.status} onChange={(event) => void moveInquiry(inquiry, event.target.value as InquiryStatus)}>
+                      {statuses.map((status) => <option key={status}>{status}</option>)}
+                    </select>
+                  </label>
+                </article>
+              ))}
+            </div>}
           </>
         ) : (
           <div className="empty-state">

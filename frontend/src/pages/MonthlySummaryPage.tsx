@@ -15,7 +15,7 @@ export function MonthlySummaryPage({ summary }: { summary: MonthlySummary | null
       <PageHeader
         eyebrow="Owner review"
         title="Monthly Owner Report"
-        description="A month-to-date view of inquiries, conversion, follow-up pressure, and estimated treatment value."
+        description="Month-to-date operational summary."
       />
       <div className="summary-card">
         <BarChart3 />
@@ -28,7 +28,7 @@ export function MonthlySummaryPage({ summary }: { summary: MonthlySummary | null
         <KpiCard label="Monthly Patient Inquiries" value={String(summary.totalPatientInquiries)} />
         <KpiCard label="Active Patients" value={String(summary.activePatients)} success />
         <KpiCard label="Follow-Ups Needed" value={String(summary.followUpsNeeded)} warning />
-        <KpiCard label="Estimated Treatment Value" value={money(summary.estimatedTreatmentValue)} featured />
+        <KpiCard label="Estimated Opportunity Value" value={money(summary.estimatedTreatmentValue)} help="Potential value, not collected revenue." featured />
         <KpiCard label="Inquiry-to-Patient Rate" value={percent(summary.inquiryToPatientRate)} />
         <KpiCard label="Top Inquiry Source" value={summary.topInquirySource} />
       </div>

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ArrowRight, CalendarClock, CheckCircle2, TrendingUp, UsersRound } from 'lucide-react';
 import { EmptyState } from '../components/EmptyState';
 import { InquiryTable } from '../components/InquiryTable';
@@ -53,6 +53,8 @@ export function DashboardPage({ kpis, recentInquiries, followUps, onChanged, set
     [followUps],
   );
 
+  const [pendingId, setPendingId] = useState<string | null>(null);
+
   const dashboardFocus = useMemo(() => {
     if (kpis.overdueFollowUps > 0) return { title: `${kpis.overdueFollowUps} follow-up${kpis.overdueFollowUps === 1 ? '' : 's'} need you`, detail: 'Contact overdue patients first.', tone: 'urgent' };
     if (dueToday.length > 0) return { title: `${dueToday.length} follow-up${dueToday.length === 1 ? '' : 's'} due today`, detail: "Work through today's follow-ups.", tone: 'today' };
@@ -61,6 +63,8 @@ export function DashboardPage({ kpis, recentInquiries, followUps, onChanged, set
   }, [dueToday.length, kpis.followUpsNeeded, kpis.overdueFollowUps]);
 
   async function updateWorkflow(inquiry: Inquiry, status: InquiryStatus, nextFollowUpDate = inquiry.next_follow_up_date) {
+    if (pendingId) return;
+    setPendingId(inquiry.id);
     setError('');
     try {
       await api.updateInquiry(inquiry.id, { status, next_follow_up_date: nextFollowUpDate, notes: inquiry.notes });
@@ -68,6 +72,8 @@ export function DashboardPage({ kpis, recentInquiries, followUps, onChanged, set
       await onChanged(`${inquiry.name} moved to ${status}.`);
     } catch (nextError) {
       setError((nextError as Error).message);
+    } finally {
+      setPendingId(null);
     }
   }
 
@@ -102,7 +108,7 @@ export function DashboardPage({ kpis, recentInquiries, followUps, onChanged, set
       <div className="today-layout" id="today-actions">
         <section className="glass-panel action-queue-panel">
           <div className="panel-heading modern-heading">
-            <div><h3>Next actions</h3></div>
+            <div><h3>Next actions</h3><p className="action-queue-guidance">Status updates are records only; CBOS does not book appointments.</p></div>
             <span className="queue-count">{todayQueue.length}</span>
           </div>
           {todayQueue.length ? (
@@ -119,10 +125,17 @@ export function DashboardPage({ kpis, recentInquiries, followUps, onChanged, set
                     </div>
                     <div className="action-state"><span className={`urgency-label ${timing.className}`}>{timing.label}</span><StatusChip status={inquiry.status} /></div>
                     <div className="action-buttons">
-                      <button className="action-primary" type="button" onClick={() => updateWorkflow(inquiry, 'Consultation Scheduled', addDaysIso(1))}>Scheduled</button>
-                      <button type="button" onClick={() => updateWorkflow(inquiry, 'Active Patient', '')}><CheckCircle2 size={14} /> Active</button>
-                      <button type="button" onClick={() => updateWorkflow(inquiry, 'Follow-Up Needed', addDaysIso(1))}>Tomorrow</button>
-                      <button className="quiet-danger" type="button" onClick={() => updateWorkflow(inquiry, 'Lost', '')}>Lost</button>
+                      <button className="action-primary" type="button" disabled={pendingId !== null} title="Records a scheduled consultation and sets the next follow-up to tomorrow; does not book an appointment." onClick={() => updateWorkflow(inquiry, 'Consultation Scheduled', addDaysIso(1))}>
+                        {pendingId === inquiry.id ? 'Saving…' : 'Mark scheduled'}
+                      </button>
+                      <details className="action-more">
+                        <summary>More actions</summary>
+                        <div className="action-more-options">
+                          <button type="button" disabled={pendingId !== null} onClick={() => updateWorkflow(inquiry, 'Active Patient', '')}><CheckCircle2 size={14} /> Mark active</button>
+                          <button type="button" disabled={pendingId !== null} onClick={() => updateWorkflow(inquiry, 'Follow-Up Needed', addDaysIso(1))}>Follow up tomorrow</button>
+                          <button className="quiet-danger" type="button" disabled={pendingId !== null} onClick={() => updateWorkflow(inquiry, 'Lost', '')}>Mark lost</button>
+                        </div>
+                      </details>
                     </div>
                   </article>
                 );

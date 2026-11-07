@@ -90,6 +90,10 @@ function needsAttention(inquiry: Inquiry) {
 export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProps) {
   const [selectedId, setSelectedId] = useState('');
   const [detailForm, setDetailForm] = useState<InquiryFormState | null>(null);
+  const [formInquiryId, setFormInquiryId] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
+  const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<InquiryStatus | 'All'>('All');
   const [sourceFilter, setSourceFilter] = useState<InquirySource | 'All'>('All');
@@ -151,17 +155,43 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
   useEffect(() => {
     if (!selectedInquiry) {
       setDetailForm(null);
+      setFormInquiryId('');
       setSelectedId('');
       return;
     }
     setSelectedId(selectedInquiry.id);
     setDetailForm(formFromInquiry(selectedInquiry));
+    setFormInquiryId(selectedInquiry.id);
   }, [selectedInquiry?.id, rows]);
 
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const selectedFollowUpTiming = detailForm
+  // Do not expose a previous inquiry's form during a selection transition.
+  const matchingDetailForm = Boolean(selectedInquiry && detailForm && formInquiryId === selectedInquiry.id);
+  const selectedFollowUpTiming = matchingDetailForm && detailForm
     ? followUpTiming(detailForm.next_follow_up_date)
     : null;
+  const hasUnsavedChanges = Boolean(
+    matchingDetailForm && selectedInquiry && detailForm &&
+    JSON.stringify(detailForm) !== JSON.stringify(formFromInquiry(selectedInquiry))
+  );
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; };
+    const guardWorkspaceChange = (event: Event) => {
+      if (!window.confirm('Discard unsaved inquiry changes?')) event.preventDefault();
+    };
+    window.addEventListener('beforeunload', warn);
+    window.addEventListener('cbos-before-workspace-change', guardWorkspaceChange);
+    return () => {
+      window.removeEventListener('beforeunload', warn);
+      window.removeEventListener('cbos-before-workspace-change', guardWorkspaceChange);
+    };
+  }, [hasUnsavedChanges]);
+
+  function allowDiscard() {
+    return !hasUnsavedChanges || window.confirm('Discard unsaved inquiry changes?');
+  }
+
 
   /** Refetches the current page after a create or update. */
   async function reloadList(message: string) {
@@ -171,26 +201,34 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
 
   async function saveDetails(event: FormEvent) {
     event.preventDefault();
-    if (!selectedInquiry || !detailForm) return;
+    if (!selectedInquiry || !detailForm || formInquiryId !== selectedInquiry.id || saving) return;
+    setSaving(true);
     setError('');
     try {
       await api.updateInquiry(selectedInquiry.id, detailForm);
       await reloadList('Patient inquiry updated.');
     } catch (nextError) {
       setError((nextError as Error).message);
+    } finally {
+      setSaving(false);
     }
   }
 
   async function quickStatus(status: InquiryStatus) {
-    if (!selectedInquiry || !detailForm) return;
+    if (!selectedInquiry || !detailForm || formInquiryId !== selectedInquiry.id || saving) return;
+    const priorForm = detailForm;
     const nextForm = { ...detailForm, status };
+    setSaving(true);
     setDetailForm(nextForm);
     setError('');
     try {
       await api.updateInquiry(selectedInquiry.id, nextForm);
       await reloadList(`Patient inquiry moved to ${status}.`);
     } catch (nextError) {
+      setDetailForm(priorForm);
       setError((nextError as Error).message);
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -227,10 +265,10 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
 
   return (
     <section className="stack workspace-page inquiries-workspace">
-      <PageHeader eyebrow="Front desk workflow" title="Patient Inquiries" description="Find the right inquiry quickly, manage follow-up details, and keep opportunities moving." />
+      <PageHeader eyebrow="Front desk workflow" title="Patient Inquiries" description="Search, update, follow up." />
 
-      <Panel title="Find Patient Inquiry" description="Search or filter before opening the inquiry details.">
-        <div className="filter-grid">
+      <Panel title="Find inquiry">
+        <div id="cbos-inquiry-filters" className={'filter-grid' + (advancedFiltersOpen ? ' advanced-filters-open' : '')}>
           <label>
             Search
             <input
@@ -263,6 +301,16 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
             </select>
           </label>
         </div>
+        <button
+          className="mobile-filter-toggle"
+          type="button"
+          aria-controls="cbos-inquiry-filters"
+          aria-expanded={advancedFiltersOpen}
+          onClick={() => setAdvancedFiltersOpen((open) => !open)}
+        >
+          {advancedFiltersOpen ? 'Hide filters' : 'Show filters'}
+          {!advancedFiltersOpen && (statusFilter !== 'All' || sourceFilter !== 'All' || followUpFilter !== 'All') ? ' · active' : ''}
+        </button>
         <div className="quick-filter-bar" aria-label="Common patient inquiry filters">
           <button type="button" onClick={showFollowUps}>
             Needs Follow-Up
@@ -282,8 +330,8 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
         </div>
       </Panel>
 
-      <div className="detail-grid">
-        <Panel title={`Inquiry List (${total})`} description="Select a patient inquiry to review or update details.">
+      <div className={'detail-grid' + (mobileDetailOpen ? ' mobile-detail-open' : '')}>
+        <Panel title={`Inquiry List (${total})`}>
           {rows.length ? (
             <div className="inquiry-list">
               {rows.map((inquiry) => {
@@ -292,7 +340,14 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
                   <button
                     className={`inquiry-list-item ${selectedInquiry?.id === inquiry.id ? 'selected' : ''} ${needsAttention(inquiry) ? 'needs-attention' : ''}`}
                     key={inquiry.id}
-                    onClick={() => setSelectedId(inquiry.id)}
+                    onClick={() => {
+                      if (selectedInquiry?.id !== inquiry.id && !allowDiscard()) return;
+                      // Batch the ID and its form so the next paint never mixes records.
+                      setMobileDetailOpen(true);
+                      setSelectedId(inquiry.id);
+                      setDetailForm(formFromInquiry(inquiry));
+                      setFormInquiryId(inquiry.id);
+                    }}
                     type="button"
                   >
                     <div>
@@ -343,11 +398,14 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
         </Panel>
 
         <div className="sticky-detail">
+          <button type="button" className="mobile-detail-back" onClick={() => { if (allowDiscard()) setMobileDetailOpen(false); }}>
+            ← Back to inquiries
+          </button>
           <Panel
             title={selectedInquiry ? `Work ${selectedInquiry.name}` : 'Inquiry Details'}
-            description="Update the patient record, follow-up timing, and next workflow step."
+            description="Edit details and follow-up."
           >
-            {selectedInquiry && detailForm ? (
+            {selectedInquiry && detailForm && matchingDetailForm ? (
               <form className="inquiry-form detail-form" onSubmit={saveDetails}>
                 <div className="detail-summary full">
                   <div>
@@ -375,6 +433,9 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
                   </div>
                 </div>
 
+              <details className="detail-field-group full" open>
+                <summary>Contact information</summary>
+                <div className="detail-field-grid">
               <label>
                 Patient Name
                 <input value={detailForm.name} onChange={(event) => setDetailForm({ ...detailForm, name: event.target.value })} required />
@@ -424,6 +485,11 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
                   {config?.sources.map((source) => <option key={source}>{source}</option>)}
                 </select>
               </label>
+                </div>
+              </details>
+              <details className="detail-field-group full" open>
+                <summary>Follow-up &amp; status</summary>
+                <div className="detail-field-grid">
               <label>
                 Status
                 <select
@@ -450,10 +516,12 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
                   onChange={(event) => setDetailForm({ ...detailForm, next_follow_up_date: event.target.value })}
                 />
               </label>
-              <div className="form-section-label full">
-                <strong>Clinic Workflow</strong>
-                <span>Appointment details and return timing used by the reactivation call list.</span>
-              </div>
+                </div>
+              </details>
+              <details className="detail-field-group full">
+                <summary>Clinic workflow</summary>
+                <p className="detail-field-help">Appointment details and return timing used by reactivations. CBOS does not book visits.</p>
+                <div className="detail-field-grid">
               <label>
                 Patient Type
                 <select
@@ -571,20 +639,27 @@ export function InquiriesPage({ config, onChanged, setError }: InquiriesPageProp
                   ))}
                 </select>
               </label>
-              <label className="full">
-                Notes
-                <textarea value={detailForm.notes} onChange={(event) => setDetailForm({ ...detailForm, notes: event.target.value })} />
-              </label>
+                </div>
+              </details>
+              <details className="detail-field-group full">
+                <summary>Notes</summary>
+                <div className="detail-field-grid">
+                  <label className="full">
+                    Notes
+                    <textarea value={detailForm.notes} onChange={(event) => setDetailForm({ ...detailForm, notes: event.target.value })} />
+                  </label>
+                </div>
+              </details>
 
               <div className="quick-actions full">
-                <button type="button" onClick={() => quickStatus('Follow-Up Needed')}>Needs Follow-Up</button>
-                <button type="button" onClick={() => quickStatus('Consultation Scheduled')}>Consultation Scheduled</button>
-                <button className="success-action" type="button" onClick={() => quickStatus('Active Patient')}>Active Patient</button>
-                <button className="danger-action" type="button" onClick={() => quickStatus('Lost')}>Lost</button>
+                <button type="button" disabled={saving} onClick={() => quickStatus('Follow-Up Needed')}>Needs Follow-Up</button>
+                <button type="button" disabled={saving} onClick={() => quickStatus('Consultation Scheduled')}>Consultation Scheduled</button>
+                <button className="success-action" type="button" disabled={saving} onClick={() => quickStatus('Active Patient')}>Active Patient</button>
+                <button className="danger-action" type="button" disabled={saving} onClick={() => quickStatus('Lost')}>Lost</button>
               </div>
 
-              <button className="primary-button full" type="submit">
-                Save Inquiry Details
+              <button className="primary-button full inquiry-save" type="submit" disabled={saving}>
+                {saving ? 'Saving…' : 'Save inquiry details'}
               </button>
             </form>
             ) : (

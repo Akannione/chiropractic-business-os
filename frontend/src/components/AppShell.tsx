@@ -39,7 +39,7 @@ type AppShellProps = {
 };
 const navigation: Array<{ label: string; secondary?: boolean; items: Array<{ view: View; label: string; icon: ReactNode }> }> = [
   {
-    label: 'Act',
+    label: 'Front Desk',
     items: [
       { view: 'dashboard', label: 'Today', icon: <LayoutDashboard /> },
       { view: 'inquiries', label: 'Patient Inquiries', icon: <Users /> },
@@ -47,19 +47,19 @@ const navigation: Array<{ label: string; secondary?: boolean; items: Array<{ vie
     ],
   },
   {
-    label: 'Review',
+    label: 'Owner',
     items: [
-      { view: 'pipeline', label: 'Pipeline', icon: <Columns3 /> },
       { view: 'summary', label: 'Owner Review', icon: <FileText /> },
-      { view: 'intelligence', label: 'Intelligence', icon: <Lightbulb /> },
       { view: 'monthly', label: 'Monthly Report', icon: <BarChart3 /> },
-      { view: 'activity', label: 'Activity', icon: <Activity /> },
     ],
   },
   {
-    label: 'Tools',
+    label: 'More',
     secondary: true,
     items: [
+      { view: 'pipeline', label: 'Pipeline', icon: <Columns3 /> },
+      { view: 'intelligence', label: 'Intelligence', icon: <Lightbulb /> },
+      { view: 'activity', label: 'Activity', icon: <Activity /> },
       { view: 'duplicates', label: 'Duplicates', icon: <Copy /> },
       { view: 'exports', label: 'Import & Export', icon: <Download /> },
       { view: 'public-intake', label: 'Public Intake', icon: <Globe2 /> },
@@ -70,10 +70,14 @@ const navigation: Array<{ label: string; secondary?: boolean; items: Array<{ vie
 export function AppShell(props: AppShellProps) {
   const { view, config, message, error, loading, onViewChange, onAddInquiry, onDemoReset, onRetry, onLogout, staffAuthEnabled, children } = props;
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(() => navigation.find((group) => group.secondary)?.items.some((item) => item.view === view) || false);
   const [collapsed, setCollapsed] = useState(false);
   const activeItem = navigation.flatMap((group) => group.items).find((item) => item.view === view);
 
   function changeView(nextView: View) {
+    if (nextView !== view && !window.dispatchEvent(
+      new Event('cbos-before-workspace-change', { cancelable: true }),
+    )) return;
     onViewChange(nextView);
     setMobileOpen(false);
   }
@@ -86,7 +90,7 @@ export function AppShell(props: AppShellProps) {
         <div className="sidebar-header">
           <div className="brand">
             <div className="brand-mark">CB</div>
-            <div className="brand-copy"><strong>CBOS</strong><span>Practice action & intelligence</span></div>
+            <div className="brand-copy"><strong>CBOS</strong><span>Practice operations</span></div>
           </div>
           <button className="sidebar-icon-button mobile-nav-close" aria-label="Close navigation" onClick={() => setMobileOpen(false)}><X /></button>
         </div>
@@ -94,12 +98,20 @@ export function AppShell(props: AppShellProps) {
         <nav aria-label="CBOS navigation">
           {navigation.map((group) => (
             <div className={`nav-group ${group.secondary ? 'secondary-nav' : ''}`} key={group.label}>
-              <span className="nav-group-label">{group.label}</span>
-              {group.items.map((item) => (
-                <NavButton key={item.view} icon={item.icon} active={view === item.view} onClick={() => changeView(item.view)}>
-                  {item.label}
-                </NavButton>
-              ))}
+              {group.secondary ? (
+                <button type="button" className="nav-button nav-more-toggle" aria-expanded={moreOpen} aria-controls="cbos-more-navigation" onClick={() => setMoreOpen((open) => !open)}>
+                  <Menu size={18} /><span>More</span>
+                </button>
+              ) : <span className="nav-group-label">{group.label}</span>}
+              {(!group.secondary || moreOpen) && (
+                <div id={group.secondary ? 'cbos-more-navigation' : undefined} className="nav-group-items">
+                  {group.items.map((item) => (
+                    <NavButton key={item.view} icon={item.icon} active={view === item.view} onClick={() => changeView(item.view)}>
+                      {item.label}
+                    </NavButton>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </nav>
@@ -116,7 +128,7 @@ export function AppShell(props: AppShellProps) {
         <header className="topbar">
           <div className="topbar-title">
             <button className="mobile-menu-button" aria-label="Open navigation" onClick={() => setMobileOpen(true)}><Menu size={20} /></button>
-            <div><span className="topbar-context">{config?.practiceName || 'CBOS'} · Front desk</span><h1>{activeItem?.label || 'Workspace'}</h1></div>
+            <div><span className="topbar-context">{config?.practiceName || 'CBOS'} · Front desk</span>{view === 'dashboard' && <h1>{activeItem?.label || 'Workspace'}</h1>}</div>
           </div>
           <button id="add-inquiry-button" className="primary-button" disabled={!config || loading} onClick={onAddInquiry}><Plus size={18} /> Add Inquiry</button>
         </header>

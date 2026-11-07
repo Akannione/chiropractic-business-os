@@ -1,8 +1,17 @@
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 const API = process.env.E2E_API_URL || 'http://localhost:4010/api';
 
+
+async function openWorkspace(page: Page, name: string) {
+  const target = page.getByRole('button', { name, exact: true });
+  if (!(await target.isVisible())) {
+    const more = page.getByRole('button', { name: 'More', exact: true });
+    if (await more.isVisible()) await more.click();
+  }
+  await target.click();
+}
 test.beforeEach(async ({ request }) => {
   const reset = await request.post(`${API}/demo/reset`);
   expect(reset.ok()).toBeTruthy();
@@ -133,7 +142,7 @@ test('inquiry quick filters and reset remain usable', async ({ page }) => {
 
 test('CSV import previews valid rows then imports them', async ({ page, request }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Import & Export', exact: true }).click();
+  await openWorkspace(page, 'Import & Export');
   await expect(page.getByLabel('Demo import safety notice')).toContainText(/do not upload a real clinic export/i);
   const fileInput = page.getByLabel('Choose patient inquiry CSV file');
   await expect(fileInput).toBeDisabled();
@@ -147,6 +156,8 @@ test('CSV import previews valid rows then imports them', async ({ page, request 
   await expect(page.getByRole('heading', { name: 'Import Preview' })).toBeVisible();
   await expect(page.getByText('CSV E2E Patient')).toBeVisible();
   const importButton = page.getByRole('button', { name: 'Import Previewed Rows' });
+  await expect(importButton).toBeDisabled();
+  await page.getByLabel('I reviewed the preview and confirm importing Ready rows only.').check();
   await expect(importButton).toBeEnabled();
   await importButton.click();
   await expect(page.locator('.notice.success').first()).toContainText(/imported/i);
@@ -169,7 +180,7 @@ test('CSV import previews valid rows then imports them', async ({ page, request 
 
 test('CSV import rejects oversized files before reading or previewing them', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Import & Export', exact: true }).click();
+  await openWorkspace(page, 'Import & Export');
   await page.getByLabel('I confirm this CSV contains only fabricated or deidentified data.').check();
   await page.locator('input[type=file]').setInputFiles({
     name: 'oversized.csv',
@@ -177,16 +188,17 @@ test('CSV import rejects oversized files before reading or previewing them', asy
     buffer: Buffer.alloc(1_000_001, 65),
   });
   await expect(page.getByText('oversized.csv is larger than the 1 MB import limit. Choose a smaller CSV.')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Import Previewed Rows' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Import Previewed Rows' })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Import Preview' })).toHaveCount(0);
 });
 
 test('CSV import blocks malformed rows instead of importing them', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Import & Export', exact: true }).click();
+  await openWorkspace(page, 'Import & Export');
   await page.getByLabel('I confirm this CSV contains only fabricated or deidentified data.').check();
   const csv = ['name,phone,email,service_needed', ',,,'].join('\n');
   await page.locator('input[type=file]').setInputFiles({ name: 'invalid.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+  await expect(page.getByRole('heading', { name: 'Import Preview' })).toBeVisible();
   const importButton = page.getByRole('button', { name: 'Import Previewed Rows' });
   await expect(importButton).toBeDisabled();
 });
@@ -196,7 +208,7 @@ test('duplicate review requires confirmation and merge completes', async ({ page
   expect((await request.post(`${API}/inquiries`, { data: payload })).ok()).toBeTruthy();
   expect((await request.post(`${API}/inquiries`, { data: { ...payload, notes: 'Second copy' } })).ok()).toBeTruthy();
   await page.goto('/');
-  await page.getByRole('button', { name: 'Duplicates', exact: true }).click();
+  await openWorkspace(page, 'Duplicates');
   await expect(page.getByText('Duplicate E2E').first()).toBeVisible();
   await page.getByRole('button', { name: 'Keep this one' }).first().click();
   await expect(page.getByRole('button', { name: 'Yes, merge' })).toBeVisible();
@@ -206,7 +218,7 @@ test('duplicate review requires confirmation and merge completes', async ({ page
 
 test('settings daily summary returns a controlled success or configuration message', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await openWorkspace(page, 'Settings');
   await page.getByRole('button', { name: 'Send Daily Summary' }).click();
   await expect(page.locator('.notice.success, .notice.error')).toBeVisible();
 });
@@ -218,7 +230,7 @@ test('desktop sidebar collapse and expansion preserve navigation', async ({ page
   await expect(page.locator('.app-shell.sidebar-collapsed')).toBeVisible();
   await page.getByRole('button', { name: 'Expand navigation' }).click();
   await expect(page.locator('.app-shell.sidebar-collapsed')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Pipeline', exact: true }).click();
+  await openWorkspace(page, 'Pipeline');
   await expect(page.getByRole('heading', { name: 'Patient Pipeline', exact: true })).toBeVisible();
 });
 
@@ -229,5 +241,5 @@ test('mobile navigation can close without changing workspace', async ({ page }) 
   await expect(page.locator('.sidebar.mobile-open')).toBeVisible();
   await page.getByRole('button', { name: 'Close navigation' }).last().click();
   await expect(page.locator('.sidebar.mobile-open')).toHaveCount(0);
-  await expect(page.getByText('Good to see you.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Next actions' })).toBeVisible();
 });
