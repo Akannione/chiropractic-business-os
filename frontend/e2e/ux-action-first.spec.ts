@@ -83,10 +83,10 @@ test('editing an inquiry warns before switching workspaces', async ({ page }) =>
   await expect(page.getByLabel('Patient Name')).toBeVisible();
   await page.getByLabel('Patient Name').fill('Synthetic unsaved edit');
   page.once('dialog', async (dialog) => { await dialog.dismiss(); });
-  await page.getByRole('button', { name: 'Owner Review', exact: true }).click();
+  await page.getByRole('button', { name: 'Reports', exact: true }).click();
   await expect(page).toHaveURL(/inquiries$/);
   page.once('dialog', async (dialog) => { await dialog.accept(); });
-  await page.getByRole('button', { name: 'Owner Review', exact: true }).click();
+  await page.getByRole('button', { name: 'Reports', exact: true }).click();
   await expect(page).toHaveURL(/owner-review$/);
 });
 
@@ -101,4 +101,59 @@ test('mobile inquiry filters are progressive and remain accessible', async ({ pa
   await toggle.click();
   await expect(page.locator('.filter-grid > label').nth(2)).toBeVisible();
   await expect(page.locator('.filter-grid > label').nth(3)).toBeVisible();
+});
+
+test('Today offers an undo that restores the prior follow-up state', async ({ page }) => {
+  const first = page.locator('.modern-action-card').first();
+  const name = await first.locator('.action-person strong').innerText();
+  await first.getByRole('button', { name: 'Mark scheduled' }).click();
+  const undo = page.getByRole('button', { name: 'Undo last change' });
+  await expect(undo).toBeVisible();
+  await undo.click();
+  await expect(page.getByRole('status').last()).toContainText('restored');
+  await expect(page.locator('.modern-action-card', { hasText: name })).toBeVisible();
+});
+
+test('Owner navigation exposes Performance and Reports and preserves monthly reporting', async ({ page }) => {
+  await expect(page.getByRole('button', { name: 'Performance', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Performance', exact: true }).click();
+  await expect(page).toHaveURL(/performance$/);
+  await expect(page.getByRole('heading', { name: 'Practice Performance' })).toBeVisible();
+  await expect(page.getByText('Estimated Opportunity Value')).toBeVisible();
+  await page.getByRole('button', { name: 'Reports', exact: true }).click();
+  await expect(page).toHaveURL(/owner-review$/);
+  await expect(page.getByRole('link', { name: 'Monthly report' })).toBeVisible();
+  await page.getByRole('link', { name: 'Monthly report' }).click();
+  await expect(page).toHaveURL(/monthly-report$/);
+});
+
+test('Owner Review presents one action plan with optional checklist and clear estimated value', async ({ page }) => {
+  await page.goto('/owner-review');
+  await expect(page.getByRole('heading', { name: 'Owner Action Plan' })).toHaveCount(1);
+  await expect(page.locator('.owner-review-grid > .panel')).toHaveCount(1);
+  await expect(page.getByText('Review checklist (4 steps)')).toBeVisible();
+  await page.getByText('Review checklist (4 steps)').click();
+  await expect(page.getByText('Review overdue follow-ups.')).toBeVisible();
+});
+
+test('Mobile reactivation workflow uses scannable cards and direct outcome action', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/reactivations');
+  await expect(page.locator('.reactivation-mobile-list')).toBeVisible();
+  await expect(page.locator('.reactivation-mobile-list .reactivation-mobile-card').first()).toBeVisible();
+  await page.locator('.reactivation-mobile-card').first().getByRole('button', { name: 'Record outcome' }).click();
+  await expect(page.getByRole('heading', { name: /Follow Up With/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Save follow-up outcome' })).toBeVisible();
+});
+
+test('mobile Performance KPIs use compact two-column cards', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/performance');
+  const cards = page.locator('.performance-workspace .kpi-card');
+  await expect(cards).toHaveCount(8);
+  const a = await cards.nth(0).boundingBox();
+  const b = await cards.nth(1).boundingBox();
+  expect(a).toBeTruthy();
+  expect(b).toBeTruthy();
+  expect(Math.abs(a!.y - b!.y)).toBeLessThan(3);
 });

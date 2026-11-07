@@ -4,10 +4,12 @@ import {
   createInquiry,
   listInquiriesPage,
   updateInquiry,
+  undoFollowUpChange,
+  type FollowUpUndoRequest,
   type FollowUpFilter,
 } from '../services/inquiryService.js';
 import { serializeInquiry } from '../serializers/inquirySerializer.js';
-import { validateInquiryBody, validateInquiryUpdate } from '../validators/inquiryValidators.js';
+import { validateInquiryBody, validateInquiryUpdate, validateFollowUpUndo } from '../validators/inquiryValidators.js';
 
 /**
  * Returns one page of inquiries with the total number matching the filters.
@@ -41,5 +43,15 @@ export async function patchInquiry(req: Request, res: Response) {
   validateInquiryUpdate(req.body);
   const inquiry = await updateInquiry(String(req.params.id || ''), req.body);
   if (!inquiry) throw new HttpError(404, 'Patient inquiry was not found.');
+  res.json(serializeInquiry(inquiry.toJSON()));
+}
+
+
+export async function postUndoFollowUp(req: Request, res: Response) {
+  validateFollowUpUndo(req.body);
+  const inquiry = await undoFollowUpChange(String(req.params.id || ''), req.body as FollowUpUndoRequest);
+  if (!inquiry) {
+    throw new HttpError(409, 'This inquiry was changed since your action. Undo was not applied; review the record before correcting it.');
+  }
   res.json(serializeInquiry(inquiry.toJSON()));
 }

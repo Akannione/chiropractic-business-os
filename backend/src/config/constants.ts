@@ -49,7 +49,7 @@ export const DEAD_LEAD_PATIENT_TYPE = 'Dead Lead';
 
 export const KPI_HELP = {
   estimatedTreatmentValue:
-    'The total potential treatment revenue from patient inquiries that have not been marked Lost.',
+    'Estimated potential treatment value from inquiries not marked Lost; not collected revenue.',
   conversionRate: 'The share of all patient inquiries that became Active Patients.',
   followUpsNeeded: 'Inquiries marked Follow-Up Needed or due for follow-up today or earlier.',
   newThisWeek: 'Patient inquiries created during the current week, starting Monday.',

@@ -32,7 +32,7 @@ import {
   startOfPracticeDayInstant,
   startOfToday,
 } from '../utils/date.js';
-import { validateInquiryUpdate } from '../validators/inquiryValidators.js';
+import { validateInquiryUpdate, validateFollowUpUndo } from '../validators/inquiryValidators.js';
 
 const today = startOfToday();
 const yesterday = addDays(today, -1);
@@ -118,6 +118,8 @@ assert.ok(weeklySummary.plainEnglishSummary.includes('patient inquiries'));
 // Counts of one must read as singular; owners paste these summaries into email.
 assert.ok(weeklySummary.plainEnglishSummary.includes('1 active patient.'));
 assert.ok(weeklySummary.plainEnglishSummary.includes('1 inquiry needs follow-up'));
+assert.ok(weeklySummary.plainEnglishSummary.includes('Estimated Opportunity Value'), 'owner summary must label value as estimated opportunity');
+assert.ok(weeklySummary.plainEnglishSummary.includes('not collected revenue'), 'owner summary must distinguish revenue');
 
 const singleInquirySummary = buildWeeklySummary([
   {
@@ -850,6 +852,7 @@ async function runTests() {
   testCsvFormulaInjectionMitigation();
   testWebhookAuthorization();
   testPatchValidationMatchesCreate();
+  testFollowUpUndoValidation();
   await testSeedRefusesOutsideDemoMode();
   testRemoteDemoMutationRequiresAuth();
 }
@@ -882,4 +885,20 @@ async function testParserErrors() {
 
 function testCsvCarriageReturnEscaping() {
   assert.ok(toCsv([{ notes: 'first\rsecond' }]).includes('"first\rsecond"'));
+}
+
+
+function testFollowUpUndoValidation() {
+  const valid = {
+    expectedUpdatedAt: '2026-11-07T14:00:00.000Z',
+    previousStatus: 'Follow-Up Needed',
+    previousFollowUpDate: '2026-11-06',
+    appliedStatus: 'Consultation Scheduled',
+    appliedFollowUpDate: '2026-11-08',
+  };
+  assert.doesNotThrow(() => validateFollowUpUndo(valid));
+  assert.throws(() => validateFollowUpUndo(null as unknown as Record<string, unknown>), /valid undo payload/i);
+  assert.throws(() => validateFollowUpUndo({ ...valid, notes: 'overwrite' }), /Unsupported undo fields/);
+  assert.throws(() => validateFollowUpUndo({ ...valid, expectedUpdatedAt: 'invalid' }), /valid saved-record version/);
+  assert.throws(() => validateFollowUpUndo({ ...valid, previousStatus: 'Improper' }), /valid inquiry status/);
 }

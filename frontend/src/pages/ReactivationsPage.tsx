@@ -158,6 +158,7 @@ export function ReactivationsPage({
         />
       </div>
 
+      <div id="reactivation-call-list">
       <Panel
         title="Call List"
         description="Overdue first."
@@ -193,6 +194,7 @@ export function ReactivationsPage({
         </div>
 
         {filteredRows.length ? (
+          <>
           <div className="table-wrap">
             <table>
               <thead>
@@ -236,6 +238,27 @@ export function ReactivationsPage({
               </tbody>
             </table>
           </div>
+          <div className="reactivation-mobile-list" role="list" aria-label="Reactivation call queue">
+            {filteredRows.map((row) => (
+              <article className={`reactivation-mobile-card ${selectedRow?.id === row.id ? 'selected' : ''}`} key={row.id} role="listitem">
+                <div className="reactivation-mobile-head">
+                  <div>
+                    <strong>{row.name}</strong>
+                    <span>{row.service_needed} · {row.phone}</span>
+                  </div>
+                  <span className={`urgency-label ${row.reactivation_status.toLowerCase().replace(' ', '-')}`}>{row.reactivation_status}</span>
+                </div>
+                <div className="reactivation-mobile-meta">
+                  <span>{row.days_overdue ? `${row.days_overdue} days overdue` : displayDate(row.next_reactivation_date)}</span>
+                  <span>Owner: {row.assigned_follow_up_owner || 'Unassigned'}</span>
+                  <span>Outcome: {row.follow_up_outcome}</span>
+                  <span>Last visit: {displayDate(row.last_visit_date)}</span>
+                </div>
+                <button type="button" className="primary-button reactivation-mobile-action" onClick={() => selectRow(row)}>Record outcome</button>
+              </article>
+            ))}
+          </div>
+          </>
         ) : (
           <div className="empty-state">
             No patients match these reactivation filters. Add a last visit date and expected
@@ -243,8 +266,10 @@ export function ReactivationsPage({
           </div>
         )}
       </Panel>
+      </div>
 
       <div id="reactivation-edit">
+      <button type="button" className="mobile-detail-back" onClick={() => document.getElementById('reactivation-call-list')?.scrollIntoView({ block: 'start', behavior: 'smooth' })}>← Back to call list</button>
       <Panel
         title={selectedRow ? `Follow Up With ${selectedRow.name}` : 'Follow-Up Details'}
         description="Record outcomes and follow-ups. No appointments are booked."

@@ -49,7 +49,8 @@ const navigation: Array<{ label: string; secondary?: boolean; items: Array<{ vie
   {
     label: 'Owner',
     items: [
-      { view: 'summary', label: 'Owner Review', icon: <FileText /> },
+      { view: 'performance', label: 'Performance', icon: <BarChart3 /> },
+      { view: 'summary', label: 'Reports', icon: <FileText /> },
       { view: 'monthly', label: 'Monthly Report', icon: <BarChart3 /> },
     ],
   },
@@ -106,7 +107,13 @@ export function AppShell(props: AppShellProps) {
               {(!group.secondary || moreOpen) && (
                 <div id={group.secondary ? 'cbos-more-navigation' : undefined} className="nav-group-items">
                   {group.items.map((item) => (
-                    <NavButton key={item.view} icon={item.icon} active={view === item.view} onClick={() => changeView(item.view)}>
+                    <NavButton
+                      key={item.view}
+                      icon={item.icon}
+                      active={view === item.view}
+                      secondary={item.view === 'monthly'}
+                      onClick={() => changeView(item.view)}
+                    >
                       {item.label}
                     </NavButton>
                   ))}
@@ -155,8 +162,8 @@ export function AppShell(props: AppShellProps) {
   );
 }
 
-type NavButtonProps = { icon: ReactNode; active: boolean; children: ReactNode; onClick: () => void };
+type NavButtonProps = { icon: ReactNode; active: boolean; secondary?: boolean; children: ReactNode; onClick: () => void };
 
-function NavButton({ icon, active, children, onClick }: NavButtonProps) {
-  return <button className={`nav-button ${active ? 'active' : ''}`} aria-current={active ? 'page' : undefined} onClick={onClick}>{icon}<span>{children}</span></button>;
+function NavButton({ icon, active, secondary = false, children, onClick }: NavButtonProps) {
+  return <button className={`nav-button ${active ? 'active' : ''} ${secondary ? 'nav-report-subitem' : ''}`} aria-current={active ? 'page' : undefined} onClick={onClick}>{icon}<span>{children}</span></button>;
 }

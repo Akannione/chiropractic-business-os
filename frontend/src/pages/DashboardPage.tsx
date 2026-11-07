@@ -54,6 +54,15 @@ export function DashboardPage({ kpis, recentInquiries, followUps, onChanged, set
   );
 
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [lastChange, setLastChange] = useState<{
+    inquiryId: string;
+    patientName: string;
+    expectedUpdatedAt: string;
+    previousStatus: InquiryStatus;
+    previousFollowUpDate: string;
+    appliedStatus: InquiryStatus;
+    appliedFollowUpDate: string;
+  } | null>(null);
 
   const dashboardFocus = useMemo(() => {
     if (kpis.overdueFollowUps > 0) return { title: `${kpis.overdueFollowUps} follow-up${kpis.overdueFollowUps === 1 ? '' : 's'} need you`, detail: 'Contact overdue patients first.', tone: 'urgent' };
@@ -65,13 +74,48 @@ export function DashboardPage({ kpis, recentInquiries, followUps, onChanged, set
   async function updateWorkflow(inquiry: Inquiry, status: InquiryStatus, nextFollowUpDate = inquiry.next_follow_up_date) {
     if (pendingId) return;
     setPendingId(inquiry.id);
+    setLastChange(null);
     setError('');
     try {
-      await api.updateInquiry(inquiry.id, { status, next_follow_up_date: nextFollowUpDate, notes: inquiry.notes });
+      const updated = await api.updateInquiry(inquiry.id, {
+        status,
+        next_follow_up_date: nextFollowUpDate,
+      });
+      setLastChange({
+        inquiryId: inquiry.id,
+        patientName: inquiry.name,
+        expectedUpdatedAt: updated.updated_at,
+        previousStatus: inquiry.status,
+        previousFollowUpDate: inquiry.next_follow_up_date,
+        appliedStatus: status,
+        appliedFollowUpDate: nextFollowUpDate,
+      });
       captureTelemetry('follow_up_action_completed', { resulting_status: status });
       await onChanged(`${inquiry.name} moved to ${status}.`);
     } catch (nextError) {
       setError((nextError as Error).message);
+    } finally {
+      setPendingId(null);
+    }
+  }
+
+  async function undoLastChange() {
+    if (!lastChange || pendingId) return;
+    const candidate = lastChange;
+    setPendingId(candidate.inquiryId);
+    setLastChange(null); // A failed or ambiguous request must never be retried blindly.
+    setError('');
+    try {
+      await api.undoFollowUp(candidate.inquiryId, {
+        expectedUpdatedAt: candidate.expectedUpdatedAt,
+        previousStatus: candidate.previousStatus,
+        previousFollowUpDate: candidate.previousFollowUpDate,
+        appliedStatus: candidate.appliedStatus,
+        appliedFollowUpDate: candidate.appliedFollowUpDate,
+      });
+      await onChanged(`${candidate.patientName}'s previous follow-up status and date were restored.`);
+    } catch (error) {
+      setError((error as Error).message);
     } finally {
       setPendingId(null);
     }
@@ -108,9 +152,17 @@ export function DashboardPage({ kpis, recentInquiries, followUps, onChanged, set
       <div className="today-layout" id="today-actions">
         <section className="glass-panel action-queue-panel">
           <div className="panel-heading modern-heading">
-            <div><h3>Next actions</h3><p className="action-queue-guidance">Status updates are records only; CBOS does not book appointments.</p></div>
+            <div><h3>Next actions</h3><p className="action-queue-guidance">Mark scheduled records status and sets tomorrow's follow-up. CBOS does not book appointments.</p></div>
             <span className="queue-count">{todayQueue.length}</span>
           </div>
+          {lastChange && (
+            <div className="follow-up-undo" role="group" aria-label="Undo latest follow-up action">
+              <span>Last change saved for {lastChange.patientName}.</span>
+              <button type="button" disabled={pendingId !== null} onClick={() => void undoLastChange()}>
+                Undo last change
+              </button>
+            </div>
+          )}
           {todayQueue.length ? (
             <div className="modern-action-list">
               {todayQueue.map((inquiry, index) => {

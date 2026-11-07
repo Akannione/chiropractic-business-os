@@ -17,7 +17,7 @@ export function buildWeeklySummary(inquiries: InquiryShape[]) {
   const summary =
     inquiries.length === 0
       ? 'No patient inquiries are currently stored. Add a few inquiries to generate a useful practice snapshot.'
-      : `The practice has ${countOf(kpis.totalPatientInquiries, 'patient inquiry', 'patient inquiries')}, ${kpis.newThisWeek} new this week, and ${countOf(kpis.activePatients, 'active patient')}. ${countOf(kpis.followUpsNeeded, 'inquiry', 'inquiries')} ${pluralize(kpis.followUpsNeeded, 'needs', 'need')} follow-up, with ${kpis.overdueFollowUps} overdue. Estimated Treatment Value is $${kpis.estimatedTreatmentValue.toLocaleString()} from inquiries not marked Lost.`;
+      : `The practice has ${countOf(kpis.totalPatientInquiries, 'patient inquiry', 'patient inquiries')}, ${kpis.newThisWeek} new this week, and ${countOf(kpis.activePatients, 'active patient')}. ${countOf(kpis.followUpsNeeded, 'inquiry', 'inquiries')} ${pluralize(kpis.followUpsNeeded, 'needs', 'need')} follow-up, with ${kpis.overdueFollowUps} overdue. Estimated Opportunity Value (potential, not collected revenue) is $${kpis.estimatedTreatmentValue.toLocaleString()} from inquiries not marked Lost.`;
 
   return {
     weekStart: formatDate(weekStart),
@@ -38,7 +38,7 @@ export function buildMonthlySummary(inquiries: InquiryShape[]) {
   const summary =
     monthlyInquiries.length === 0
       ? 'No patient inquiries were created this month yet.'
-      : `This month has ${countOf(kpis.totalPatientInquiries, 'patient inquiry', 'patient inquiries')}, ${countOf(kpis.activePatients, 'active patient')}, and ${countOf(kpis.followUpsNeeded, 'follow-up')} needing attention. Estimated Treatment Value for this month is $${kpis.estimatedTreatmentValue.toLocaleString()}.`;
+      : `This month has ${countOf(kpis.totalPatientInquiries, 'patient inquiry', 'patient inquiries')}, ${countOf(kpis.activePatients, 'active patient')}, and ${countOf(kpis.followUpsNeeded, 'follow-up')} needing attention. Estimated Opportunity Value (not collected revenue) for this month is $${kpis.estimatedTreatmentValue.toLocaleString()}.`;
 
   return {
     monthStart: formatDate(monthStart),

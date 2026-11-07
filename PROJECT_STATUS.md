@@ -1,13 +1,17 @@
 
 # Project Status
 
+## November 7, 2026 — UX review closure release candidate
+
+The original redesign is already live from PR #14. The separate branch codex/cbos-ux-closure-20261107 completes the remaining review gaps: guarded follow-up Undo, true Practice Performance KPIs, owner reporting consolidation, and mobile Reactivations cards. Local tests use only a separate synthetic database. Details and human acceptance checklist: docs/validation/2026-11-07-cbos-ux-closure.md. This follow-up is not production until its new PR and Vercel deployment are verified. Human clinic-owner timing remains pending.
+
 ## November 7, 2026 — CBOS owner-first UX release candidate
 
-**State:** Implemented in isolated worktree business_os_mvp_owner_focus_20261022, branch codex/cbos-ux-20261107, based on merged main commit 1128670. The redesigned production site has **not yet been deployed** as of this entry.
+**State:** Implemented in isolated worktree business_os_mvp_owner_focus_20261022, branch codex/cbos-ux-20261107, based on merged main commit 1128670. The first redesign shipped through merged PR #14 at commit 10454b1 and was verified in production.
 
 Changes: Today presents overdue follow-ups before secondary metrics, with a single primary action and contextual alternatives. Patient Inquiries adds progressive forms, compact mobile filters, mobile list/detail navigation, safe pending states and unsaved-change guards. Reactivations and Pipeline get action-first selection and responsive compact views. Owner Review simplifies reporting while labeling potential value as an estimate. CSV import requires explicit preview acknowledgement and preserves duplicate detection, history, and undo behavior. Navigation groups secondary tools under More without deleting routes.
 
-Safety and verification: locally isolated demo database only; no production patient records changed. Backend and frontend dependency audit fixes resolve the reported Express, body-parser, Nodemailer, qs, and DOMPurify advisories. Backend/frontend TypeScript, service/frontend/routing tests, local database integration, builds, bundle budget, tracked-secret scan, and both npm audits passed. The malformed-CSV test was corrected to await preview completion and assert that import stays disabled. Focused Chromium/WebKit rerun: 8/8 passed. A 36-page-and-viewport visual scan reported zero horizontal overflow or runtime JS errors. Full GitHub quality CI and production deployment verification must pass before declaring release complete.
+Safety and verification: locally isolated demo database only; no production patient records changed. Backend and frontend dependency audit fixes resolve the reported Express, body-parser, Nodemailer, qs, and DOMPurify advisories. Backend/frontend TypeScript, service/frontend/routing tests, local database integration, builds, bundle budget, tracked-secret scan, and both npm audits passed. The malformed-CSV test was corrected to await preview completion and assert that import stays disabled. Focused Chromium/WebKit rerun: 8/8 passed. A 36-page-and-viewport visual scan reported zero horizontal overflow or runtime JS errors. Hosted CI and production smoke passed for PR #14; the follow-up closure is separate.
 
 ## Project Purpose
 

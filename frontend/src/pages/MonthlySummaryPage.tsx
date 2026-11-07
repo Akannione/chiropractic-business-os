@@ -17,6 +17,7 @@ export function MonthlySummaryPage({ summary }: { summary: MonthlySummary | null
         title="Monthly Owner Report"
         description="Month-to-date operational summary."
       />
+      <div className="summary-actions"><a href="/owner-review" className="report-switch-link">Weekly owner review</a></div>
       <div className="summary-card">
         <BarChart3 />
         <div>

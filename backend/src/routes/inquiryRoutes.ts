@@ -24,6 +24,7 @@ import {
   getInquiries,
   patchInquiry,
   postInquiry,
+  postUndoFollowUp,
 } from '../controllers/inquiryController.js';
 
 export const inquiryRouter = Router();
@@ -51,6 +52,7 @@ inquiryRouter.get('/reactivations', asyncHandler(getReactivations));
 inquiryRouter.post('/intelligence/preview', asyncHandler(postIntelligencePreview));
 inquiryRouter.post('/inquiries', asyncHandler(postInquiry));
 inquiryRouter.patch('/inquiries/:id', asyncHandler(patchInquiry));
+inquiryRouter.post('/inquiries/:id/undo-follow-up', asyncHandler(postUndoFollowUp));
 inquiryRouter.get('/activities', asyncHandler(getActivities));
 inquiryRouter.get('/kpis', asyncHandler(getKpis));
 inquiryRouter.get('/weekly-summary', asyncHandler(getWeeklySummary));

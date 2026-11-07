@@ -125,7 +125,7 @@ try {
   }
 
   await page.getByText('Good to see you.').waitFor();
-  for (const name of ['Patient Inquiries', 'Pipeline', 'Intelligence', 'Import & Export', 'Settings']) {
+  for (const name of ['Patient Inquiries', 'Pipeline', 'Performance', 'Intelligence', 'Import & Export', 'Settings']) {
     await page.getByRole('button', { name, exact: true }).click();
   }
   await page.goto(`${deployment.origin}/intake`, { waitUntil: 'networkidle', timeout: 30_000 });

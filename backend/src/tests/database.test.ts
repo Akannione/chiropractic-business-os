@@ -22,6 +22,8 @@ import {
   buildInquiryDocument,
   listInquiriesPage,
   listReactivationCandidates,
+  updateInquiry,
+  undoFollowUpChange,
 } from '../services/inquiryService.js';
 import { calculateKpis, calculateKpisFromDatabase } from '../services/kpiService.js';
 import { buildReactivationQueue } from '../services/reactivationService.js';
@@ -479,6 +481,57 @@ async function testImportBatchRecovery() {
     'blocked undo must preserve the modified inquiry');
 }
 
+
+async function testSafeFollowUpUndo() {
+  const doc = await Inquiry.findOne({ name: 'Overdue Patient' });
+  assert.ok(doc);
+  const originalStatus = doc.status;
+  const originalDate = formatDate(doc.next_follow_up_date);
+  const appliedDate = formatDate(tomorrow);
+  const applied = await updateInquiry(doc.id, {
+    status: 'Consultation Scheduled',
+    next_follow_up_date: appliedDate,
+  });
+  assert.ok(applied);
+  const returned = await undoFollowUpChange(doc.id, {
+    expectedUpdatedAt: applied.updated_at.toISOString(),
+    previousStatus: originalStatus,
+    previousFollowUpDate: originalDate,
+    appliedStatus: 'Consultation Scheduled',
+    appliedFollowUpDate: appliedDate,
+  });
+  assert.ok(returned, 'unchanged record can undo the latest follow-up update');
+  assert.equal(returned.status, originalStatus);
+  assert.equal(formatDate(returned.next_follow_up_date), originalDate);
+  const secondUndo = await undoFollowUpChange(doc.id, {
+    expectedUpdatedAt: applied.updated_at.toISOString(),
+    previousStatus: originalStatus,
+    previousFollowUpDate: originalDate,
+    appliedStatus: 'Consultation Scheduled',
+    appliedFollowUpDate: appliedDate,
+  });
+  assert.equal(secondUndo, null, 'undo must not replay');
+
+  const newAction = await updateInquiry(doc.id, {
+    status: 'Consultation Scheduled',
+    next_follow_up_date: appliedDate,
+  });
+  assert.ok(newAction);
+  const afterConcurrentChange = await updateInquiry(doc.id, { notes: 'Another staff edit' });
+  assert.ok(afterConcurrentChange);
+  const blocked = await undoFollowUpChange(doc.id, {
+    expectedUpdatedAt: newAction.updated_at.toISOString(),
+    previousStatus: originalStatus,
+    previousFollowUpDate: originalDate,
+    appliedStatus: 'Consultation Scheduled',
+    appliedFollowUpDate: appliedDate,
+  });
+  assert.equal(blocked, null, 'another staff edit must prevent undo');
+  const stillModified = await Inquiry.findById(doc.id);
+  assert.equal(stillModified?.notes, 'Another staff edit');
+  assert.equal(stillModified?.status, 'Consultation Scheduled');
+}
+
 async function main() {
   try {
     await mongoose.connect(TEST_URI, { serverSelectionTimeoutMS: 3000 });
@@ -497,6 +550,7 @@ async function main() {
     await seed();
 
     await testFollowUpFiltersHandleNulls();
+    await testSafeFollowUpUndo();
     await testRangeQueriesAreTypeBracketed();
     await testFilterClausesDoNotCollide();
     await testSearchSpansEveryField();
