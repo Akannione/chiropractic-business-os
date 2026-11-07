@@ -1,9 +1,27 @@
 
 # Project Status
 
-## November 7, 2026 — UX review closure release candidate
+## November 7, 2026 — CBOS UI/UX closure and post-merge WebKit hardening
 
-The original redesign is already live from PR #14. The separate branch codex/cbos-ux-closure-20261107 completes the remaining review gaps: guarded follow-up Undo, true Practice Performance KPIs, owner reporting consolidation, and mobile Reactivations cards. Local tests use only a separate synthetic database. Details and human acceptance checklist: docs/validation/2026-11-07-cbos-ux-closure.md. This follow-up is not production until its new PR and Vercel deployment are verified. Human clinic-owner timing remains pending.
+The redesign and review closure are merged and deployed through PR #14 (10454b1)
+and PR #15 (dc3871a). Both production Vercel deployments were verified on that
+SHA; the read-only 18-screen production smoke returned HTTP 200 with no overflow,
+JavaScript exceptions or missing fake-data safety messaging.
+
+A subsequent main-branch CI run reported 160 passed, 1 skipped and one failed
+WebKit inquiry-create check. The failure screenshot showed misplaced focus: an
+email entry was appended to the name field, leaving Email required and empty.
+The isolated fix branch fix/cbos-postmerge-webkit-qa-20261107 addresses focus
+lifecycle in the inquiry drawer/form and asserts required field values before
+submit. Local WebKit repetition (12/12), focused Chromium/Firefox/WebKit (15/15),
+TypeScript, unit/database, builds, secret and bundle checks, and npm audits
+pass. The fix must pass hosted CI and production verification separately
+before it can be called released.
+
+The complete software checklist and remaining unaided human clinic-owner
+10/30/60-second acceptance goals are recorded in
+docs/validation/2026-11-07-cbos-ux-closure.md. A real participant has
+not been recruited or observed; timed human acceptance remains unverified.
 
 ## November 7, 2026 — CBOS owner-first UX release candidate
 

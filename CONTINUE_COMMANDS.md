@@ -1,8 +1,16 @@
 # Continue Commands
 
-## Follow-up UX closure — November 7, 2026
+## Current CBOS work — November 7, 2026
 
-Use the isolated worktree at /Users/tobiloba202/Developer/New-project/business_os_mvp_owner_focus_20261022, branch codex/cbos-ux-closure-20261107, based on merged PR #14. Finish focused/hosted CI, create and merge a separate PR, and verify production. See docs/validation/2026-11-07-cbos-ux-closure.md for completed software checks and the pending human clinic-owner study. Do not use real patient data or reset production.
+PR #15 is merged and the corresponding frontend and API deployments are live
+at their canonical Vercel URLs. A later main-branch WebKit inquiry-create
+check failed due to misplaced email input focus. Use the clean isolated
+worktree at /Users/tobiloba202/Developer/New-project/business_os_mvp_owner_focus_20261022,
+branch fix/cbos-postmerge-webkit-qa-20261107 (based on merged PR #15),
+to finish hosted CI and production verification of the focus hardening.
+Do not reset production or enter real patient data. The independent,
+unaided clinic-owner timing study remains pending as documented in
+docs/validation/2026-11-07-cbos-ux-closure.md.
 
 ## Active CBOS UX release — November 7, 2026
 

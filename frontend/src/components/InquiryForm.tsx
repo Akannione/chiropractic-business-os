@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import type {
   AppConfig,
@@ -75,6 +75,17 @@ export function InquiryForm({
   const [form, setForm] = useState<InquiryFormState>(() => emptyInquiryForm(config));
   const [submitting, setSubmitting] = useState(false);
   const servicesId = useId();
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const focusInitialized = useRef(false);
+
+  // Focus the first field at most once for the lifetime of this form. Repeated
+  // effect setup must not steal focus while staff edit another input.
+  useEffect(() => {
+    if (autoFocus && !focusInitialized.current) {
+      focusInitialized.current = true;
+      nameInputRef.current?.focus();
+    }
+  }, [autoFocus]);
   const safeAutocomplete = config?.demoMode !== false;
 
   useEffect(() => {
@@ -104,7 +115,7 @@ export function InquiryForm({
       )}
       <label>
         Patient Name
-        <input autoFocus={autoFocus} autoComplete={safeAutocomplete ? 'off' : 'name'} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
+        <input ref={nameInputRef} autoComplete={safeAutocomplete ? 'off' : 'name'} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
       </label>
       <label>
         Phone
