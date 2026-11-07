@@ -11,6 +11,7 @@ import { LoginPage } from './pages/LoginPage';
 import { ActivityPage } from './pages/ActivityPage';
 import { MonthlySummaryPage } from './pages/MonthlySummaryPage';
 import { PipelinePage } from './pages/PipelinePage';
+import { PerformancePage } from './pages/PerformancePage';
 import { PublicInquiryPage } from './pages/PublicInquiryPage';
 import { ReactivationsPage } from './pages/ReactivationsPage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -152,6 +153,7 @@ function StaffApp({ authRequired, onLogout }: { authRequired: boolean; onLogout:
       onLogout={onLogout}
       staffAuthEnabled={authRequired}
     >
+      {view === 'performance' && <PerformancePage kpis={kpis} />}
       {view === 'dashboard' && (
         <DashboardPage
           kpis={kpis}

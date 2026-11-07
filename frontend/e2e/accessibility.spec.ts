@@ -5,7 +5,7 @@ const API = process.env.E2E_API_URL || 'http://localhost:4010/api';
 
 const workspaces = [
   ['Today', 'Today'], ['Patient Inquiries', 'Patient Inquiries'], ['Reactivations', 'Patient Reactivations'],
-  ['Pipeline', 'Patient Pipeline'], ['Owner Review', 'Weekly Owner Review'], ['Intelligence', 'Practice Intelligence'],
+  ['Pipeline', 'Patient Pipeline'], ['Reports', 'Weekly Owner Review'], ['Performance', 'Practice Performance'], ['Intelligence', 'Practice Intelligence'],
   ['Monthly Report', 'Monthly Practice Report'], ['Activity', 'Activity'], ['Duplicates', 'Possible Duplicates'],
   ['Import & Export', 'Import & Export'], ['Settings', 'Practice Settings'],
 ] as const;

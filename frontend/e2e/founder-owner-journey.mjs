@@ -78,7 +78,7 @@ try {
   record('Review and log a synthetic reactivation', 'PASS', 'Chris outcome and ownership saved and verified through isolated API; no real patient contacted', Date.now() - start);
 
   start = Date.now();
-  await page.getByRole('button', { name: 'Owner Review', exact: true }).click();
+  await page.getByRole('button', { name: 'Reports', exact: true }).click();
   const heading = page.getByRole('heading', { name: 'Weekly Owner Review', exact: true });
   await heading.waitFor();
   const summary = await fetchJson('/weekly-summary');

@@ -387,3 +387,45 @@ export async function updateInquiry(
   }
   return updated;
 }
+
+
+export type FollowUpUndoRequest = {
+  expectedUpdatedAt: string;
+  previousStatus: string;
+  previousFollowUpDate: string;
+  appliedStatus: string;
+  appliedFollowUpDate: string;
+};
+
+/**
+ * Undo only the latest follow-up action, without overwriting another staff edit.
+ * MongoDB compares the recorded update timestamp and both action fields atomically.
+ * There is no delete and both the action and reversal remain in activity history.
+ */
+export async function undoFollowUpChange(id: string, request: FollowUpUndoRequest) {
+  const restored = await Inquiry.findOneAndUpdate(
+    {
+      _id: id,
+      updated_at: new Date(request.expectedUpdatedAt),
+      status: request.appliedStatus,
+      next_follow_up_date: parseDateOnly(request.appliedFollowUpDate),
+    },
+    {
+      $set: {
+        status: request.previousStatus,
+        next_follow_up_date: parseDateOnly(request.previousFollowUpDate),
+        updated_at: new Date(),
+      },
+    },
+    { new: true, runValidators: true },
+  );
+  if (restored) {
+    await logActivity({
+      inquiryId: restored.id,
+      patientName: restored.name,
+      action: 'Follow-up action undone',
+      detail: 'The previous inquiry status and follow-up date were restored.',
+    });
+  }
+  return restored;
+}

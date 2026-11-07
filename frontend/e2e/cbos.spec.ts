@@ -5,8 +5,8 @@ const sections = [
   ['Patient Inquiries', /Patient Inquiries/i],
   ['Reactivations', /Patient Reactivations/i],
   ['Pipeline', /Patient Pipeline/i],
-  ['Owner Review', /Weekly Owner Review/i],
-  ['Intelligence', /Practice Intelligence/i],
+  ['Reports', /Weekly Owner Review/i],
+  ['Performance', /Practice Performance/i], ['Intelligence', /Practice Intelligence/i],
   ['Monthly Report', /Monthly Owner Report/i],
   ['Activity', /Activity History/i],
   ['Duplicates', /Possible Duplicates/i],
@@ -205,7 +205,7 @@ test('successful inquiry save is not reported as failed when background refresh 
 });
 
 test('Intelligence synthetic demo produces report matches and signals', async ({ page }) => {
-  await openWorkspace(page, 'Intelligence');
+  await openWorkspace(page, 'Performance');
   await expect(page.getByLabel('Intelligence demo data safety notice')).toContainText(/no raw clinic exports/i);
   await expect(page.getByRole('heading', { name: 'Preview sample reports' })).toBeVisible();
   const intelligenceFileInput = page.locator('input[type=file]');
@@ -240,7 +240,7 @@ test('mobile layout opens navigation and reaches Today/Intelligence', async ({ p
   await page.goto('/');
   await page.getByRole('button', { name: 'Open navigation' }).click();
   await expect(page.locator('.sidebar.mobile-open')).toBeVisible();
-  await openWorkspace(page, 'Intelligence');
+  await openWorkspace(page, 'Performance');
   await expect(page.getByText('Practice Intelligence')).toBeVisible();
 });
 

@@ -163,6 +163,17 @@ export const api = {
     request<Inquiry>('/public/inquiries', { method: 'POST', body: JSON.stringify(payload) }),
   updateInquiry: (id: string, payload: Partial<Inquiry>) =>
     request<Inquiry>(`/inquiries/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  undoFollowUp: (id: string, payload: {
+    expectedUpdatedAt: string;
+    previousStatus: string;
+    previousFollowUpDate: string;
+    appliedStatus: string;
+    appliedFollowUpDate: string;
+  }) =>
+    request<Inquiry>(`/inquiries/${id}/undo-follow-up`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
   previewImportCsv: (csvText: string) =>
     request<ImportPreview>('/imports/inquiries.csv/preview', {
       method: 'POST',

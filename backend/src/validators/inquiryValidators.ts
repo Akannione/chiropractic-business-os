@@ -136,3 +136,49 @@ export function validateInquiryUpdate(body: Record<string, unknown>) {
   }
   assertValid(errors);
 }
+
+
+/**
+ * Restrict the Undo payload to the two fields changed by a Today action and
+ * an exact version token. Reject unknown fields rather than accepting a
+ * forged full-record rollback request.
+ */
+export function validateFollowUpUndo(body: Record<string, unknown>) {
+  const expected = [
+    'expectedUpdatedAt',
+    'previousStatus',
+    'previousFollowUpDate',
+    'appliedStatus',
+    'appliedFollowUpDate',
+  ];
+  const errors: string[] = [];
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    throw new HttpError(400, 'A valid undo payload is required.');
+  }
+  if (Object.keys(body).some((key) => !expected.includes(key))) {
+    errors.push('Unsupported undo fields.');
+  }
+  for (const key of ['previousStatus', 'appliedStatus'] as const) {
+    if (!(STATUSES as readonly string[]).includes(String(body[key] || ''))) {
+      errors.push('Choose a valid inquiry status.');
+    }
+  }
+  for (const key of ['previousFollowUpDate', 'appliedFollowUpDate'] as const) {
+    if (
+      typeof body[key] !== 'string' ||
+      (body[key] !== '' && (!dateOnlyPattern.test(String(body[key])) || !parseDateOnly(String(body[key]))))
+    ) {
+      errors.push('Follow-up dates must use YYYY-MM-DD or be empty.');
+    }
+  }
+  const stamp = body.expectedUpdatedAt;
+  if (
+    typeof stamp !== 'string' ||
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(stamp) ||
+    !Number.isFinite(Date.parse(stamp)) ||
+    new Date(stamp).toISOString() !== stamp
+  ) {
+    errors.push('Undo requires a valid saved-record version.');
+  }
+  assertValid(errors);
+}

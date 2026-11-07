@@ -18,8 +18,8 @@ test('owner-first workspaces avoid duplicate page titles and retain safety', asy
     ['Patient Inquiries', 'Patient Inquiries'],
     ['Reactivations', 'Patient Reactivations'],
     ['Pipeline', 'Patient Pipeline'],
-    ['Owner Review', 'Weekly Owner Review'],
-    ['Intelligence', 'Practice Intelligence'],
+    ['Reports', 'Weekly Owner Review'],
+    ['Performance', 'Practice Performance'], ['Intelligence', 'Practice Intelligence'],
     ['Monthly Report', 'Monthly Owner Report'],
     ['Import & Export', 'Import & Export'],
   ];
@@ -29,12 +29,14 @@ test('owner-first workspaces avoid duplicate page titles and retain safety', asy
     await expect(page.locator('main h1')).toHaveCount(1);
     await expect(page.getByRole('note', { name: 'Demo data safety notice', exact: true })).toBeVisible();
   }
-  await page.getByRole('button', { name: 'Owner Review', exact: true }).click();
+  await page.getByRole('button', { name: 'Reports', exact: true }).click();
   const checklist = page.locator('.owner-review-details');
   await expect(checklist.locator('summary')).toBeVisible();
   await expect(checklist.getByText('Confirm every new inquiry has a next step.')).not.toBeVisible();
   await checklist.locator('summary').click();
   await expect(checklist.getByText('Confirm every new inquiry has a next step.')).toBeVisible();
+  await openWorkspace(page, 'Performance');
+  await expect(page.getByRole('heading', { name: 'Practice Performance' })).toBeVisible();
   await openWorkspace(page, 'Intelligence');
   await expect(page.getByText('API / FHIR')).toHaveCount(0);
   await expect(page.getByText('Preview · no data saved')).toBeVisible();
@@ -50,7 +52,7 @@ test('owner-first mobile screen does not overflow', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   await expect(page.getByRole('note', { name: 'Demo data safety notice', exact: true })).toBeVisible();
-  for (const label of ['Patient Inquiries', 'Owner Review', 'Intelligence']) {
+  for (const label of ['Patient Inquiries', 'Reports', 'Performance']) {
     await page.getByRole('button', { name: 'Open navigation' }).click();
     await openWorkspace(page, label);
     const width = await page.evaluate(() => document.documentElement.scrollWidth);

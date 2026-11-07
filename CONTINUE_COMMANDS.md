@@ -1,10 +1,14 @@
 # Continue Commands
 
+## Follow-up UX closure — November 7, 2026
+
+Use the isolated worktree at /Users/tobiloba202/Developer/New-project/business_os_mvp_owner_focus_20261022, branch codex/cbos-ux-closure-20261107, based on merged PR #14. Finish focused/hosted CI, create and merge a separate PR, and verify production. See docs/validation/2026-11-07-cbos-ux-closure.md for completed software checks and the pending human clinic-owner study. Do not use real patient data or reset production.
+
 ## Active CBOS UX release — November 7, 2026
 
 Release candidate: codex/cbos-ux-20261107 in /Users/tobiloba202/Developer/New-project/business_os_mvp_owner_focus_20261022. This is an isolated checkout; the original repository is not the implementation tree. GitHub main was at 1128670 on release preparation.
 
-The new owner-first frontend and dependency patches are ready for hosted CI and controlled Vercel deployment. Preserve the existing production domain https://businessosmvp.vercel.app/, production API https://cbos-api.vercel.app/, routes, demo-only safety, and existing clinic records. Do not reset MongoDB Atlas or copy local synthetic test data to production. Review GitHub PR, check all CI gates, deploy to existing projects, smoke-test, and record deployment evidence. On Mac, local isolated demo preview uses port 5173 and isolated fake-data API uses 4010; these are not public URLs.
+The original redesign and dependency patches shipped in merged PR #14, commit 10454b1, with successful hosted CI and production smoke. Preserve the existing production domain https://businessosmvp.vercel.app/, production API https://cbos-api.vercel.app/, routes, demo-only safety, and existing clinic records. Do not reset MongoDB Atlas or copy local synthetic test data to production. Review GitHub PR, check all CI gates, deploy to existing projects, smoke-test, and record deployment evidence. On Mac, local isolated demo preview uses port 5173 and isolated fake-data API uses 4010; these are not public URLs.
 
 
 ## Project Path

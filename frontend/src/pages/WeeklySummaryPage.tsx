@@ -15,7 +15,7 @@ function buildSummaryText(summary: WeeklySummary) {
     `Active Patients: ${summary.activePatients}`,
     `Follow-Ups Needed: ${summary.followUpsNeeded}`,
     `Overdue Follow-Ups: ${summary.overdueFollowUps}`,
-    `Estimated Treatment Value: ${money(summary.estimatedTreatmentValue)}`,
+    `Estimated Opportunity Value (not collected revenue): ${money(summary.estimatedTreatmentValue)}`,
     `Inquiry-to-Patient Rate: ${percent(summary.inquiryToPatientRate)}`,
     `Top Inquiry Source: ${summary.topInquirySource}`,
     '',
@@ -77,8 +77,6 @@ export function WeeklySummaryPage({ summary }: { summary: WeeklySummary | null }
               <span>{summary.topInquirySource} is currently the top inquiry source.</span>
             </div>
           </div>
-        </div>
-        <div className="panel">
           <details className="owner-review-details">
             <summary>Review checklist (4 steps)</summary>
             <ul className="checklist">
@@ -91,6 +89,7 @@ export function WeeklySummaryPage({ summary }: { summary: WeeklySummary | null }
         </div>
       </div>
       <div className="summary-actions">
+        <a href="/monthly-report" className="report-switch-link">Monthly report</a>
         <button type="button" onClick={() => window.print()}>
           Print Summary
         </button>
