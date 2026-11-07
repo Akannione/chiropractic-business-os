@@ -205,7 +205,7 @@ test('successful inquiry save is not reported as failed when background refresh 
 });
 
 test('Intelligence synthetic demo produces report matches and signals', async ({ page }) => {
-  await openWorkspace(page, 'Performance');
+  await openWorkspace(page, 'Intelligence');
   await expect(page.getByLabel('Intelligence demo data safety notice')).toContainText(/no raw clinic exports/i);
   await expect(page.getByRole('heading', { name: 'Preview sample reports' })).toBeVisible();
   const intelligenceFileInput = page.locator('input[type=file]');
@@ -240,7 +240,7 @@ test('mobile layout opens navigation and reaches Today/Intelligence', async ({ p
   await page.goto('/');
   await page.getByRole('button', { name: 'Open navigation' }).click();
   await expect(page.locator('.sidebar.mobile-open')).toBeVisible();
-  await openWorkspace(page, 'Performance');
+  await openWorkspace(page, 'Intelligence');
   await expect(page.getByText('Practice Intelligence')).toBeVisible();
 });
 
